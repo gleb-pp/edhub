@@ -10,17 +10,7 @@ June 2025
 
 </aside>
 
-# Team
-
-| Team Member | Telegram Alias | Email | Track |
-| --- | --- | --- | --- |
-| Gleb Popov | [@gleb_pp](https://t.me/gleb_pp) | g.popov@innopolis.university | Backend Developer, Project Manager |
-| Timur Usmanov | [@error10556](https://t.me/error10556) | t.usmanov@innopolis.university | Backend Developer, **Backend Lead** |
-| Asqar Dinikeev | [@bailey_64](https://t.me/bailey_64) | a.dinikeev@innopolis.university | Backend Developer, DevOps |
-| Alina Suhoverkova | [@diggoryk](https://t.me/diggoryk) | a.suhoverkova@innopolis.university | Frontend Developer, **Frontend Lead** |
-| Timur Struchkov | [@AlfyKls](https://t.me/AlfyKls) | t.struchkov@innopolis.university | Frontend Developer, UX/UI designer |
-
-# Schedule
+# Plans & Prioritized backlog
 
 We decided to split our project into several versions, each of which has full self-sufficient functionality. With each version new features are added to the project.
 
@@ -33,6 +23,8 @@ We decided to split our project into several versions, each of which has full se
 | **Materials** | :ballot_box_with_check: Done in Week 1 | :white_check_mark: Done in Week 2 |
 | **Assignment** | :white_check_mark: Done in Week 2 | :black_square_button: Planned for Week 3 |
 | **Files** | :black_square_button: Planned for Week 3 | :black_square_button: Planned for Week 3 or Week 4 |
+
+Since the project is dynamically changed, we plan to develop a detailed backlog at the beginning of each week. The backlog for Week 2 [was developed](https://github.com/orgs/IU-Capstone-Project-2025/projects/14/views/1) on June 12. The backlog for Week 3 will be extended after the meeting with TA.
 
 # Individual contribution
 
