@@ -61,7 +61,7 @@ We also need to check the correctness of the input data before handling the requ
 3. a function to check that the user is not already a member of that course
 4. a function to check that the sender of the request has teacher privileges
 
-This week we realized that some of these checks overlap and removed the unnecessary ones. For example, we don't need to call the check 2, because this check is implemented within the check 3, which also validates the input parameters.
+This week we realized that some of these checks overlap and **removed the unnecessary ones**. For example, we don't need to call the check 2, because this check is implemented within the check 3, which also validates the input parameters.
 
 ## Frontend
 
