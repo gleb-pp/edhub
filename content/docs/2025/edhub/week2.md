@@ -18,15 +18,15 @@ After a meeting with TA on June 12, we were recommended to conduct a more detail
 
 We analyzed the 3 popular LMSs (Google Classroom, Moodle, and Stepik) and concluded that none of them are suitable for quick setup and easy use by school teachers. Based on the market, we wrote out the functionality of EdHub and compared it with existing solutions:
 
-- user-friendly design (implemented in Google Classroom and Stepik, Moodle is hard to evaluate)
-- easy and quick setup (implemented in Google Classroom, lacking in Stepik and Moodle)
-- easy customization of criteria for each task (implemented in Google Classroom and Stepik, lacking in Moodle)
-- completely free functionality (implemented in Google Classroom and Moodle, lacking in Stepik)
-- parental access (lacking in Google Classroom, Moodle, and Stepik)
-- flexible customization of the course evaluation formula (implemented in Moodle and Stepik, lacking in Google Classroom)
-- attendance tracking mechanism (implemented in Moodle, lacking in Google Classroom and Stepik)
-- global servers (implemented in in Google Classroom and Stepik, lacking in Moodle)
-- local hosting option (implemented in Moodle, lacking in Google Classroom and Stepik)
+- **user-friendly design** (implemented in Google Classroom and Stepik, Moodle is hard to evaluate)
+- **easy and quick setup** (implemented in Google Classroom, lacking in Stepik and Moodle)
+- **easy customization of criteria for each task** (implemented in Google Classroom and Stepik, lacking in Moodle)
+- **completely free functionality** (implemented in Google Classroom and Moodle, lacking in Stepik)
+- **parental access (lacking in Google Classroom, Moodle, and Stepik)
+- **flexible customization of the course evaluation formula** (implemented in Moodle and Stepik, lacking in Google Classroom)
+- **attendance tracking mechanism** (implemented in Moodle, lacking in Google Classroom and Stepik)
+- **global servers** (implemented in in Google Classroom and Stepik, lacking in Moodle)
+- **local hosting option** (implemented in Moodle, lacking in Google Classroom and Stepik)
 
 ## Management: Plans & Prioritized backlog
 
