@@ -16,7 +16,7 @@ June 2025
 
 After a meeting with TA on June 12, we were recommended to conduct a more detailed market analysis of similar products to identify useful features we want to implement in our project and gaps we want to fill.
 
-#### Google Classroom
+### Google Classroom
 
 **Advantages (what we wnat to take):**
 
@@ -32,7 +32,7 @@ After a meeting with TA on June 12, we were recommended to conduct a more detail
 - no attendance tracking mechanism
 - no local hosting option (for data secutiry)
 
-#### Moodle LMS
+### Moodle LMS
 
 **Advantages (what we wnat to take):**
 
@@ -48,7 +48,7 @@ After a meeting with TA on June 12, we were recommended to conduct a more detail
 - a lot of unnecessary functionality that complicates the design
 - no customization of criteria for evaluating assignments
 
-#### Stepik
+### Stepik
 
 **Advantages (what we wnat to take):**
 
