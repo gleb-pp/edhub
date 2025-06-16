@@ -30,7 +30,7 @@ We analyzed the 3 popular LMSs (Google Classroom, Moodle, and Stepik) and conclu
 
 ## Acceptance Criteria
 
-In the Week 1 report, we have already describe the user stories for our MVP in details, so this week we focused on defining the acceptance criteria:
+In the Week 1 report, we have already described the user stories for the MVP of our project in details, so this week we have focused on defining the acceptance criteria.
 
 ### User
 
