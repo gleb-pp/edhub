@@ -16,55 +16,17 @@ June 2025
 
 After a meeting with TA on June 12, we were recommended to conduct a more detailed market analysis of similar products to identify useful features we want to implement in our project and gaps we want to fill.
 
-### Google Classroom
+We analyzed the 3 popular LMSs (Google Classroom, Moodle, and Stepik) and concluded that none of them are suitable for quick setup and easy use by school teachers. Based on the market, we wrote out the functionality of EdHub and compared it with existing solutions:
 
-**Advantages (what we wnat to take):**
-
-- user-friendly design
-- easy and quick setup (every user can create a course in 1 minute)
-- easy customization of criteria for each task
-- completely free functionality
-
-**Disadvantages (what we wnat to fix):**
-
-- no parental access
-- no support for course evaluation in general
-- no attendance tracking mechanism
-- no local hosting option (for data secutiry)
-
-### Moodle LMS
-
-**Advantages (what we wnat to take):**
-
-- attendance tracking mechanism
-- flexible customization of the course evaluation formula
-- completely free functionality
-
-**Disadvantages (what we wnat to fix):**
-
-- сomplexity of setup (requires configuration at the organization level)
-- no parental access
-- no global servers (you always have to host your own)
-- a lot of unnecessary functionality that complicates the design
-- no customization of criteria for evaluating assignments
-
-### Stepik
-
-**Advantages (what we wnat to take):**
-
-- user-friendly design
-- easy and quick setup
-- easy customization of criteria for each task
-
-**Disadvantages (what we wnat to fix):**
-
-- restrictions on course creation (at least 1 module and at least 9 lessons **must be** created)
-- no parental access
-- no attendance tracking mechanism
-- no local hosting option (for data secutiry)
-- paid invitation of additional teachers
-- paid attachments upload
-- paid student report card
+- user-friendly design (implemented in Google Classroom and Stepik, Moodle is hard to evaluate)
+- easy and quick setup (implemented in Google Classroom, lacking in Stepik and Moodle)
+- easy customization of criteria for each task (implemented in Google Classroom and Stepik, lacking in Moodle)
+- completely free functionality (implemented in Google Classroom and Moodle, lacking in Stepik)
+- parental access (lacking in Google Classroom, Moodle, and Stepik)
+- flexible customization of the course evaluation formula (implemented in Moodle and Stepik, lacking in Google Classroom)
+- attendance tracking mechanism (implemented in Moodle, lacking in Google Classroom and Stepik)
+- global servers (implemented in in Google Classroom and Stepik, lacking in Moodle)
+- local hosting option (implemented in Moodle, lacking in Google Classroom and Stepik)
 
 ## Management: Plans & Prioritized backlog
 
