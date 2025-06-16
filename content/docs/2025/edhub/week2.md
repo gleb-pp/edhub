@@ -28,24 +28,6 @@ We analyzed the 3 popular LMSs (Google Classroom, Moodle, and Stepik) and conclu
 - **global servers** (implemented in in Google Classroom and Stepik, lacking in Moodle)
 - **local hosting option** (implemented in Moodle, lacking in Google Classroom and Stepik)
 
-## Plans & Prioritized backlog
-
-We decided to split our project into several versions, each of which has full self-sufficient functionality. With each version new features are added to the project.
-
-- **Materials**: Teacher can create courses, invite students, parents, or teachers, create materials. Student can enter the course and view the list of available materials. Parent can enter the course and view the list of available materials.
-- **Assignment**: Teacher can create assignments, see the list of students' submissions and grade them. Student can submit assignments. Parents can track their students' submissions.
-- **Files**: Teacher can attach files up to 5MB to course materials and assignments. Student can attach files up to 5MB to their submissions.
-
-By the end of Week 3, we plan to have an MVP of our product, and the global plan for the week is the following:
-
-| Project Version | Backend | Frontend |
-| --- | --- | --- |
-| **Materials** | :ballot_box_with_check: Done in Week 1 | :white_check_mark: Done in Week 2 |
-| **Assignment** | :white_check_mark: Done in Week 2 | :black_square_button: Planned for Week 3 |
-| **Files** | :black_square_button: Planned for Week 3 | :black_square_button: Planned for Week 3 or Week 4 |
-
-During the development process we sometimes change the vision of our product, so we plan to focus on a more detailed backlog and work out the week's plan at the beginning of each week. The backlog for Week 2 [was developed](https://github.com/orgs/IU-Capstone-Project-2025/projects/14/views/1) on June 12. The backlog for Week 3 will be extended after the meeting with TA and discussing the project.
-
 ## Acceptance Criteria
 
 In the Week 1 report, we have already describe the user stories for our MVP in details, so this week we focused on defining the acceptance criteria:
@@ -92,6 +74,24 @@ In the Week 1 report, we have already describe the user stories for our MVP in d
 - **Given** I'm a parent in a course, **when** I open the material page, **then** I can see the material details.
 - **Given** I'm a parent in a course, **when** I open the assignment page, **then** I can see the assignment details and the status of my childrens' submission.
 - **Given** I'm a student in a course, **when** I want to delete myself from the course, **then** I lose access to the course.
+
+## Plans & Prioritized backlog
+
+We decided to split our project into several versions, each of which has full self-sufficient functionality. With each version new features are added to the project.
+
+- **Materials**: Teacher can create courses, invite students, parents, or teachers, create materials. Student can enter the course and view the list of available materials. Parent can enter the course and view the list of available materials.
+- **Assignment**: Teacher can create assignments, see the list of students' submissions and grade them. Student can submit assignments. Parents can track their students' submissions.
+- **Files**: Teacher can attach files up to 5MB to course materials and assignments. Student can attach files up to 5MB to their submissions.
+
+By the end of Week 3, we plan to have an MVP of our product, and the global plan for the week is the following:
+
+| Project Version | Backend | Frontend |
+| --- | --- | --- |
+| **Materials** | :ballot_box_with_check: Done in Week 1 | :white_check_mark: Done in Week 2 |
+| **Assignment** | :white_check_mark: Done in Week 2 | :black_square_button: Planned for Week 3 |
+| **Files** | :black_square_button: Planned for Week 3 | :black_square_button: Planned for Week 3 or Week 4 |
+
+During the development process we sometimes change the vision of our product, so we plan to focus on a more detailed backlog and work out the week's plan at the beginning of each week. The backlog for Week 2 [was developed](https://github.com/orgs/IU-Capstone-Project-2025/projects/14/views/1) on June 12. The backlog for Week 3 will be extended after the meeting with TA and discussing the project.
 
 ## Backend
 
