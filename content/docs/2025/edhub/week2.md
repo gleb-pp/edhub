@@ -48,11 +48,11 @@ During the development process we sometimes change the vision of our product, so
 
 ## Backend
 
-The main task of the backend team this week was to work on the API commands to implement the assignments and grades feature. A teacher can now create assignments within a course and add a title and description to them. Students can attach their text responses to assignments and submit them to the teacher for review. The teacher can track student submissions and grade them. Parents of students can also track their children's submissions.
+The main task of the backend team this week was to work on the API commands to implement the **assignments and grades feature**. A teacher can now create assignments within a course and add a title and description to them. Students can attach their text responses to assignments and submit them to the teacher for review. The teacher can track student submissions and grade them. Parents of students can also track their children's submissions.
 
-We also found that there is no way for a user to delete their account on the site. We consider the user's right to delete their account and all data about themselves from the service to be a priority, so we have implemented such an option.
+We also found that there is no way for a user to **delete their account** on the site. We consider the user's right to delete their account and all data about themselves from the service to be a priority, so we have implemented such an option.
 
-During the review of the account deletion function poolquest, we came up with the idea of not deleting all user-related data directly using sql queries, but rather writing `on delete` functions into the database initialization script. This way PostrgreSQL will automatically process user data when deleting a user from the `users` table. We also decided to apply this solution to improve the `remove_course` function, which previously had to delete all students, materials, and other related data manually.
+During the review of the account deletion function poolquest, we came up with the idea of not deleting all user-related data directly using sql queries, but rather **writing `on delete` functions** into the database initialization script. This way PostrgreSQL will automatically process user data when deleting a user from the `users` table. We also decided to apply this solution to improve the `remove_course` function, which previously had to delete all students, materials, and other related data manually.
 
 We also need to check the correctness of the input data before handling the request. For example, when we receive a request to add a student to a course, we call: 
 
