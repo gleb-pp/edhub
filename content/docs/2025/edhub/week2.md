@@ -36,7 +36,7 @@ In the Week 1 report, we have already described the user stories for the MVP of 
 
 - **Given** I'm a new user, **when** I want to create an account and specify the email, name, and password, **then** my account is created in the system.
 - **Given** I'm a new user, **when** I want to create an account with email that is already exists, **then** I see an error notice.
-- **Given** I'm a new user, **when** I want to create an account with too week password, **then** I see an error notice.
+- **Given** I'm a new user, **when** I want to create an account with too weak password, **then** I see an error notice.
 - **Given** I'm an unauthorized user, **when** I want to log in my account and specify the email and password, **then** I get access to my courses for 30 minutes.
 - **Given** I'm an authenticated user, **when** I want to delete my account from the system, **then** my account is deleted from the system with all my assignment submissions, course affiliation and authorship of assignments and materials.
 - **Given** I'm an authenticated user, **when** I want to create a course and provide a course title, **then** a new course is created with me as a teacher.
@@ -50,14 +50,13 @@ In the Week 1 report, we have already described the user stories for the MVP of 
 - **Given** I'm a teacher in a course, **when** I want to invite the student's parent and provide a valid parent email, **then** the parent gets access to observer the student within the course.
 - **Given** I'm a teacher in a course, **when** I want to invite the user that does not exists, **then** I see an error notice.
 - **Given** I'm a teacher in a course, **when** I want to invite the user that is already part of the course, **then** I see a warning.
-- **Given** I'm a teacher in a course, **when** I want to upload/update/remove materials, **then** changes are immediately visible to all course participants.
-- **Given** I'm a teacher in a course, **when** I want to upload/update/remove assignments, **then** changes are immediately visible to all course participants.
+- **Given** I'm a teacher in a course, **when** I want to upload/update/remove materials / assignments, **then** changes are immediately visible to all course participants.
 - **Given** I'm a teacher in a course, **when** I open the assignment page, **then** I can see the assignment details and the list of students' submissions.
 - **Given** I'm a teacher in a course, **when** I grade the student's submission, **then** the student sees this evaluation in their view.
 - **Given** I'm a teacher in a course, **when** I want to delete the user from the course and provide a valid user email, **then** the user loses access to the course.
-- **Given** I'm a teacher in a course, **when** I want to delete myself from the course and some other teachers leave in the course, **then** I lose access to the course.
+- **Given** I'm a teacher in a course, **when** I want to leave the course and some other teachers remain in the course, **then** I lose access to the course.
 - **Given** I'm a teacher in a course, **when** I want to delete the course **then** the course deleted with all its materials, assignments, submissions, students, teachers, parents.
-- **Given** I'm a teacher in a course, **when** I want to delete myself from the course and some I'm the only teacher left **then** I see a warning.
+- **Given** I'm a teacher in a course, **when** I want to leave course and some I'm the only teacher left **then** I see a warning.
 
 ### Student
 
@@ -65,15 +64,15 @@ In the Week 1 report, we have already described the user stories for the MVP of 
 - **Given** I'm a student in a course, **when** I open the material page, **then** I can see the material details.
 - **Given** I'm a student in a course, **when** I open the assignment page, **then** I can see the assignment details and the status of my submission.
 - **Given** I'm a student in a course, **when** I want to submit the assignment and specify the submission text, **then** assignment is submitted and teacher can evaluate it.
-- **Given** I'm a student in a course with a submitted assignment, **when** the teacher evaluates my submission, **then** I can the my grade and the email of teacher that graded my submission.
-- **Given** I'm a student in a course, **when** I want to delete myself from the course, **then** I lose access to the course.
+- **Given** I'm a student in a course with a submitted assignment, **when** the teacher evaluates my submission, **then** I can see my grade and the email of teacher that graded my submission.
+- **Given** I'm a student in a course, **when** I want to leave the course, **then** I lose access to the course.
 
 ### Parent
 
 - **Given** I'm a parent in a course, **when** I enter the course page, **then** I can see all the course materials and assignments.
 - **Given** I'm a parent in a course, **when** I open the material page, **then** I can see the material details.
 - **Given** I'm a parent in a course, **when** I open the assignment page, **then** I can see the assignment details and the status of my childrens' submission.
-- **Given** I'm a student in a course, **when** I want to delete myself from the course, **then** I lose access to the course.
+- **Given** I'm a student in a course, **when** I want to leave the course, **then** I lose access to the course.
 
 ## Plans & Prioritized backlog
 
@@ -99,7 +98,7 @@ The main task of the backend team this week was to work on the API commands to i
 
 We also found that there is no way for a user to **delete their account** on the site. We consider the user's right to delete their account and all data about themselves from the service to be a priority, so we have implemented such an option.
 
-During the review of the account deletion function poolquest, we came up with the idea of not deleting all user-related data directly using sql queries, but rather **writing `on delete` functions** into the database initialization script. This way PostrgreSQL will automatically process user data when deleting a user from the `users` table. We also decided to apply this solution to improve the `remove_course` function, which previously had to delete all students, materials, and other related data manually.
+During the review of the account deletion function pull request, we came up with the idea of not deleting all user-related data directly using sql queries, but rather **writing `on delete` functions** into the database initialization script. This way PostrgreSQL will automatically process user data when deleting a user from the `users` table. We also decided to apply this solution to improve the `remove_course` function, which previously had to delete all students, materials, and other related data manually.
 
 We also need to check the correctness of the input data before handling the request. For example, when we receive a request to add a student to a course, we call: 
 
@@ -108,7 +107,7 @@ We also need to check the correctness of the input data before handling the requ
 3. a function to check that the user is not already a member of that course
 4. a function to check that the sender of the request has teacher privileges
 
-This week we realized that some of these checks overlap and **removed the unnecessary ones** to speed up the processing of requests. For example, we don't need to call the check 2, because this check is implemented within the check 3, which also validates the input parameters.
+This week we realized that some of these checks overlap and **removed redundant checks** to optimize request handling. For example, we don't need to call the check 2, because this check is implemented within the check 3, which also validates the input parameters.
 
 ## Frontend
 
@@ -118,7 +117,7 @@ This week we realized that some of these checks overlap and **removed the unnece
 
 After the TA's recommendation, we fixed the network settings in the `docker-compose.yml` file that previously specified a concrete address.
 
-We also decided to redesign the architecture of the project to break one big `main.py` file into several parts with logic, models and routers. This way the project will be more scalable and it will be easier to work on several functions in parallel.
+We also decided to redesign the architecture of the project to break one big `main.py` file into several parts with `logic/`, `models/` and `routers/`. This way the project will be more scalable and it will be easier to work on several functions in parallel.
 
 ## Plan for the Week 3
 
@@ -127,19 +126,19 @@ During the Week 3, we plan to fully finalize the MVP of our project: the fronten
 # Individual contribution
 
 ### Gleb Popov
-- [`backend`]: Backend part of the **Assignment** feature has been developed ([*PR*](https://github.com/IU-Capstone-Project-2025/edhub/pull/21));
-- [`backend`]: The feature of proper deletion of user account and all their data from the system has been developed ([*PR*](https://github.com/IU-Capstone-Project-2025/edhub/pull/22));
+- [`backend`]: Backend part of the **Assignment** feature has been developed ([*PR #21*](https://github.com/IU-Capstone-Project-2025/edhub/pull/21));
+- [`backend`]: The feature of proper deletion of user account and all their data from the system has been developed ([*PR #22*](https://github.com/IU-Capstone-Project-2025/edhub/pull/22));
 - [`management`]: A more detailed market research was carried out after the recommendation of TA;
 - [`management`]: Development plan and weekly backlog have been created ([*kanban board*](https://github.com/orgs/IU-Capstone-Project-2025/projects/14/views/1));
-- [`management`]: Weekly report has been written ([*PR*](https://github.com/IU-PR/Capstone_project/pull/493)).
+- [`management`]: Weekly report has been written ([*PR #493*](https://github.com/IU-PR/Capstone_project/pull/493)).
 
 ### Timur Usmanov
-- [`backend`]: Docker network bug has been fixed after the recommendation of TA ([*PR*](https://github.com/IU-Capstone-Project-2025/edhub/pull/6));
-- [`backend`]: The correctness of input arguments of constraint checking functions is now validated ([*PR*](https://github.com/IU-Capstone-Project-2025/edhub/pull/23));
-- [`backend`]: Careful checking and commenting of pull request has been conducted ([*PR*](https://github.com/IU-Capstone-Project-2025/edhub/pull/21), [*PR*](https://github.com/IU-Capstone-Project-2025/edhub/pull/22)).
+- [`backend`]: Docker network bug has been fixed after the recommendation of TA ([*PR #6*](https://github.com/IU-Capstone-Project-2025/edhub/pull/6));
+- [`backend`]: The correctness of input arguments of constraint checking functions is now validated ([*PR #23*](https://github.com/IU-Capstone-Project-2025/edhub/pull/23));
+- [`backend`]: Careful reviewing of pull request has been conducted ([*PR #21*](https://github.com/IU-Capstone-Project-2025/edhub/pull/21), [*PR #22*](https://github.com/IU-Capstone-Project-2025/edhub/pull/22)).
 
 ### Asqar Dinikeev
-- [`devops`]: Project architecture has been developed, methods have been refactored into new modules ([*PR*](https://github.com/IU-Capstone-Project-2025/edhub/pull/25)).
+- [`devops`]: Project architecture has been developed, methods have been refactored into new modules ([*PR #25*](https://github.com/IU-Capstone-Project-2025/edhub/pull/25)).
 
 ### Alina Suhoverkova
 - [`frontend`]: 
