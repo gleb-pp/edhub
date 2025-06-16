@@ -44,7 +44,7 @@ By the end of Week 3, we plan to have an MVP of our product, and the global plan
 | **Assignment** | :white_check_mark: Done in Week 2 | :black_square_button: Planned for Week 3 |
 | **Files** | :black_square_button: Planned for Week 3 | :black_square_button: Planned for Week 3 or Week 4 |
 
-During the development process we sometimes change the vision of our product, so we plan to focus on a more detailed backlog and work out the week's plan at the beginning of each week. The backlog for Week 2 [was developed](https://github.com/orgs/IU-Capstone-Project-2025/projects/14/views/1) on June 12. The backlog for Week 3 will be extended after the meeting with TA.
+During the development process we sometimes change the vision of our product, so we plan to focus on a more detailed backlog and work out the week's plan at the beginning of each week. The backlog for Week 2 [was developed](https://github.com/orgs/IU-Capstone-Project-2025/projects/14/views/1) on June 12. The backlog for Week 3 will be extended after the meeting with TA and discussing the project.
 
 ## Backend
 
@@ -61,7 +61,7 @@ We also need to check the correctness of the input data before handling the requ
 3. a function to check that the user is not already a member of that course
 4. a function to check that the sender of the request has teacher privileges
 
-This week we realized that some of these checks overlap and **removed the unnecessary ones**. For example, we don't need to call the check 2, because this check is implemented within the check 3, which also validates the input parameters.
+This week we realized that some of these checks overlap and **removed the unnecessary ones** to speed up the processing of requests. For example, we don't need to call the check 2, because this check is implemented within the check 3, which also validates the input parameters.
 
 ## Frontend
 
