@@ -46,6 +46,53 @@ By the end of Week 3, we plan to have an MVP of our product, and the global plan
 
 During the development process we sometimes change the vision of our product, so we plan to focus on a more detailed backlog and work out the week's plan at the beginning of each week. The backlog for Week 2 [was developed](https://github.com/orgs/IU-Capstone-Project-2025/projects/14/views/1) on June 12. The backlog for Week 3 will be extended after the meeting with TA and discussing the project.
 
+## Acceptance Criteria
+
+In the Week 1 report, we have already describe the user stories for our MVP in details, so this week we focused on defining the acceptance criteria:
+
+### User
+
+- **Given** I'm a new user, **when** I want to create an account and specify the email, name, and password, **then** my account is created in the system.
+- **Given** I'm a new user, **when** I want to create an account with email that is already exists, **then** I see an error notice.
+- **Given** I'm a new user, **when** I want to create an account with too week password, **then** I see an error notice.
+- **Given** I'm an unauthorized user, **when** I want to log in my account and specify the email and password, **then** I get access to my courses for 30 minutes.
+- **Given** I'm an authenticated user, **when** I want to delete my account from the system, **then** my account is deleted from the system with all my assignment submissions, course affiliation and authorship of assignments and materials.
+- **Given** I'm an authenticated user, **when** I want to create a course and provide a course title, **then** a new course is created with me as a teacher.
+
+### Teacher
+
+- **Given** I'm a teacher in a course, **when** I enter the course page, **then** I can see all the course materials and assignments.
+- **Given** I'm a teacher in a course, **when** I open the material page, **then** I can see the material details.
+- **Given** I'm a teacher in a course, **when** I want to invite the student and provide a valid student email, **then** the student gets access to the course.
+- **Given** I'm a teacher in a course, **when** I want to invite the teacher and provide a valid teacher email, **then** the teacher gets access to the course.
+- **Given** I'm a teacher in a course, **when** I want to invite the student's parent and provide a valid parent email, **then** the parent gets access to observer the student within the course.
+- **Given** I'm a teacher in a course, **when** I want to invite the user that does not exists, **then** I see an error notice.
+- **Given** I'm a teacher in a course, **when** I want to invite the user that is already part of the course, **then** I see a warning.
+- **Given** I'm a teacher in a course, **when** I want to upload/update/remove materials, **then** changes are immediately visible to all course participants.
+- **Given** I'm a teacher in a course, **when** I want to upload/update/remove assignments, **then** changes are immediately visible to all course participants.
+- **Given** I'm a teacher in a course, **when** I open the assignment page, **then** I can see the assignment details and the list of students' submissions.
+- **Given** I'm a teacher in a course, **when** I grade the student's submission, **then** the student sees this evaluation in their view.
+- **Given** I'm a teacher in a course, **when** I want to delete the user from the course and provide a valid user email, **then** the user loses access to the course.
+- **Given** I'm a teacher in a course, **when** I want to delete myself from the course and some other teachers leave in the course, **then** I lose access to the course.
+- **Given** I'm a teacher in a course, **when** I want to delete the course **then** the course deleted with all its materials, assignments, submissions, students, teachers, parents.
+- **Given** I'm a teacher in a course, **when** I want to delete myself from the course and some I'm the only teacher left **then** I see a warning.
+
+### Student
+
+- **Given** I'm a student in a course, **when** I enter the course page, **then** I can see all the course materials and assignments.
+- **Given** I'm a student in a course, **when** I open the material page, **then** I can see the material details.
+- **Given** I'm a student in a course, **when** I open the assignment page, **then** I can see the assignment details and the status of my submission.
+- **Given** I'm a student in a course, **when** I want to submit the assignment and specify the submission text, **then** assignment is submitted and teacher can evaluate it.
+- **Given** I'm a student in a course with a submitted assignment, **when** the teacher evaluates my submission, **then** I can the my grade and the email of teacher that graded my submission.
+- **Given** I'm a student in a course, **when** I want to delete myself from the course, **then** I lose access to the course.
+
+### Parent
+
+- **Given** I'm a parent in a course, **when** I enter the course page, **then** I can see all the course materials and assignments.
+- **Given** I'm a parent in a course, **when** I open the material page, **then** I can see the material details.
+- **Given** I'm a parent in a course, **when** I open the assignment page, **then** I can see the assignment details and the status of my childrens' submission.
+- **Given** I'm a student in a course, **when** I want to delete myself from the course, **then** I lose access to the course.
+
 ## Backend
 
 The main task of the backend team this week was to work on the API commands to implement the **assignments and grades feature**. A teacher can now create assignments within a course and add a title and description to them. Students can attach their text responses to assignments and submit them to the teacher for review. The teacher can track student submissions and grade them. Parents of students can also track their children's submissions.
@@ -85,7 +132,6 @@ During the Week 3, we plan to fully finalize the MVP of our project: the fronten
 - [`management`]: A more detailed market research was carried out after the recommendation of TA;
 - [`management`]: Development plan and weekly backlog have been created ([*kanban board*](https://github.com/orgs/IU-Capstone-Project-2025/projects/14/views/1));
 - [`management`]: Weekly report has been written ([*PR*](https://github.com/IU-PR/Capstone_project/pull/493)).
-<!-- add link for the pull request with weekly report -->
 
 ### Timur Usmanov
 - [`backend`]: Docker network bug has been fixed after the recommendation of TA ([*PR*](https://github.com/IU-Capstone-Project-2025/edhub/pull/6));
