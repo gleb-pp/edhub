@@ -73,6 +73,10 @@ After the TA's recommendation, we fixed the network settings in the `docker-comp
 
 We also decided to redesign the architecture of the project to break one big `main.py` file into several parts with logic, models and routers. This way the project will be more scalable and it will be easier to work on several functions in parallel.
 
+## Plan for the Week 3
+
+During the Week 3, we plan to fully finalize the MVP of our project: the frontend team will create pages for assignments with their descriptions and the ability to submit students' work. The backend team will work on the ability to attach files to materials and assignments. If the frontend team has time left, they will also develop a frontend for uploading files.
+
 # Individual contribution
 
 ### Gleb Popov
