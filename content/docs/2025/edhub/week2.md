@@ -111,7 +111,20 @@ This week we realized that some of these checks overlap and **removed redundant 
 
 ## Frontend
 
+During Week 2, the frontend team focused on implementing the Materials version of the product — the foundation for our MVP and the teacher interface.
 
+The following features have been completed:
+
+- **Registration page**: Users can register with email, name, and password. Upon successful registration, they receive a JWT token and are redirected to their dashboard.
+- **Login page**: Users can log into their account using email and password. The design supports a responsive layout and a visual switch between login and registration modes.
+- **Course list page** (teacher view): Displays a list of all teacher’s courses as cards with metadata: title, creation date, and number of students.
+- **Course creation page**: Teachers can create a new course by providing a title. The course is immediately added to their list.
+- **Layout and routing**: A responsive sidebar navigation is implemented, highlighting the active page. This allows clear and convenient navigation between “My Courses” and “Create Course”.
+- **API integration**: All implemented pages use JWT-based authentication. Protected routes attach the token automatically, and user sessions are handled through localStorage.
+
+All implemented functionality is connected to the backend via protected API calls and uses real-time responses from the server. The UI is built with Tailwind CSS and shadcn/ui for styling and layout consistency across components.
+
+At this stage, the frontend is focused on the teacher interface, since most critical operations — such as course creation and participant management — are performed by teachers.
 
 ## DevOps
 
