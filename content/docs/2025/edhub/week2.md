@@ -150,7 +150,7 @@ During the Week 3, we plan to fully finalize the MVP of our project: the fronten
 - [`backend`]: The correctness of input arguments of constraint checking functions is now validated ([*PR #23*](https://github.com/IU-Capstone-Project-2025/edhub/pull/23));
 - [`backend`]: Careful reviewing of pull request has been conducted ([*PR #21*](https://github.com/IU-Capstone-Project-2025/edhub/pull/21), [*PR #22*](https://github.com/IU-Capstone-Project-2025/edhub/pull/22)).
 
-### Asqar Dinikeev
+### Askar Dinikeev
 - [`devops`]: Project architecture has been developed, methods have been refactored into new modules ([*PR #25*](https://github.com/IU-Capstone-Project-2025/edhub/pull/30)).
 
 ### Alina Suhoverkova
