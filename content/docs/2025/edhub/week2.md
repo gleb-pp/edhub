@@ -154,7 +154,8 @@ During the Week 3, we plan to fully finalize the MVP of our project: the fronten
 - [`devops`]: Project architecture has been developed, methods have been refactored into new modules ([*PR #25*](https://github.com/IU-Capstone-Project-2025/edhub/pull/30)).
 
 ### Alina Suhoverkova
-- [`frontend`]: 
+- [`frontend`]: added base structure and main pages, initial routing, login/register pages, and main course page are ready. Basic layout and styles added ([*commit*](https://github.com/IU-Capstone-Project-2025/edhub/commit/4c02ddb8b12b8a2102bd5b501cf75ac893bd6515))
+- [`frontend`]: added main colors and icons to [*Figma*](https://www.figma.com/design/dZsl8QQ8ZdJAXhzhCROajk/EdHub?node-id=0-1&p=f&t=yK7vWguu6P4d9RM8-0)
 
 ### Timur Struchkov
 - [`frontend`]: 
