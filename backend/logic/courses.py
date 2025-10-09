@@ -8,15 +8,29 @@ import logic.logging as logger
 
 def available_courses(db_cursor, user_email: str):
     courses = repo.courses.sql_select_available_courses(db_cursor, user_email)
-    result = [{"course_id": crs} for crs in courses]
-    return result
+    res = [{
+        "course_id": str(course[0]),
+        "title": course[1],
+        "instructor": course[2],
+        "organization": course[3],
+        "creation_time": course[4].strftime(TIME_FORMAT),
+        "emoji_id": course[5],
+    } for course in courses]
+    return res
 
 
 def get_all_courses(db_cursor, user_email: str):
     constraints.assert_admin_access(db_cursor, user_email)
-    courses = repo.courses.sql_select_all_courses(db_cursor)
-    result = [{"course_id": crs[0]} for crs in courses]
-    return result
+    courses = repo.courses.sql_select_all_courses(db_cursor, user_email)
+    res = [{
+        "course_id": str(course[0]),
+        "title": course[1],
+        "instructor": course[2],
+        "organization": course[3],
+        "creation_time": course[4].strftime(TIME_FORMAT),
+        "emoji_id": course[5],
+    } for course in courses]
+    return res
 
 
 def create_course(db_conn, db_cursor, title: str, user_email: str, organization: Optional[str] = None):

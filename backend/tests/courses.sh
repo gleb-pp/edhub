@@ -320,11 +320,11 @@ courses=$(curl -s -X GET \
     "$API_URL/available_courses")
 
 expected='[
-    {"course_id":"'"$mathcourseid"'"},
-    {"course_id":"'"$engcourseid"'"}
+    {"course_id":"'"$mathcourseid"'","title":"Math","organization":"Innopolis University"},
+    {"course_id":"'"$engcourseid"'","title":"English","organization":"Skyeng"}
 ]'
 
-json_exact_match_test "Request the list of available courses from Alice" "$courses" "$expected" "course_id"
+json_partial_match_test "Request the list of available courses from Alice" "$courses" "$expected" "course_id" "timeadded emojiid"
 
 # --------------------------------------------------------------------
 
@@ -343,11 +343,11 @@ courses=$(curl -s -X GET \
     "$API_URL/available_courses")
 
 expected='[
-    {"course_id":"'"$engcourseid"'"},
-    {"course_id":"'"$mathcourseid"'"}
+    {"course_id":"'"$engcourseid"'","title":"English","organization":"Skyeng"},
+    {"course_id":"'"$mathcourseid"'","title":"Math","organization":"Innopolis University"}
 ]'
 
-json_exact_match_test "Request the list of available courses from Alice" "$courses" "$expected" "course_id"
+json_partial_match_test "Request the list of available courses from Alice" "$courses" "$expected" "course_id" "timeadded emojiid"
 
 # --------------------------------------------------------------------
 
@@ -522,10 +522,10 @@ courses=$(curl -s -X GET \
     "$API_URL/available_courses")
 
 expected='[
-    {"course_id":"'"$mathcourseid"'"}
+    {"course_id":"'"$mathcourseid"'","title":"Math","organization":"Innopolis University"}
 ]'
 
-json_exact_match_test "Request the list of available courses from Alice" "$courses" "$expected" "course_id"
+json_partial_match_test "Request the list of available courses from Alice" "$courses" "$expected" "course_id" "timeadded emojiid"
 
 # --------------------------------------------------------------------
 
