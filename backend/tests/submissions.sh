@@ -72,7 +72,7 @@ expected='[
     {"course_id":"'"$mathcourseid"'","post_id":'$assignmentid',"section_id":1,"section_name":"General","section_order":0,"type":"ass","author":"alice@example.com"}
 ]'
 
-json_partial_match_test "Request the course feed from Bob" "$info" "$expected" "post_id type" "timeadded"
+json_partial_match_test "Request the course feed from Bob" "$info" "$expected" "post_id type" "creation_time"
 
 # --------------------------------------------------------------------
 

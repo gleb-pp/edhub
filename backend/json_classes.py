@@ -24,7 +24,8 @@ class CourseID(BaseModel):
 
 class Course(CourseID):
     title: str
-    instructor: str
+    instructor_email: str
+    instructor_name: str
     organization: Optional[str]
     creation_time: str
     emoji_id: Optional[int]
@@ -45,7 +46,7 @@ class CoursePost(BaseModel):
     section_name: str
     section_order: int
     type: Optional[str]
-    timeadded: Optional[str]
+    creation_time: Optional[str]
     author: Optional[str]
 
 

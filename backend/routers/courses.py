@@ -8,19 +8,23 @@ import logic.courses
 router = APIRouter()
 
 
-@router.get("/available_courses", response_model=List[json_classes.CourseID], tags=["Courses"])
+@router.get("/available_courses", response_model=List[json_classes.Course], tags=["Courses"])
 async def available_courses(user_email: str = Depends(get_current_user)):
     """
-    Get the list of IDs of courses available for user (as a Primary Instructor, Teacher, Student, or Parent).
+    Get the list of of courses available for user (as a Primary Instructor, Teacher, Student, or Parent).
+
+    For each course, returns (course_id, title, instructor_email, instructor_name, organization, creation_time, personal emoji_id).
     """
     with get_db() as (db_conn, db_cursor):
         return logic.courses.available_courses(db_cursor, user_email)
 
 
-@router.get("/get_all_courses", response_model=List[json_classes.CourseID], tags=["Courses"])
+@router.get("/get_all_courses", response_model=List[json_classes.Course], tags=["Courses"])
 async def get_all_courses(user_email: str = Depends(get_current_user)):
     """
-    Get the list of IDs of all courses in the system.
+    Get the list of all courses in the system.
+
+    For each course, returns (course_id, title, instructor_email, instructor_name, organization, creation_time, personal emoji_id).
 
     Admin role required.
     """
@@ -75,7 +79,7 @@ async def remove_course(course_id: str, user_email: str = Depends(get_current_us
 @router.get("/get_course_info", response_model=json_classes.Course, tags=["Courses"])
 async def get_course_info(course_id: str, user_email: str = Depends(get_current_user)):
     """
-    Get information about the course: course_id, title, instructor, organization, creation date, and personal emoji_id.
+    Get information about the course: course_id, title, instructor_email, instructor_name, organization, creation_time, and personal emoji_id.
 
     emoji_id is optional (can be None).
 

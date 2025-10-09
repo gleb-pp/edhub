@@ -48,7 +48,7 @@ expected='[
     {"course_id":"'"$mathcourseid"'","post_id":null,"section_id":1,"section_name":"General","section_order":0,"type":null,"author":null}
 ]'
 
-json_partial_match_test "Request the course feed from Alice" "$info" "$expected" "post_id type" "timeadded"
+json_partial_match_test "Request the course feed from Alice" "$info" "$expected" "post_id type" "creation_time"
 
 # --------------------------------------------------------------------
 
@@ -91,7 +91,7 @@ expected='[
     {"course_id":"'"$mathcourseid"'","post_id":'$materialid',"section_id":2,"section_name":"New Section","section_order":1,"type":"mat","author":"alice@example.com"}
 ]'
 
-json_partial_match_test "Request the course feed from Alice" "$info" "$expected" "post_id type" "timeadded"
+json_partial_match_test "Request the course feed from Alice" "$info" "$expected" "post_id type" "creation_time"
 
 # --------------------------------------------------------------------
 
@@ -110,7 +110,7 @@ expected='[
     {"course_id":"'"$mathcourseid"'","post_id":'$assignmentid',"section_id":1,"section_name":"General","section_order":1,"type":"ass","author":"alice@example.com"}
 ]'
 
-json_partial_match_test "Request the course feed from Alice" "$info" "$expected" "post_id type" "timeadded"
+json_partial_match_test "Request the course feed from Alice" "$info" "$expected" "post_id type" "creation_time"
 
 # --------------------------------------------------------------------
 
@@ -129,7 +129,7 @@ expected='[
     {"course_id":"'"$mathcourseid"'","post_id":'$assignmentid',"section_id":1,"section_name":"General","section_order":1,"type":"ass","author":"alice@example.com"}
 ]'
 
-json_partial_match_test "Request the course feed from Alice" "$info" "$expected" "post_id type" "timeadded"
+json_partial_match_test "Request the course feed from Alice" "$info" "$expected" "post_id type" "creation_time"
 
 # --------------------------------------------------------------------
 
@@ -147,7 +147,7 @@ expected='[
     {"course_id":"'"$mathcourseid"'","post_id":null,"section_id":2,"section_name":"New Section","section_order":0,"type":null,"author":null}
 ]'
 
-json_partial_match_test "Request the course feed from Alice" "$info" "$expected" "post_id type" "timeadded"
+json_partial_match_test "Request the course feed from Alice" "$info" "$expected" "post_id type" "creation_time"
 
 # --------------------------------------------------------------------
 

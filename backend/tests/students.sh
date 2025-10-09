@@ -88,10 +88,10 @@ courses=$(curl -s -X GET \
     "$API_URL/available_courses")
 
 expected='[
-    {"course_id":"'"$mathcourseid"'"}
+    {"course_id":"'"$mathcourseid"'","title":"Math","organization":"Innopolis University","instructor_email":"alice@example.com","instructor_name":"Alice"}
 ]'
 
-json_exact_match_test "Request the list of available courses from Bob" "$courses" "$expected" "course_id"
+json_partial_match_test "Request the list of available courses from Bob" "$courses" "$expected" "course_id" "creation_time emoji_id"
 
 # --------------------------------------------------------------------
 

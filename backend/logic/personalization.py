@@ -12,8 +12,8 @@ def change_courses_order(db_conn, db_cursor, new_order: List[str], user_email: s
     if not all(isinstance(i, str) for i in new_order):
         raise HTTPException(status_code=400, detail="Provided parameter new_order is not a list of strings")
 
-    courses = repo.courses.sql_select_available_courses(db_cursor, user_email)
-    if len(new_order) != len(courses) or set(new_order) != set(courses):
+    course_ids = [str(crs[0]) for crs in repo.courses.sql_select_available_courses(db_cursor, user_email)]
+    if len(new_order) != len(course_ids) or set(new_order) != set(course_ids):
         raise HTTPException(status_code=400, detail="Provided parameter new_order does not match with the list of available courses")
 
     repo.personalization.sql_update_courses_order(db_cursor, new_order, user_email)

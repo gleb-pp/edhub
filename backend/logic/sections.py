@@ -17,7 +17,7 @@ def get_course_feed(db_cursor, course_id: str, user_email: str):
             "section_name": mat[3],
             "section_order": mat[4],
             "type": mat[5],
-            "timeadded": mat[6].strftime(TIME_FORMAT) if mat[6] is not None else None,
+            "creation_time": mat[6].strftime(TIME_FORMAT) if mat[6] is not None else None,
             "author": mat[7]
         }
         for mat in course_feed

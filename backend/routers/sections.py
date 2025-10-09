@@ -13,11 +13,11 @@ async def get_course_feed(course_id: str, user_email: str = Depends(get_current_
     """
     Get the course feed with all its materials and assignments.
 
-    Returns the list of (course_id, post_id, section_id, section_name, section_order, type, timeadded, author) for each material.
+    Returns the list of (course_id, post_id, section_id, section_name, section_order, type, creation_time, author) for each material.
 
     Rows are ordered by section_order, then by creation_date, old posts go first.
 
-    For sections with no feed in it, there is a string with (post_id, type, timeadded, author) equal to None.
+    For sections with no feed in it, there is a string with (post_id, type, creation_time, author) equal to None.
 
     Course role (Primary Instructor, Teacher, Student, Parent) required.
     """
