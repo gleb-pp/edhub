@@ -24,7 +24,8 @@ class CourseID(BaseModel):
 
 class Course(CourseID):
     title: str
-    instructor: str
+    instructor_email: str
+    instructor_name: str
     organization: Optional[str]
     creation_time: str
     emoji_id: Optional[int]

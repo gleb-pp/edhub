@@ -320,8 +320,8 @@ courses=$(curl -s -X GET \
     "$API_URL/available_courses")
 
 expected='[
-    {"course_id":"'"$mathcourseid"'","title":"Math","organization":"Innopolis University","instructor":"alice@example.com"},
-    {"course_id":"'"$engcourseid"'","title":"English","organization":"Skyeng","instructor":"bob@example.com"}
+    {"course_id":"'"$mathcourseid"'","title":"Math","organization":"Innopolis University","instructor_email":"alice@example.com","instructor_name":"Alice"},
+    {"course_id":"'"$engcourseid"'","title":"English","organization":"Skyeng","instructor_email":"bob@example.com","instructor_name":"Bob"}
 ]'
 
 json_partial_match_test "Request the list of available courses from Alice" "$courses" "$expected" "course_id" "creation_time emoji_id"
@@ -343,8 +343,8 @@ courses=$(curl -s -X GET \
     "$API_URL/available_courses")
 
 expected='[
-    {"course_id":"'"$engcourseid"'","title":"English","organization":"Skyeng","instructor":"bob@example.com"},
-    {"course_id":"'"$mathcourseid"'","title":"Math","organization":"Innopolis University","instructor":"alice@example.com"}
+    {"course_id":"'"$engcourseid"'","title":"English","organization":"Skyeng","instructor_email":"bob@example.com","instructor_name":"Bob"},
+    {"course_id":"'"$mathcourseid"'","title":"Math","organization":"Innopolis University","instructor_email":"alice@example.com","instructor_name":"Alice"}
 ]'
 
 json_partial_match_test "Request the list of available courses from Alice" "$courses" "$expected" "course_id" "creation_time emoji_id"
@@ -522,7 +522,7 @@ courses=$(curl -s -X GET \
     "$API_URL/available_courses")
 
 expected='[
-    {"course_id":"'"$mathcourseid"'","title":"Math","organization":"Innopolis University","instructor":"alice@example.com"}
+    {"course_id":"'"$mathcourseid"'","title":"Math","organization":"Innopolis University","instructor_email":"alice@example.com","instructor_name":"Bob"}
 ]'
 
 json_partial_match_test "Request the list of available courses from Alice" "$courses" "$expected" "course_id" "creation_time emoji_id"

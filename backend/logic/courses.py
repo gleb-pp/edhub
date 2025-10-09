@@ -11,10 +11,11 @@ def available_courses(db_cursor, user_email: str):
     res = [{
         "course_id": str(course[0]),
         "title": course[1],
-        "instructor": course[2],
-        "organization": course[3],
-        "creation_time": course[4].strftime(TIME_FORMAT),
-        "emoji_id": course[5],
+        "instructor_email": course[2],
+        "instructor_name": course[3],
+        "organization": course[4],
+        "creation_time": course[5].strftime(TIME_FORMAT),
+        "emoji_id": course[6],
     } for course in courses]
     return res
 
@@ -25,10 +26,11 @@ def get_all_courses(db_cursor, user_email: str):
     res = [{
         "course_id": str(course[0]),
         "title": course[1],
-        "instructor": course[2],
-        "organization": course[3],
-        "creation_time": course[4].strftime(TIME_FORMAT),
-        "emoji_id": course[5],
+        "instructor_email": course[2],
+        "instructor_name": course[3],
+        "organization": course[4],
+        "creation_time": course[5].strftime(TIME_FORMAT),
+        "emoji_id": course[6],
     } for course in courses]
     return res
 
@@ -58,9 +60,10 @@ def get_course_info(db_cursor, course_id: str, user_email: str):
     res = {
         "course_id": str(course[0]),
         "title": course[1],
-        "instructor": course[2],
-        "organization": course[3],
-        "creation_time": course[4].strftime(TIME_FORMAT),
-        "emoji_id": course[5],
+        "instructor_email": course[2],
+        "instructor_name": course[3],
+        "organization": course[4],
+        "creation_time": course[5].strftime(TIME_FORMAT),
+        "emoji_id": course[6],
     }
     return res

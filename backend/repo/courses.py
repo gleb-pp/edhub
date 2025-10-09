@@ -5,9 +5,10 @@ from datetime import datetime
 def sql_select_available_courses(db_cursor, user_email: str) -> List[UUID]:
     db_cursor.execute(
         """
-        SELECT pci.courseid, c.name, c.instructor, c.organization, c.timecreated, pci.emojiid
+        SELECT pci.courseid, c.name, c.instructor, u.publicname, c.organization, c.timecreated, pci.emojiid
         FROM personal_course_info pci
         JOIN courses c ON c.courseid = pci.courseid AND pci.email = %s
+        JOIN users u ON c.instructor = u.email
         ORDER BY pci.courseorder ASC
         """,
         (user_email, ),
@@ -18,9 +19,10 @@ def sql_select_available_courses(db_cursor, user_email: str) -> List[UUID]:
 def sql_select_all_courses(db_cursor, user_email) -> List[Tuple[UUID, str, str, Optional[str], datetime, Optional[int]]]:
     db_cursor.execute(
         """
-        SELECT c.courseid, c.name, c.instructor, c.organization, c.timecreated, pci.emojiid
+        SELECT c.courseid, c.name, c.instructor, u.publicname, c.organization, c.timecreated, pci.emojiid
         FROM courses c
         LEFT JOIN personal_course_info pci ON c.courseid = pci.courseid AND pci.email = %s
+        JOIN users u ON c.instructor = u.email
         """,
         (user_email,),
     )
