@@ -101,7 +101,7 @@ info=$(curl -s -X GET \
     "$API_URL/get_course_info?course_id=$mathcourseid")
 
 expected='
-    {"course_id":"'"$mathcourseid"'","title":"Math","instructor":"alice@example.com","organization":"Innopolis University","emoji_id":1}
+    {"course_id":"'"$mathcourseid"'","title":"Math","instructor_email":"alice@example.com","instructor_name":"Alice","organization":"Innopolis University","emoji_id":1}
 '
 
 json_partial_match_test "Request the course info from Alice" "$info" "$expected" "course_id" "creation_time"
