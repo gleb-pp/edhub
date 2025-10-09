@@ -165,7 +165,7 @@ expected='[
     {"course_id":"'"$mathcourseid"'","post_id":'$assignmentid',"section_id":2,"section_name":"General","section_order":0,"type":"ass","author":"alice@example.com"}
 ]'
 
-json_partial_match_test "Request the course feed from Alice" "$info" "$expected" "post_id type" "timeadded"
+json_partial_match_test "Request the course feed from Alice" "$info" "$expected" "post_id type" "creation_time"
 
 # --------------------------------------------------------------------
 
@@ -320,11 +320,11 @@ courses=$(curl -s -X GET \
     "$API_URL/available_courses")
 
 expected='[
-    {"course_id":"'"$mathcourseid"'","title":"Math","organization":"Innopolis University"},
-    {"course_id":"'"$engcourseid"'","title":"English","organization":"Skyeng"}
+    {"course_id":"'"$mathcourseid"'","title":"Math","organization":"Innopolis University","instructor":"alice@example.com"},
+    {"course_id":"'"$engcourseid"'","title":"English","organization":"Skyeng","instructor":"bob@example.com"}
 ]'
 
-json_partial_match_test "Request the list of available courses from Alice" "$courses" "$expected" "course_id" "timeadded emojiid"
+json_partial_match_test "Request the list of available courses from Alice" "$courses" "$expected" "course_id" "creation_time emoji_id"
 
 # --------------------------------------------------------------------
 
@@ -343,11 +343,11 @@ courses=$(curl -s -X GET \
     "$API_URL/available_courses")
 
 expected='[
-    {"course_id":"'"$engcourseid"'","title":"English","organization":"Skyeng"},
-    {"course_id":"'"$mathcourseid"'","title":"Math","organization":"Innopolis University"}
+    {"course_id":"'"$engcourseid"'","title":"English","organization":"Skyeng","instructor":"bob@example.com"},
+    {"course_id":"'"$mathcourseid"'","title":"Math","organization":"Innopolis University","instructor":"alice@example.com"}
 ]'
 
-json_partial_match_test "Request the list of available courses from Alice" "$courses" "$expected" "course_id" "timeadded emojiid"
+json_partial_match_test "Request the list of available courses from Alice" "$courses" "$expected" "course_id" "creation_time emoji_id"
 
 # --------------------------------------------------------------------
 
@@ -372,7 +372,7 @@ expected='[
     {"course_id":"'"$engcourseid"'","post_id":'$assignmentid',"section_id":4,"section_name":"New Section","section_order":1,"type":"ass","author":"bob@example.com"}
 ]'
 
-json_partial_match_test "Request the course feed from Alice" "$info" "$expected" "post_id type" "timeadded"
+json_partial_match_test "Request the course feed from Alice" "$info" "$expected" "post_id type" "creation_time"
 
 # --------------------------------------------------------------------
 
@@ -454,7 +454,7 @@ expected='[
     {"course_id":"'"$engcourseid"'","post_id":null,"section_id":4,"section_name":"New Section","section_order":1,"type":null,"author":null}
 ]'
 
-json_partial_match_test "Request the empty course feed from Bob" "$info" "$expected" "post_id type" "timeadded"
+json_partial_match_test "Request the empty course feed from Bob" "$info" "$expected" "post_id type" "creation_time"
 
 # --------------------------------------------------------------------
 
@@ -522,10 +522,10 @@ courses=$(curl -s -X GET \
     "$API_URL/available_courses")
 
 expected='[
-    {"course_id":"'"$mathcourseid"'","title":"Math","organization":"Innopolis University"}
+    {"course_id":"'"$mathcourseid"'","title":"Math","organization":"Innopolis University","instructor":"alice@example.com"}
 ]'
 
-json_partial_match_test "Request the list of available courses from Alice" "$courses" "$expected" "course_id" "timeadded emojiid"
+json_partial_match_test "Request the list of available courses from Alice" "$courses" "$expected" "course_id" "creation_time emoji_id"
 
 # --------------------------------------------------------------------
 

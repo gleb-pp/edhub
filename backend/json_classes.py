@@ -45,7 +45,7 @@ class CoursePost(BaseModel):
     section_name: str
     section_order: int
     type: Optional[str]
-    timeadded: Optional[str]
+    creation_time: Optional[str]
     author: Optional[str]
 
 
