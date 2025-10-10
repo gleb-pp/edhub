@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import Link from 'next/link'
 import React, { ReactNode } from 'react'
 import '../sidebar.css'
+import { useAnimatedPresence } from '@/shared/hooks'
 
 interface Props {
   className?: string
@@ -18,6 +19,7 @@ export const SidebarButton: React.FC<Props> = ({
   text,
   isOpen = false,
 }) => {
+  const isVisible = useAnimatedPresence(isOpen, 200)
   return (
     <Link
       className={clsx(
@@ -34,14 +36,16 @@ export const SidebarButton: React.FC<Props> = ({
         {icon}
       </div>
 
-      <p
-        className={clsx(
-          'ml-2 whitespace-nowrap transition-opacity duration-300 group-hover:text-dark',
-          isOpen ? 'fade-in' : 'fade-out pointer-events-none',
-        )}
-      >
-        {text}
-      </p>
+      {isVisible && (
+        <p
+          className={clsx(
+            'ml-2 whitespace-nowrap transition-opacity duration-300 group-hover:text-dark',
+            isOpen ? 'fade-in' : 'fade-out',
+          )}
+        >
+          {text}
+        </p>
+      )}
     </Link>
   )
 }

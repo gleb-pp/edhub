@@ -18,13 +18,13 @@ export const CourseItem: React.FC<Props> = ({ className }) => {
   return (
     <Card
       className={clsx(
-        'h-[270px] w-[500px] flex flex-col transition-all duration-300 hover:shadow-lg hover:border-dark/15',
+        'h-[270px] w-[460px] flex flex-col transition-all duration-300 hover:shadow-lg hover:border-dark/15',
         className,
       )}
     >
       <div className="flex items-center gap-4 pt-8 px-8">
         <div className="size-[50px] bg-zinc-200" />
-        <p className="text-3xl text-dark font-medium">Networks</p>
+        <p className="text-4xl text-dark font-medium">Networks</p>
       </div>
 
       <div className="flex-1 flex flex-col justify-center gap-3 px-8 text-dark/60 text-lg">
@@ -38,7 +38,7 @@ export const CourseItem: React.FC<Props> = ({ className }) => {
         </div>
       </div>
 
-      <div className="relative w-full p-[14px] pl-8 flex items-center justify-between bg-dark/5 rounded-b-xl">
+      <div className="relative w-full p-[14px] pl-8 flex items-center justify-between bg-dark/2 rounded-b-xl">
         <div className="absolute left-0 top-[-2px] h-[2px] w-full">
           <ProgressBar
             className="bg-dark w-full h-full"

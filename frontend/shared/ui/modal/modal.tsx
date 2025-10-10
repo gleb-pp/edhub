@@ -1,13 +1,5 @@
 'use client'
-import React, {
-  useEffect,
-  FC,
-  useRef,
-  useCallback,
-  useId,
-  createContext,
-  useContext,
-} from 'react'
+import React, { useEffect, FC, useRef, createContext, useContext } from 'react'
 import clsx from 'clsx'
 import { Card } from '../card/card'
 import './modal.css'
@@ -63,7 +55,7 @@ const ModalComponent: FC<ModalProps> = ({
       <div
         ref={overlayRef}
         className={clsx(
-          'fixed inset-0 flex items-center justify-center bg-black/50 z-50',
+          'fixed inset-0 flex items-center justify-center bg-black/50 z-50 outline-none',
           isOpen ? 'fade-in' : 'fade-out',
         )}
         onClick={onClose}
