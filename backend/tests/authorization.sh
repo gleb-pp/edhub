@@ -90,7 +90,7 @@ json_exact_match_test "Get Alice's name" "$info" "$expected" "email"
 # --------------------------------------------------------------------
 
 fail_test "Changing password with incorrect original password" \
-    -X POST "$API_URL/change_password" \
+    -X PATCH "$API_URL/change_password" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $TOKEN" \
     -d "{\"email\":\"alice@example.com\",\"password\":\"Password123!\",\"new_password\":\"NewPass456!\"}"
@@ -98,7 +98,7 @@ fail_test "Changing password with incorrect original password" \
 # --------------------------------------------------------------------
 
 success_test "Correct changing password" \
-    -X POST "$API_URL/change_password" \
+    -X PATCH "$API_URL/change_password" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $TOKEN" \
     -d "{\"email\":\"alice@example.com\",\"password\":\"alicePass123!\",\"new_password\":\"AlicePass123!\"}"
@@ -113,13 +113,13 @@ success_test "Correct registration of Bob" \
 # --------------------------------------------------------------------
 
 fail_test "Removing Bob account from Alice" \
-    -X POST "$API_URL/remove_user?deleted_user_email=bob@example.com" \
+    -X DELETE "$API_URL/remove_user?deleted_user_email=bob@example.com" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
 
 success_test "Removing Alice account from Alice" \
-    -X POST "$API_URL/remove_user?deleted_user_email=alice@example.com" \
+    -X DELETE "$API_URL/remove_user?deleted_user_email=alice@example.com" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
@@ -132,5 +132,5 @@ login_and_get_token "Correct login as Bob" \
 # --------------------------------------------------------------------
 
 success_test "Removing Bob account from Bob" \
-    -X POST "$API_URL/remove_user?deleted_user_email=bob@example.com" \
+    -X DELETE "$API_URL/remove_user?deleted_user_email=bob@example.com" \
     -H "Authorization: Bearer $TOKEN" \

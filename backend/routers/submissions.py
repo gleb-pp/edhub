@@ -8,7 +8,7 @@ import logic.submissions
 router = APIRouter()
 
 
-@router.post("/submit_assignment", response_model=json_classes.Success, tags=["Submissions"])
+@router.put("/submit_assignment", response_model=json_classes.Success, tags=["Submissions"])
 async def submit_assignment(
     course_id: str,
     assignment_id: str,

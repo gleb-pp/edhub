@@ -133,7 +133,7 @@ download_file_test "Download assignment attachment by Bob" "$API_URL/download_as
 # --------------------------------------------------------------------
 
 success_test "Submit assignment as Bob" \
-    -X POST "$API_URL/submit_assignment?course_id=$mathcourseid&assignment_id=$assignmentid&submission_text=The%20answer%20is%2010" \
+    -X PUT "$API_URL/submit_assignment?course_id=$mathcourseid&assignment_id=$assignmentid&submission_text=The%20answer%20is%2010" \
     -H "Authorization: Bearer $TOKEN" \
 
 filesubmissionid=$(curl -s -X POST \

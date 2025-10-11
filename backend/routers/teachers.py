@@ -36,7 +36,7 @@ async def invite_teacher(
         return logic.teachers.invite_teacher(db_conn, db_cursor, course_id, new_teacher_email, teacher_email)
 
 
-@router.post("/remove_teacher", response_model=json_classes.Success, tags=["Teachers"])
+@router.delete("/remove_teacher", response_model=json_classes.Success, tags=["Teachers"])
 async def remove_teacher(
     course_id: str,
     removing_teacher_email: str,
@@ -53,7 +53,7 @@ async def remove_teacher(
         return logic.teachers.remove_teacher(db_conn, db_cursor, course_id, removing_teacher_email, teacher_email)
 
 
-@router.post("/change_course_instructor", response_model=json_classes.Success, tags=["Courses"])
+@router.patch("/change_course_instructor", response_model=json_classes.Success, tags=["Courses"])
 async def change_course_instructor(course_id: str, teacher_email: str, instructor_email: str = Depends(get_current_user)):
     """
     Transfer the course ownership (Primary Instructor role) to other Teacher within the course.

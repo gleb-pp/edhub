@@ -44,7 +44,7 @@ async def create_material(
         return logic.materials.create_material(db_conn, db_cursor, course_id, section_id, title, description, user_email)
 
 
-@router.post("/remove_material", response_model=json_classes.Success, tags=["Materials"])
+@router.delete("/remove_material", response_model=json_classes.Success, tags=["Materials"])
 async def remove_material(course_id: str, material_id: str, user_email: str = Depends(get_current_user)):
     """
     Remove the material by the provided course_id and material_id.

@@ -129,11 +129,11 @@ fail_test "Request to create an assignment from a student Bob" \
     -H "Authorization: Bearer $TOKEN" \
 
 fail_test "Request to remove Charlie from Math course by Bob" \
-    -X POST "$API_URL/remove_student?course_id=$mathcourseid&student_email=charlie@example.com" \
+    -X DELETE "$API_URL/remove_student?course_id=$mathcourseid&student_email=charlie@example.com" \
     -H "Authorization: Bearer $TOKEN" \
 
 success_test "Request to remove Bob from Math course by Bob" \
-    -X POST "$API_URL/remove_student?course_id=$mathcourseid&student_email=bob@example.com" \
+    -X DELETE "$API_URL/remove_student?course_id=$mathcourseid&student_email=bob@example.com" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
@@ -170,7 +170,7 @@ json_exact_match_test "Get students enrolled into Math course by Alice" "$info" 
 # --------------------------------------------------------------------
 
 success_test "Request to remove Charlie from Math course by Alice" \
-    -X POST "$API_URL/remove_student?course_id=$mathcourseid&student_email=charlie@example.com" \
+    -X DELETE "$API_URL/remove_student?course_id=$mathcourseid&student_email=charlie@example.com" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
@@ -211,7 +211,7 @@ login_and_get_token "Login as Charlie" \
     -d "{\"email\":\"charlie@example.com\",\"password\":\"charliePass123!\"}"
 
 success_test "Removing Charlie's account from Charlie" \
-    -X POST "$API_URL/remove_user?deleted_user_email=charlie@example.com" \
+    -X DELETE "$API_URL/remove_user?deleted_user_email=charlie@example.com" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
