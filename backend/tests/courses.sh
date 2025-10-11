@@ -59,7 +59,7 @@ noorgcourseid=$(curl -s -X POST \
 echo "✓ Successful Create the course with no organization"
 
 success_test "Remove the course with no organization" \
-    -X POST "$API_URL/remove_course?course_id=$noorgcourseid" \
+    -X DELETE "$API_URL/remove_course?course_id=$noorgcourseid" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
@@ -83,15 +83,15 @@ json_exact_match_test "Get Alice's role in course Math" "$info" "$expected" "is_
 # --------------------------------------------------------------------
 
 success_test "Set course emoji" \
-    -X POST "$API_URL/set_course_emoji?course_id=$mathcourseid&emoji_id=1" \
+    -X PUT "$API_URL/set_course_emoji?course_id=$mathcourseid&emoji_id=1" \
     -H "Authorization: Bearer $TOKEN" \
 
 fail_test "Set course emoji with too large ID" \
-    -X POST "$API_URL/set_course_emoji?course_id=$mathcourseid&emoji_id=10000" \
+    -X PUT "$API_URL/set_course_emoji?course_id=$mathcourseid&emoji_id=10000" \
     -H "Authorization: Bearer $TOKEN" \
 
 fail_test "Set course emoji with negative ID" \
-    -X POST "$API_URL/set_course_emoji?course_id=$mathcourseid&emoji_id=-10" \
+    -X PUT "$API_URL/set_course_emoji?course_id=$mathcourseid&emoji_id=-10" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
@@ -329,11 +329,11 @@ json_partial_match_test "Request the list of available courses from Alice" "$cou
 # --------------------------------------------------------------------
 
 success_test "Change the order of available courses by Alice" \
-    -X POST "$API_URL/change_courses_order?new_order=$engcourseid&new_order=$mathcourseid" \
+    -X PUT "$API_URL/change_courses_order?new_order=$engcourseid&new_order=$mathcourseid" \
     -H "Authorization: Bearer $TOKEN" \
 
 fail_test "Request to change the order of courses to repeating ones by Alice" \
-    -X POST "$API_URL/change_courses_order?new_order=$mathcourseid&new_order=$mathcourseid" \
+    -X PUT "$API_URL/change_courses_order?new_order=$mathcourseid&new_order=$mathcourseid" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
@@ -401,19 +401,19 @@ json_partial_match_test "Request the assignment info from Alice" "$info" "$expec
 # --------------------------------------------------------------------
 
 fail_test "Request to delete Bob's course by Alice" \
-    -X POST "$API_URL/remove_course?course_id=$engcourseid" \
+    -X DELETE "$API_URL/remove_course?course_id=$engcourseid" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
 
 fail_test "Request to delete the material in Bob's course by Alice" \
-    -X POST "$API_URL/remove_material?course_id=$engcourseid&material_id=$materialid" \
+    -X DELETE "$API_URL/remove_material?course_id=$engcourseid&material_id=$materialid" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
 
 fail_test "Request to delete the assignment in Bob's course by Alice" \
-    -X POST "$API_URL/remove_assignment?course_id=$engcourseid&assignment_id=$assignmentid" \
+    -X DELETE "$API_URL/remove_assignment?course_id=$engcourseid&assignment_id=$assignmentid" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
@@ -426,21 +426,21 @@ login_and_get_token "Login as Bob" \
 # --------------------------------------------------------------------
 
 success_test "Delete the material in Bob's course by Bob" \
-    -X POST "$API_URL/remove_material?course_id=$engcourseid&material_id=$materialid" \
+    -X DELETE "$API_URL/remove_material?course_id=$engcourseid&material_id=$materialid" \
     -H "Authorization: Bearer $TOKEN" \
 
 success_test "Delete the assignment in Bob's course by Bob" \
-    -X POST "$API_URL/remove_assignment?course_id=$engcourseid&assignment_id=$assignmentid" \
+    -X DELETE "$API_URL/remove_assignment?course_id=$engcourseid&assignment_id=$assignmentid" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
 
 fail_test "Request to delete the deleted material in Bob's course by Bob" \
-    -X POST "$API_URL/remove_material?course_id=$engcourseid&material_id=$materialid" \
+    -X DELETE "$API_URL/remove_material?course_id=$engcourseid&material_id=$materialid" \
     -H "Authorization: Bearer $TOKEN" \
 
 fail_test "Request to delete the deleted assignment in Bob's course by Bob" \
-    -X POST "$API_URL/remove_assignment?course_id=$engcourseid&assignment_id=$assignmentid" \
+    -X DELETE "$API_URL/remove_assignment?course_id=$engcourseid&assignment_id=$assignmentid" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
@@ -493,7 +493,7 @@ login_and_get_token "Login as Bob" \
 # --------------------------------------------------------------------
 
 success_test "Delete Bob's course" \
-    -X POST "$API_URL/remove_course?course_id=$engcourseid" \
+    -X DELETE "$API_URL/remove_course?course_id=$engcourseid" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
@@ -505,7 +505,7 @@ fail_test "Request to get the feed of the removed course by Bob" \
 # --------------------------------------------------------------------
 
 success_test "Removing Bob's account from Bob" \
-    -X POST "$API_URL/remove_user?deleted_user_email=bob@example.com" \
+    -X DELETE "$API_URL/remove_user?deleted_user_email=bob@example.com" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
@@ -536,7 +536,7 @@ fail_test "Request to get the feed of the removed course" \
 # --------------------------------------------------------------------
 
 success_test "Delete Alice's course" \
-    -X POST "$API_URL/remove_course?course_id=$mathcourseid" \
+    -X DELETE "$API_URL/remove_course?course_id=$mathcourseid" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------

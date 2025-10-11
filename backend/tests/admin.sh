@@ -100,7 +100,7 @@ json_exact_match_test "Request the list of courses from Admin" "$courses" "$expe
 # --------------------------------------------------------------------
 
 success_test "Giving admin rights to Alice by Admin" \
-    -X POST "$API_URL/give_admin_permissions?object_email=alice@example.com" \
+    -X PATCH "$API_URL/give_admin_permissions?object_email=alice@example.com" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
@@ -119,7 +119,7 @@ json_exact_match_test "Request the list of admins from Admin" "$admins" "$expect
 # --------------------------------------------------------------------
 
 success_test "Removing Alice account from Admin" \
-    -X POST "$API_URL/remove_user?deleted_user_email=alice@example.com" \
+    -X DELETE "$API_URL/remove_user?deleted_user_email=alice@example.com" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------

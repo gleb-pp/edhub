@@ -56,7 +56,7 @@ async def login(user: json_classes.UserLogin):
         return logic.users.login(db_cursor, user)
 
 
-@router.post("/change_password", response_model=json_classes.Success, tags=["Users"])
+@router.patch("/change_password", response_model=json_classes.Success, tags=["Users"])
 async def change_password(user: json_classes.UserNewPassword):
     """
     Change the user password to a new one.
@@ -74,7 +74,7 @@ async def get_instructor_courses(user_email: str = Depends(get_current_user)):
         return logic.users.get_instructor_courses(db_cursor, user_email)
 
 
-@router.post("/remove_user", response_model=json_classes.Success, tags=["Users"])
+@router.delete("/remove_user", response_model=json_classes.Success, tags=["Users"])
 async def remove_user(deleted_user_email: str, user_email: str = Depends(get_current_user)):
     """
     Delete user account from the system.
@@ -95,7 +95,7 @@ async def remove_user(deleted_user_email: str, user_email: str = Depends(get_cur
         return logic.users.remove_user(db_conn, db_cursor, deleted_user_email, user_email)
 
 
-@router.post("/give_admin_permissions", response_model=json_classes.Success, tags=["Users"])
+@router.patch("/give_admin_permissions", response_model=json_classes.Success, tags=["Users"])
 async def give_admin_permissions(object_email: str, subject_email: str = Depends(get_current_user)):
     """
     Give admin rights to some existing user by their email.

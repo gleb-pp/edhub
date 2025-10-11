@@ -96,7 +96,7 @@ json_partial_match_test "Request the course feed from Alice" "$info" "$expected"
 # --------------------------------------------------------------------
 
 success_test "Change the section order in Math course by Alice" \
-    -X POST "$API_URL/change_section_order?course_id=$mathcourseid&new_order=2&new_order=1" \
+    -X PUT "$API_URL/change_section_order?course_id=$mathcourseid&new_order=2&new_order=1" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
@@ -115,7 +115,7 @@ json_partial_match_test "Request the course feed from Alice" "$info" "$expected"
 # --------------------------------------------------------------------
 
 success_test "Delete the material in Math course by Alice" \
-    -X POST "$API_URL/remove_material?course_id=$mathcourseid&material_id=$materialid" \
+    -X DELETE "$API_URL/remove_material?course_id=$mathcourseid&material_id=$materialid" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
@@ -134,7 +134,7 @@ json_partial_match_test "Request the course feed from Alice" "$info" "$expected"
 # --------------------------------------------------------------------
 
 success_test "Remove the section from the Math course by Alice" \
-    -X POST "$API_URL/remove_section?course_id=$mathcourseid&section_id=1" \
+    -X DELETE "$API_URL/remove_section?course_id=$mathcourseid&section_id=1" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
@@ -152,7 +152,7 @@ json_partial_match_test "Request the course feed from Alice" "$info" "$expected"
 # --------------------------------------------------------------------
 
 fail_test "Request to remove the last section from the Math course by Alice" \
-    -X POST "$API_URL/remove_section?course_id=$mathcourseid&section_id=2" \
+    -X DELETE "$API_URL/remove_section?course_id=$mathcourseid&section_id=2" \
     -H "Authorization: Bearer $TOKEN" \
 
 success_test "Add a new section to Math course by Alice" \
@@ -173,11 +173,11 @@ fail_test "Add a new section to Math course by Bob" \
     -H "Authorization: Bearer $TOKEN" \
 
 fail_test "Request to change the section order in Math course by Bob" \
-    -X POST "$API_URL/change_section_order?course_id=$mathcourseid&new_order=1&new_order=2" \
+    -X PUT "$API_URL/change_section_order?course_id=$mathcourseid&new_order=1&new_order=2" \
     -H "Authorization: Bearer $TOKEN" \
 
 fail_test "Request to remove the section from the Math course by Bob" \
-    -X POST "$API_URL/remove_section?course_id=$mathcourseid&section_id=2" \
+    -X DELETE "$API_URL/remove_section?course_id=$mathcourseid&section_id=2" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------

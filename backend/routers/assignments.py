@@ -46,7 +46,7 @@ async def create_assignment(
         return logic.assignments.create_assignment(db_conn, db_cursor, course_id, section_id, title, description, user_email)
 
 
-@router.post("/remove_assignment", response_model=json_classes.Success, tags=["Assignments"])
+@router.delete("/remove_assignment", response_model=json_classes.Success, tags=["Assignments"])
 async def remove_assignment(course_id: str, assignment_id: str, user_email: str = Depends(get_current_user)):
     """
     Remove the assignment by the provided course_id and assignment_id.

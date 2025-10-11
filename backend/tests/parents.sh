@@ -100,11 +100,11 @@ json_exact_match_test "Get the list of Charlie's parents" "$info" "$expected" "e
 # --------------------------------------------------------------------
 
 success_test "Remove Dmitry from the Alice's course as a Charlie's parent" \
-    -X POST "$API_URL/remove_parent?course_id=$mathcourseid&student_email=charlie@example.com&parent_email=dmitry@example.com" \
+    -X DELETE "$API_URL/remove_parent?course_id=$mathcourseid&student_email=charlie@example.com&parent_email=dmitry@example.com" \
     -H "Authorization: Bearer $TOKEN" \
 
 fail_test "One more time remove Dmitry from the Alice's course as a Charlie's parent" \
-    -X POST "$API_URL/remove_parent?course_id=$mathcourseid&student_email=charlie@example.com&parent_email=dmitry@example.com" \
+    -X DELETE "$API_URL/remove_parent?course_id=$mathcourseid&student_email=charlie@example.com&parent_email=dmitry@example.com" \
     -H "Authorization: Bearer $TOKEN" \
 
 success_test "Invite Dmitry to Alice's course as a student" \

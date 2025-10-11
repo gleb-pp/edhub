@@ -39,7 +39,7 @@ async def invite_parent(
         return logic.parents.invite_parent(db_conn, db_cursor, course_id, student_email, parent_email, teacher_email)
 
 
-@router.post("/remove_parent", response_model=json_classes.Success, tags=["Parents"])
+@router.delete("/remove_parent", response_model=json_classes.Success, tags=["Parents"])
 async def remove_parent(
     course_id: str,
     student_email: str,

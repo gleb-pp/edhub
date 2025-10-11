@@ -50,7 +50,7 @@ async def create_section(
         return logic.sections.create_section(db_conn, db_cursor, course_id, title, user_email)
 
 
-@router.post("/change_section_order", response_model=json_classes.Success, tags=["Courses"])
+@router.put("/change_section_order", response_model=json_classes.Success, tags=["Courses"])
 async def change_section_order(
     course_id: str,
     new_order: List[int] = Query(...),
@@ -67,7 +67,7 @@ async def change_section_order(
         return logic.sections.change_section_order(db_conn, db_cursor, course_id, new_order, user_email)
 
 
-@router.post("/remove_section", response_model=json_classes.Success, tags=["Courses"])
+@router.delete("/remove_section", response_model=json_classes.Success, tags=["Courses"])
 async def remove_section(
     course_id: str,
     section_id: int,

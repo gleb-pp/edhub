@@ -63,7 +63,7 @@ async def create_course(
         return logic.courses.create_course(db_conn, db_cursor, title, user_email, organization)
 
 
-@router.post("/remove_course", response_model=json_classes.Success, tags=["Courses"])
+@router.delete("/remove_course", response_model=json_classes.Success, tags=["Courses"])
 async def remove_course(course_id: str, user_email: str = Depends(get_current_user)):
     """
     Remove the course with provided course_id.

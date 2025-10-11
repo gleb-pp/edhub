@@ -107,7 +107,7 @@ json_exact_match_test "Get the Bob's role in course Math" "$info" "$expected" "i
 # --------------------------------------------------------------------
 
 success_test "Request to remove Charlie from Math course by Bob" \
-    -X POST "$API_URL/remove_student?course_id=$mathcourseid&student_email=charlie@example.com" \
+    -X DELETE "$API_URL/remove_student?course_id=$mathcourseid&student_email=charlie@example.com" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
@@ -130,11 +130,11 @@ success_test "Invite Charlie to Alice's course as a student" \
 # --------------------------------------------------------------------
 
 fail_test "Request to remove Alice from Math course by Bob" \
-    -X POST "$API_URL/remove_teacher?course_id=$mathcourseid&removing_teacher_email=alice@example.com" \
+    -X DELETE "$API_URL/remove_teacher?course_id=$mathcourseid&removing_teacher_email=alice@example.com" \
     -H "Authorization: Bearer $TOKEN" \
 
 fail_test "Request to change the course instructor from Alice to Bob by Bob" \
-    -X POST "$API_URL/change_course_instructor?course_id=$mathcourseid&teacher_email=bob@example.com" \
+    -X PATCH "$API_URL/change_course_instructor?course_id=$mathcourseid&teacher_email=bob@example.com" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
@@ -153,21 +153,21 @@ login_and_get_token "Login as Alice" \
 # --------------------------------------------------------------------
 
 fail_test "Request to remove Alice from Math course by Alice" \
-    -X POST "$API_URL/remove_teacher?course_id=$mathcourseid&removing_teacher_email=alice@example.com" \
+    -X DELETE "$API_URL/remove_teacher?course_id=$mathcourseid&removing_teacher_email=alice@example.com" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
 
 success_test "Change the course instructor from Alice to Bob by Alice" \
-    -X POST "$API_URL/change_course_instructor?course_id=$mathcourseid&teacher_email=bob@example.com" \
+    -X PATCH "$API_URL/change_course_instructor?course_id=$mathcourseid&teacher_email=bob@example.com" \
     -H "Authorization: Bearer $TOKEN" \
 
 success_test "Request to remove Alice from Math course by Alice" \
-    -X POST "$API_URL/remove_teacher?course_id=$mathcourseid&removing_teacher_email=alice@example.com" \
+    -X DELETE "$API_URL/remove_teacher?course_id=$mathcourseid&removing_teacher_email=alice@example.com" \
     -H "Authorization: Bearer $TOKEN" \
 
 success_test "Removing Alice's account from Alice" \
-    -X POST "$API_URL/remove_user?deleted_user_email=alice@example.com" \
+    -X DELETE "$API_URL/remove_user?deleted_user_email=alice@example.com" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------

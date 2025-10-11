@@ -76,7 +76,7 @@ login_and_get_token "Login as Bob" \
     -d "{\"email\":\"bob@example.com\",\"password\":\"bobPass123!\"}"
 
 success_test "Submit assignment as Bob" \
-    -X POST "$API_URL/submit_assignment?course_id=$mathcourseid&assignment_id=$firstassignmentid&submission_text=The%20answer%20is%2010" \
+    -X PUT "$API_URL/submit_assignment?course_id=$mathcourseid&assignment_id=$firstassignmentid&submission_text=The%20answer%20is%2010" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
