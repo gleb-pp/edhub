@@ -83,15 +83,15 @@ json_exact_match_test "Get Alice's role in course Math" "$info" "$expected" "is_
 # --------------------------------------------------------------------
 
 success_test "Set course emoji" \
-    -X PUT "$API_URL/set_course_emoji?course_id=$mathcourseid&emoji_id=1" \
+    -X PATCH "$API_URL/set_course_emoji?course_id=$mathcourseid&emoji_id=1" \
     -H "Authorization: Bearer $TOKEN" \
 
 fail_test "Set course emoji with too large ID" \
-    -X PUT "$API_URL/set_course_emoji?course_id=$mathcourseid&emoji_id=10000" \
+    -X PATCH "$API_URL/set_course_emoji?course_id=$mathcourseid&emoji_id=10000" \
     -H "Authorization: Bearer $TOKEN" \
 
 fail_test "Set course emoji with negative ID" \
-    -X PUT "$API_URL/set_course_emoji?course_id=$mathcourseid&emoji_id=-10" \
+    -X PATCH "$API_URL/set_course_emoji?course_id=$mathcourseid&emoji_id=-10" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------

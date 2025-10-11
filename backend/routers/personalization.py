@@ -23,7 +23,7 @@ async def change_courses_order(
         return logic.personalization.change_courses_order(db_conn, db_cursor, new_order, user_email)
 
 
-@router.put("/set_course_emoji", response_model=json_classes.Success, tags=["Personalization"])
+@router.patch("/set_course_emoji", response_model=json_classes.Success, tags=["Personalization"])
 async def set_course_emoji(
     course_id: str,
     emoji_id: int = Query(..., ge=0, le=EMOJI_COUNT),
