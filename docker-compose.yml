@@ -7,6 +7,11 @@ services:
       - POSTGRES_USER=postgres
     volumes:
       - edhub_system_storage:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d edhub"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   filestorage_db:
     build: ./database/filestorage
@@ -16,6 +21,11 @@ services:
       - POSTGRES_USER=postgres
     volumes:
       - edhub_filestorage_storage:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d edhub_storage"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
     build: ./backend
@@ -24,8 +34,10 @@ services:
       - DATABASE_URL=postgresql://postgres:12345678@system_db:5432/edhub
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     depends_on:
-      - system_db
-      - filestorage_db
+      system_db:
+        condition: service_healthy
+      filestorage_db:
+        condition: service_healthy
 
   frontend:
     build: ./frontend
