@@ -144,7 +144,7 @@ json_partial_match_test "Request the submission details by Alice" "$info" "$expe
 # --------------------------------------------------------------------
 
 success_test "Grade submission by Alice" \
-    -X POST "$API_URL/grade_submission?course_id=$mathcourseid&assignment_id=$assignmentid&student_email=bob@example.com&grade=5&comment=Good%20job" \
+    -X PUT "$API_URL/grade_submission?course_id=$mathcourseid&assignment_id=$assignmentid&student_email=bob@example.com&grade=5&comment=Good%20job" \
     -H "Authorization: Bearer $TOKEN" \
 
 # --------------------------------------------------------------------
