@@ -4,5 +4,5 @@ myenv
 venv
 tempCodeRunnerFile.py
 database.py
-secrets.env
+.env
 .pylintrc
