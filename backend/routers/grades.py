@@ -8,7 +8,7 @@ import logic.grades
 router = APIRouter()
 
 
-@router.post("/grade_submission", response_model=json_classes.Success, tags=["Grades"])
+@router.put("/grade_submission", response_model=json_classes.Success, tags=["Grades"])
 async def grade_submission(
     course_id: str,
     assignment_id: str,
@@ -24,6 +24,8 @@ async def grade_submission(
 ):
     """
     Allows teacher to grade student's submission.
+
+    If the assignment is already graded, the grade will be updated.
 
     Teacher OR Primary Instructor role required.
 
