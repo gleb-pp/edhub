@@ -1,14 +1,16 @@
-from typing import List
 from fastapi import APIRouter, Depends, Query, UploadFile, File
 from auth import get_current_user, get_db, get_storage_db
 import json_classes
 import logic.submissions
 
 
-router = APIRouter()
+router = APIRouter(
+    prefix='courses/{course_id}/assignment/{assignment_id}/submissions',
+    tags=["Submissions"],
+)
 
 
-@router.put("/submit_assignment", response_model=json_classes.Success, tags=["Submissions"])
+@router.put("/")
 async def submit_assignment(
     course_id: str,
     assignment_id: str,
@@ -19,7 +21,7 @@ async def submit_assignment(
         description="Submission text must contain 3-10000 symbols"
     ),
     student_email: str = Depends(get_current_user),
-):
+) -> json_classes.Success:
     """
     Allows student to submit their assignment.
 
@@ -35,8 +37,12 @@ async def submit_assignment(
         return logic.submissions.submit_assignment(db_conn, db_cursor, course_id, assignment_id, submission_text, student_email)
 
 
-@router.get("/get_assignment_submissions", response_model=List[json_classes.Submission], tags=["Submissions"])
-async def get_assignment_submissions(course_id: str, assignment_id: str, user_email: str = Depends(get_current_user)):
+@router.get("/")
+async def get_assignment_submissions(
+    course_id: str,
+    assignment_id: str,
+    user_email: str = Depends(get_current_user)
+) -> list[json_classes.Submission]:
     """
     Get the list of students submissions of provided assignments.
 
@@ -56,13 +62,13 @@ async def get_assignment_submissions(course_id: str, assignment_id: str, user_em
         return logic.submissions.get_assignment_submissions(db_cursor, course_id, assignment_id, user_email)
 
 
-@router.get("/get_submission", response_model=json_classes.Submission, tags=["Submissions"])
+@router.get("/{student_email}")
 async def get_submission(
     course_id: str,
     assignment_id: str,
     student_email: str,
     user_email: str = Depends(get_current_user),
-):
+) -> json_classes.Submission:
     """
     Get the student submission of assignment by course_id, assignment_id and student_email.
 
@@ -82,14 +88,14 @@ async def get_submission(
         return logic.submissions.get_submission(db_cursor, course_id, assignment_id, student_email, user_email)
 
 
-@router.post("/create_submission_attachment", response_model=json_classes.SubmissionAttachmentMetadata, tags=["Submissions"])
+@router.post("{student_email}/attachment")
 async def create_submission_attachment(
     course_id: str,
     assignment_id: str,
     student_email: str,
     file: UploadFile = File(...),
     user_email: str = Depends(get_current_user),
-):
+) -> json_classes.SubmissionAttachmentMetadata:
     """
     Attach the provided file to provided course assignment submission.
 
@@ -105,8 +111,13 @@ async def create_submission_attachment(
         return await logic.submissions.create_submission_attachment(db_conn, db_cursor, storage_db_conn, storage_db_cursor, course_id, assignment_id, student_email, file, user_email)
 
 
-@router.get("/get_submission_attachments", response_model=List[json_classes.SubmissionAttachmentMetadata], tags=["Submissions"])
-async def get_submission_attachments(course_id: str, assignment_id: str, student_email: str, user_email: str = Depends(get_current_user)):
+@router.get("/attachments")
+async def get_submission_attachments(
+    course_id: str,
+    assignment_id: str,
+    student_email: str,
+    user_email: str = Depends(get_current_user)
+) -> list[json_classes.SubmissionAttachmentMetadata]:
     """
     Get the list of attachments to the course assignment submission by provided course_id, assignment_id, student_email.
 
@@ -122,8 +133,14 @@ async def get_submission_attachments(course_id: str, assignment_id: str, student
         return logic.submissions.get_submission_attachments(db_cursor, course_id, assignment_id, student_email, user_email)
 
 
-@router.get("/download_submission_attachment", tags=["Submissions"])
-async def download_submission_attachment(course_id: str, assignment_id: str, student_email: str, file_id: str, user_email: str = Depends(get_current_user)):
+@router.get("/{student_email}/attachment/{file_id}")
+async def download_submission_attachment(
+    course_id: str,
+    assignment_id: str,
+    student_email: str,
+    file_id: str,
+    user_email: str = Depends(get_current_user)
+):
     """
     Download the attachment to the course assignment submission by provided course_id, assignment_id, student_email, file_id.
     """

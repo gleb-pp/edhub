@@ -5,10 +5,13 @@ import json_classes
 import logic.materials
 
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/materials",
+    tags=["Materials"],
+)
 
 
-@router.post("/create_material", response_model=json_classes.MaterialID, tags=["Materials"])
+@router.post("/{course_id}/{section_id}")
 async def create_material(
     course_id: str,
     section_id: int,
@@ -26,7 +29,7 @@ async def create_material(
         description="Description must contain 3-10000 symbols"
     ),
     user_email: str = Depends(get_current_user),
-):
+) -> json_classes.MaterialID:
     """
     Create the material with provided title and description within the section by provided section_id within the course with provided course_id.
 
@@ -44,8 +47,12 @@ async def create_material(
         return logic.materials.create_material(db_conn, db_cursor, course_id, section_id, title, description, user_email)
 
 
-@router.delete("/remove_material", response_model=json_classes.Success, tags=["Materials"])
-async def remove_material(course_id: str, material_id: str, user_email: str = Depends(get_current_user)):
+@router.delete("/{course_id}/{material_id}")
+async def remove_material(
+    course_id: str,
+    material_id: str,
+    user_email: str = Depends(get_current_user)
+) -> json_classes.Success:
     """
     Remove the material by the provided course_id and material_id.
 
@@ -55,8 +62,12 @@ async def remove_material(course_id: str, material_id: str, user_email: str = De
         return logic.materials.remove_material(db_conn, db_cursor, course_id, material_id, user_email)
 
 
-@router.get("/get_material", response_model=json_classes.Material, tags=["Materials"])
-async def get_material(course_id: str, material_id: str, user_email: str = Depends(get_current_user)):
+@router.get("/{course_id}/{material_id}")
+async def get_material(
+    course_id: str,
+    material_id: str,
+    user_email: str = Depends(get_current_user)
+) -> json_classes.Material:
     """
     Get the material details by the provided (course_id, material_id).
 
@@ -72,13 +83,13 @@ async def get_material(course_id: str, material_id: str, user_email: str = Depen
         return logic.materials.get_material(db_cursor, course_id, material_id, user_email)
 
 
-@router.post("/create_material_attachment", response_model=json_classes.MaterialAttachmentMetadata, tags=["Materials"])
+@router.post("/attachment/{course_id}/{material_id}")
 async def create_material_attachment(
     course_id: str,
     material_id: str,
     file: UploadFile = File(...),
     user_email: str = Depends(get_current_user),
-):
+) -> json_classes.MaterialAttachmentMetadata:
     """
     Attach the provided file to provided course material.
 
@@ -94,8 +105,12 @@ async def create_material_attachment(
         return await logic.materials.create_material_attachment(db_conn, db_cursor, storage_db_conn, storage_db_cursor, course_id, material_id, file, user_email)
 
 
-@router.get("/get_material_attachments", response_model=List[json_classes.MaterialAttachmentMetadata], tags=["Materials"])
-async def get_material_attachments(course_id: str, material_id: str, user_email: str = Depends(get_current_user)):
+@router.get("/attachment/{course_id}/{material_id}")
+async def get_material_attachments(
+    course_id: str,
+    material_id: str,
+    user_email: str = Depends(get_current_user)
+) -> list[json_classes.MaterialAttachmentMetadata]:
     """
     Get the list of course material attachments by provided course_id, material_id.
 
@@ -109,8 +124,13 @@ async def get_material_attachments(course_id: str, material_id: str, user_email:
         return logic.materials.get_material_attachments(db_cursor, course_id, material_id, user_email)
 
 
-@router.get("/download_material_attachment", tags=["Materials"])
-async def download_material_attachment(course_id: str, material_id: str, file_id: str, user_email: str = Depends(get_current_user)):
+@router.get("/attachment/{course_id}/{material_id}/{file_id}")
+async def download_material_attachment(
+    course_id: str,
+    material_id: str,
+    file_id: str,
+    user_email: str = Depends(get_current_user)
+):
     """
     Download the course material attachment by provided course_id, material_id, file_id.
 

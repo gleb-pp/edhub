@@ -1,27 +1,29 @@
-from typing import Optional, List
 from fastapi import APIRouter, Depends, Query
 from auth import get_current_user, get_db
 import json_classes
 import logic.grades
 
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/grades",
+    tags=["Grades"],
+)
 
 
-@router.put("/grade_submission", response_model=json_classes.Success, tags=["Grades"])
+@router.put("/{course_id}/{assignment_id}/{student_email}")
 async def grade_submission(
     course_id: str,
     assignment_id: str,
     student_email: str,
     grade: int,
-    comment: Optional[str] = Query(
+    comment: str | None = Query(
         None,
         min_length=3,
         max_length=10000,
         description="Comment must contain 3-10000 symbols"
     ),
     user_email: str = Depends(get_current_user),
-):
+) -> json_classes.Success:
     """
     Allows teacher to grade student's submission.
 
@@ -46,11 +48,11 @@ async def grade_submission(
         )
 
 
-@router.get("/get_all_course_grades", response_model=List[json_classes.StudentsGrades], tags=["Grades"])
+@router.get("/{course_id}")
 async def get_all_course_grades(
     course_id: str,
     user_email: str = Depends(get_current_user)
-):
+) -> list[json_classes.StudentsGrades]:
     """
     Get the table of all course grades.
 
@@ -58,7 +60,7 @@ async def get_all_course_grades(
 
     Returns the list where each row corresponds to some student (students are sorted in the alphabetical order (first by user name, then by email)).
 
-    Each row has the following format: {name: str, email: str, grades: List[Optional[int]]}
+    Each row has the following format: {name: str, email: str, grades: List[int | None]}
 
     Students (rows) are ordered by user name, then by email.
 
@@ -72,12 +74,12 @@ async def get_all_course_grades(
         return logic.grades.get_all_course_grades(db_cursor, course_id, user_email)
 
 
-@router.get("/get_student_course_grades", response_model=List[json_classes.AssignmentGrade], tags=["Grades"])
+@router.get("/{course_id}/{student_email}")
 async def get_student_course_grades(
     course_id: str,
     student_email: str,
     user_email: str = Depends(get_current_user)
-):
+) -> list[json_classes.AssignmentGrade]:
     """
     Get the table of course grades of student with provided student_email.
 
@@ -87,7 +89,7 @@ async def get_student_course_grades(
 
     Returns the list where each row corresponds to some assignment.
 
-    Each row has the following format: {assignment_name: str, assignment_id: int, grade: Optional[int], comment: Optional[str], grader_name: Optional[str], grader_email: Optional[str]}
+    Each row has the following format: {assignment_name: str, assignment_id: int, grade: int | None, comment: str | None, grader_name: str | None, grader_email: str | None}
 
     Assignments are ordered by section_order, then by creation_date, old posts go first.
 

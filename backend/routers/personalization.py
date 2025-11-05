@@ -6,14 +6,16 @@ import logic.personalization
 from constants import EMOJI_COUNT
 
 
-router = APIRouter()
+router = APIRouter(
+    tags=["Personalization"]
+)
 
 
-@router.put("/change_courses_order", response_model=json_classes.Success, tags=["Personalization"])
+@router.put("/courses/order")
 async def change_courses_order(
     new_order: List[str] = Query(...),
     user_email: str = Depends(get_current_user),
-):
+) -> json_classes.Success:
     """
     Change the order of courses.
 
@@ -23,12 +25,12 @@ async def change_courses_order(
         return logic.personalization.change_courses_order(db_conn, db_cursor, new_order, user_email)
 
 
-@router.patch("/set_course_emoji", response_model=json_classes.Success, tags=["Personalization"])
+@router.patch("/courses/{course_id}/emoji")
 async def set_course_emoji(
     course_id: str,
     emoji_id: int = Query(..., ge=0, le=EMOJI_COUNT),
     user_email: str = Depends(get_current_user)
-):
+) -> json_classes.Success:
     """
     Set a personal emoji for a course.
 

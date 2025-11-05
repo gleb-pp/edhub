@@ -1,15 +1,19 @@
-from typing import List
 from fastapi import APIRouter, Query, Depends
 from auth import get_current_user, get_db
 import json_classes
 import logic.sections
 
 
-router = APIRouter()
+router = APIRouter(
+    tags=["Courses"],
+)
 
 
-@router.get("/get_course_feed", response_model=List[json_classes.CoursePost], tags=["Courses"])
-async def get_course_feed(course_id: str, user_email: str = Depends(get_current_user)):
+@router.get("/get_course_feed")
+async def get_course_feed(
+    course_id: str,
+    user_email: str = Depends(get_current_user)
+) -> list[json_classes.CoursePost]:
     """
     Get the course feed with all its materials and assignments.
 
@@ -25,7 +29,7 @@ async def get_course_feed(course_id: str, user_email: str = Depends(get_current_
         return logic.sections.get_course_feed(db_cursor, course_id, user_email)
 
 
-@router.post("/create_section", response_model=json_classes.SectionID, tags=["Courses"])
+@router.post("/create_section")
 async def create_section(
     course_id: str,
     title: str = Query(
@@ -36,7 +40,7 @@ async def create_section(
         description="Section title can contain only letters, digits, spaces, and underscores, 3-80 symbols"
     ),
     user_email: str = Depends(get_current_user),
-):
+) -> json_classes.SectionID:
     """
     Create the course section with provided title within the course with provided course_id.
 
@@ -50,12 +54,12 @@ async def create_section(
         return logic.sections.create_section(db_conn, db_cursor, course_id, title, user_email)
 
 
-@router.put("/change_section_order", response_model=json_classes.Success, tags=["Courses"])
+@router.put("/change_section_order")
 async def change_section_order(
     course_id: str,
-    new_order: List[int] = Query(...),
+    new_order: list[int] = Query(...),
     user_email: str = Depends(get_current_user),
-):
+) -> json_classes.Success:
     """
     Change the order of sections within the course with provided course_id.
 
@@ -67,12 +71,12 @@ async def change_section_order(
         return logic.sections.change_section_order(db_conn, db_cursor, course_id, new_order, user_email)
 
 
-@router.delete("/remove_section", response_model=json_classes.Success, tags=["Courses"])
+@router.delete("/remove_section")
 async def remove_section(
     course_id: str,
     section_id: int,
     user_email: str = Depends(get_current_user),
-):
+) -> json_classes.Success:
     """
     Remove the section with provided section_id from the course with provided course_id.
 
