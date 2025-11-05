@@ -1,6 +1,11 @@
 from fastapi import APIRouter, Depends, Query, UploadFile, File
 from auth import get_current_user, get_db, get_storage_db
-import json_classes
+from models.common import Success
+from models.assignments import (
+    AssignmentID,
+    Assignment,
+    AssignmentAttachmentMetadata
+)
 import logic.assignments
 
 
@@ -26,7 +31,7 @@ async def create_assignment(
         description="Description must contain 3-10000 symbols"
     ),
     user_email: str = Depends(get_current_user),
-) -> json_classes.AssignmentID:
+) -> AssignmentID:
     """
     Create the assignment with provided title and description within the section by provided section_id within the course with provided course_id.
 
@@ -51,7 +56,7 @@ async def remove_assignment(
     course_id: str,
     assignment_id: str,
     user_email: str = Depends(get_current_user)
-) -> json_classes.Success:
+) -> Success:
     """
     Remove the assignment by the provided course_id and assignment_id.
 
@@ -68,7 +73,7 @@ async def get_assignment(
     course_id: str,
     assignment_id: str,
     user_email: str = Depends(get_current_user)
-) -> json_classes.Assignment:
+) -> Assignment:
     """
     Get the assignment details by the provided (course_id, assignment_id).
 
@@ -90,7 +95,7 @@ async def get_assignment(
 async def get_course_assignments(
     course_id: str,
     user_email: str = Depends(get_current_user)
-) -> list[json_classes.Assignment]:
+) -> list[Assignment]:
     """
     Get the list of course assignments by the provided course_id.
 
@@ -116,7 +121,7 @@ async def create_assignment_attachment(
     assignment_id: str,
     file: UploadFile = File(...),
     user_email: str = Depends(get_current_user),
-) -> json_classes.AssignmentAttachmentMetadata:
+) -> AssignmentAttachmentMetadata:
     """
     Attach the provided file to provided course assignment.
 
@@ -137,7 +142,7 @@ async def get_assignment_attachments(
     course_id: str,
     assignment_id: str,
     user_email: str = Depends(get_current_user)
-) -> list[json_classes.AssignmentAttachmentMetadata]:
+) -> list[AssignmentAttachmentMetadata]:
     """
     Get the list of course assignment attachments by provided course_id, assignment_id.
 

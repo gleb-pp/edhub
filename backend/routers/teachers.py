@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 from auth import get_current_user, get_db
-import json_classes
 import logic.teachers
+from models.common import Success
+from models.users import User
 
 
 router = APIRouter(
@@ -15,7 +16,7 @@ router = APIRouter(
 async def get_course_teachers(
     course_id: str,
     user_email: str = Depends(get_current_user)
-) -> list[json_classes.User]:
+) -> list[User]:
     """
     Get the list of teachers teaching the course with the provided course_id.
 
@@ -32,7 +33,7 @@ async def invite_teacher(
     course_id: str,
     new_teacher_email: str,
     teacher_email: str = Depends(get_current_user),
-) -> json_classes.Success:
+) -> Success:
     """
     Add the user with provided new_teacher_email as a teacher to the course with provided course_id.
 
@@ -47,7 +48,7 @@ async def remove_teacher(
     course_id: str,
     removing_teacher_email: str,
     teacher_email: str = Depends(get_current_user),
-) -> json_classes.Success:
+) -> Success:
     """
     Remove the teacher with removing_teacher_email from the course with provided course_id.
 
@@ -64,7 +65,7 @@ async def change_course_instructor(
     course_id: str,
     teacher_email: str,
     instructor_email: str = Depends(get_current_user)
-) -> json_classes.Success:
+) -> Success:
     """
     Transfer the course ownership (Primary Instructor role) to other Teacher within the course.
 

@@ -1,9 +1,9 @@
 from typing import List
 from fastapi import APIRouter, Query, Depends
 from auth import get_current_user, get_db
-import json_classes
 import logic.personalization
 from constants import EMOJI_COUNT
+from models.common import Success
 
 
 router = APIRouter(
@@ -15,7 +15,7 @@ router = APIRouter(
 async def change_courses_order(
     new_order: List[str] = Query(...),
     user_email: str = Depends(get_current_user),
-) -> json_classes.Success:
+) -> Success:
     """
     Change the order of courses.
 
@@ -30,7 +30,7 @@ async def set_course_emoji(
     course_id: str,
     emoji_id: int = Query(..., ge=0, le=EMOJI_COUNT),
     user_email: str = Depends(get_current_user)
-) -> json_classes.Success:
+) -> Success:
     """
     Set a personal emoji for a course.
 

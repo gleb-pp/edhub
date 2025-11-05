@@ -1,7 +1,15 @@
 from fastapi import APIRouter, Depends
 from auth import get_current_user, get_db
-import json_classes
 import logic.users
+from models.common import Success
+from models.users import (
+    User,
+    CourseRole,
+    UserCreate,
+    Account,
+    UserLogin,
+    UserNewPassword
+)
 
 
 router = APIRouter(
@@ -11,9 +19,7 @@ router = APIRouter(
 
 
 @router.get("{user_email}/info")
-async def get_user_info(
-    user_email: str = Depends(get_current_user)
-) -> json_classes.User:
+async def get_user_info(user_email: str) -> User:
     """
     Get the info about the user.
     """
@@ -21,11 +27,11 @@ async def get_user_info(
         return logic.users.get_user_info(db_cursor, user_email)
 
 
-@router.get("/{user_email}/role")
+@router.get("/{course_id}/my_role")
 async def get_user_role(
     course_id: str,
     user_email: str = Depends(get_current_user)
-) -> json_classes.CourseRole:
+) -> CourseRole:
     """
     Get the user's role in the provided course.
     """
@@ -34,7 +40,7 @@ async def get_user_role(
 
 
 @router.post("/")
-async def create_user(user: json_classes.UserCreate) -> json_classes.Account:
+async def create_user(user: UserCreate) -> Account:
     """
     Creates a user account with provided email, name, and password.
 
@@ -53,7 +59,7 @@ async def create_user(user: json_classes.UserCreate) -> json_classes.Account:
 
 
 @router.post("/login")
-async def login(user: json_classes.UserLogin) -> json_classes.Account:
+async def login(user: UserLogin) -> Account:
     """
     Log into user account with provided email and password.
 
@@ -64,7 +70,7 @@ async def login(user: json_classes.UserLogin) -> json_classes.Account:
 
 
 @router.patch("/change_password")
-async def change_password(user: json_classes.UserNewPassword) -> json_classes.Success:
+async def change_password(user: UserNewPassword) -> Success:
     """
     Change the user password to a new one.
     """
@@ -75,7 +81,7 @@ async def change_password(user: json_classes.UserNewPassword) -> json_classes.Su
 @router.get("/instructor_courses")
 async def get_instructor_courses(
     user_email: str = Depends(get_current_user)
-) -> list[json_classes.CourseID]:
+) -> list[CourseID]:
     """
     Get the list of IDs of courses where the provided user is a Primary Instructor.
     """
@@ -87,7 +93,7 @@ async def get_instructor_courses(
 async def remove_user(
     deleted_user_email: str,
     user_email: str = Depends(get_current_user)
-) -> json_classes.Success:
+) -> Success:
     """
     Delete user account from the system.
 
@@ -112,7 +118,7 @@ async def remove_user(
 async def give_admin_permissions(
     object_email: str,
     subject_email: str = Depends(get_current_user)
-) -> json_classes.Success:
+) -> Success:
     """
     Give admin rights to some existing user by their email.
 
@@ -125,7 +131,7 @@ async def give_admin_permissions(
 @router.get("/")
 async def get_all_users(
     user_email: str = Depends(get_current_user)
-) -> list[json_classes.User]:
+) -> list[User]:
     """
     Get the list of all users in the system.
 
@@ -139,9 +145,7 @@ async def get_all_users(
 
 # TODO: to admin.py
 @router.get("/get_admins")
-async def get_admins(
-    user_email: str = Depends(get_current_user)
-) -> list[json_classes.User]:
+async def get_admins() -> list[User]:
     """
     Get the list of platform administrators.
     """

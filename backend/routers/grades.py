@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 from auth import get_current_user, get_db
-import json_classes
+from models.common import Success
+from models.grades import StudentsGrades, AssignmentGrade
 import logic.grades
 
 
@@ -23,7 +24,7 @@ async def grade_submission(
         description="Comment must contain 3-10000 symbols"
     ),
     user_email: str = Depends(get_current_user),
-) -> json_classes.Success:
+) -> Success:
     """
     Allows teacher to grade student's submission.
 
@@ -52,7 +53,7 @@ async def grade_submission(
 async def get_all_course_grades(
     course_id: str,
     user_email: str = Depends(get_current_user)
-) -> list[json_classes.StudentsGrades]:
+) -> list[StudentsGrades]:
     """
     Get the table of all course grades.
 
@@ -79,7 +80,7 @@ async def get_student_course_grades(
     course_id: str,
     student_email: str,
     user_email: str = Depends(get_current_user)
-) -> list[json_classes.AssignmentGrade]:
+) -> list[AssignmentGrade]:
     """
     Get the table of course grades of student with provided student_email.
 

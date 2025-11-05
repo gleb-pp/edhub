@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Query, Depends
 from auth import get_current_user, get_db
-import json_classes
 import logic.sections
+from models.common import Success
+from models.sections import CoursePost, SectionID
 
 
 router = APIRouter(
@@ -13,7 +14,7 @@ router = APIRouter(
 async def get_course_feed(
     course_id: str,
     user_email: str = Depends(get_current_user)
-) -> list[json_classes.CoursePost]:
+) -> list[CoursePost]:
     """
     Get the course feed with all its materials and assignments.
 
@@ -40,7 +41,7 @@ async def create_section(
         description="Section title can contain only letters, digits, spaces, and underscores, 3-80 symbols"
     ),
     user_email: str = Depends(get_current_user),
-) -> json_classes.SectionID:
+) -> SectionID:
     """
     Create the course section with provided title within the course with provided course_id.
 
@@ -59,7 +60,7 @@ async def change_section_order(
     course_id: str,
     new_order: list[int] = Query(...),
     user_email: str = Depends(get_current_user),
-) -> json_classes.Success:
+) -> Success:
     """
     Change the order of sections within the course with provided course_id.
 
@@ -76,7 +77,7 @@ async def remove_section(
     course_id: str,
     section_id: int,
     user_email: str = Depends(get_current_user),
-) -> json_classes.Success:
+) -> Success:
     """
     Remove the section with provided section_id from the course with provided course_id.
 

@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 from auth import get_current_user, get_db
-import json_classes
 import logic.students
+from models.common import Success
+from models.users import User
 
 
 router = APIRouter(
@@ -14,7 +15,7 @@ router = APIRouter(
 async def get_enrolled_students(
     course_id: str,
     user_email: str = Depends(get_current_user)
-) -> list[json_classes.User]:
+) -> list[User]:
     """
     Get the list of enrolled students by course_id.
 
@@ -33,7 +34,7 @@ async def invite_student(
     course_id: str,
     student_email: str,
     teacher_email: str = Depends(get_current_user)
-) -> json_classes.Success:
+) -> Success:
     """
     Add the student with provided email to the course with provided course_id.
 
@@ -48,7 +49,7 @@ async def remove_student(
     course_id: str,
     student_email: str,
     user_email: str = Depends(get_current_user)
-) -> json_classes.Success:
+) -> Success:
     """
     Remove the student with provided email from the course with provided course_id.
 

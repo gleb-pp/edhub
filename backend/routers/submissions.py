@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, Query, UploadFile, File
 from auth import get_current_user, get_db, get_storage_db
-import json_classes
 import logic.submissions
+from models.common import Success
+from models.submissions import Submission, SubmissionAttachmentMetadata
 
 
 router = APIRouter(
@@ -21,7 +22,7 @@ async def submit_assignment(
         description="Submission text must contain 3-10000 symbols"
     ),
     student_email: str = Depends(get_current_user),
-) -> json_classes.Success:
+) -> Success:
     """
     Allows student to submit their assignment.
 
@@ -42,7 +43,7 @@ async def get_assignment_submissions(
     course_id: str,
     assignment_id: str,
     user_email: str = Depends(get_current_user)
-) -> list[json_classes.Submission]:
+) -> list[Submission]:
     """
     Get the list of students submissions of provided assignments.
 
@@ -68,7 +69,7 @@ async def get_submission(
     assignment_id: str,
     student_email: str,
     user_email: str = Depends(get_current_user),
-) -> json_classes.Submission:
+) -> Submission:
     """
     Get the student submission of assignment by course_id, assignment_id and student_email.
 
@@ -95,7 +96,7 @@ async def create_submission_attachment(
     student_email: str,
     file: UploadFile = File(...),
     user_email: str = Depends(get_current_user),
-) -> json_classes.SubmissionAttachmentMetadata:
+) -> SubmissionAttachmentMetadata:
     """
     Attach the provided file to provided course assignment submission.
 
@@ -117,7 +118,7 @@ async def get_submission_attachments(
     assignment_id: str,
     student_email: str,
     user_email: str = Depends(get_current_user)
-) -> list[json_classes.SubmissionAttachmentMetadata]:
+) -> list[SubmissionAttachmentMetadata]:
     """
     Get the list of attachments to the course assignment submission by provided course_id, assignment_id, student_email.
 

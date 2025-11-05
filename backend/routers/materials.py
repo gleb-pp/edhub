@@ -1,7 +1,7 @@
-from typing import List
 from fastapi import APIRouter, Depends, Query, UploadFile, File
 from auth import get_current_user, get_db, get_storage_db
-import json_classes
+from models.common import Success
+from models.materials import MaterialID, Material, MaterialAttachmentMetadata
 import logic.materials
 
 
@@ -29,7 +29,7 @@ async def create_material(
         description="Description must contain 3-10000 symbols"
     ),
     user_email: str = Depends(get_current_user),
-) -> json_classes.MaterialID:
+) -> MaterialID:
     """
     Create the material with provided title and description within the section by provided section_id within the course with provided course_id.
 
@@ -52,7 +52,7 @@ async def remove_material(
     course_id: str,
     material_id: str,
     user_email: str = Depends(get_current_user)
-) -> json_classes.Success:
+) -> Success:
     """
     Remove the material by the provided course_id and material_id.
 
@@ -67,7 +67,7 @@ async def get_material(
     course_id: str,
     material_id: str,
     user_email: str = Depends(get_current_user)
-) -> json_classes.Material:
+) -> Material:
     """
     Get the material details by the provided (course_id, material_id).
 
@@ -89,7 +89,7 @@ async def create_material_attachment(
     material_id: str,
     file: UploadFile = File(...),
     user_email: str = Depends(get_current_user),
-) -> json_classes.MaterialAttachmentMetadata:
+) -> MaterialAttachmentMetadata:
     """
     Attach the provided file to provided course material.
 
@@ -110,7 +110,7 @@ async def get_material_attachments(
     course_id: str,
     material_id: str,
     user_email: str = Depends(get_current_user)
-) -> list[json_classes.MaterialAttachmentMetadata]:
+) -> list[MaterialAttachmentMetadata]:
     """
     Get the list of course material attachments by provided course_id, material_id.
 

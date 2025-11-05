@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 from auth import get_current_user, get_db
 import logic.parents
-import json_classes
+from models.common import Success
+from models.users import User
 
 
 router = APIRouter(
@@ -14,7 +15,7 @@ async def get_students_parents(
     course_id: str,
     student_email: str,
     user_email: str = Depends(get_current_user)
-) -> list[json_classes.User]:
+) -> list[User]:
     """
     Get the list of parents observing the student with provided email on course with provided course_id.
 
@@ -32,7 +33,7 @@ async def invite_parent(
     student_email: str,
     parent_email: str,
     teacher_email: str = Depends(get_current_user),
-) -> json_classes.Success:
+) -> Success:
     """
     Invite the user with provided parent_email to become a parent of the student with provided student_email on course with provided course_id.
 
@@ -50,7 +51,7 @@ async def remove_parent(
     student_email: str,
     parent_email: str,
     user_email: str = Depends(get_current_user),
-) -> json_classes.Success:
+) -> Success:
     """
     Remove the parent identified by parent_email from the tracking of student with provided student_email on course with provided course_id.
 
@@ -69,7 +70,7 @@ async def get_parents_children(
     course_id: str,
     parent_email: str,
     user_email: str = Depends(get_current_user)
-) -> list[json_classes.User]:
+) -> list[User]:
     """
     Get the list of students for the parent with provided email on course with provided course_id.
 

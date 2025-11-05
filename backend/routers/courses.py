@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Query, Depends
 from auth import get_current_user, get_db
-import json_classes
+from models.courses import CourseID, Course
+from models.common import Success
 import logic.courses
 
 
@@ -13,7 +14,7 @@ router = APIRouter(
 @router.get("/")
 async def get_available_courses(
     user_email: str = Depends(get_current_user)
-) -> list[json_classes.Course]:
+) -> list[Course]:
     """
     Get the list of of courses available for user (as a Primary Instructor, Teacher, Student, or Parent).
 
@@ -27,7 +28,7 @@ async def get_available_courses(
 @router.get("/get_all_courses")
 async def get_all_courses(
     user_email: str = Depends(get_current_user)
-) -> list[json_classes.Course]:
+) -> list[Course]:
     """
     Get the list of all courses in the system.
 
@@ -56,7 +57,7 @@ async def create_course(
         description="Organization can contain only letters, digits, spaces, and underscores, 3-80 symbols"
     ),
     user_email: str = Depends(get_current_user),
-) -> json_classes.CourseID:
+) -> CourseID:
     """
     Create the course with provided title and become a Primary Instructor in it.
 
@@ -74,7 +75,7 @@ async def create_course(
 async def delete_course(
     course_id: str,
     user_email: str = Depends(get_current_user)
-) -> json_classes.Success:
+) -> Success:
     """
     Remove the course with provided course_id.
 
@@ -90,7 +91,7 @@ async def delete_course(
 async def get_course_info(
     course_id: str,
     user_email: str = Depends(get_current_user)
-) -> json_classes.Course:
+) -> Course:
     """
     Get information about the course: course_id, title, instructor_email, instructor_name, organization, creation_time, and personal emoji_id.
 
