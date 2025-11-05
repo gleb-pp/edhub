@@ -6,7 +6,7 @@ from models.users import User
 
 
 router = APIRouter(
-    prefix='courses/{course_id}/teachers',
+    prefix='/{course_id}/teachers',
     tags=["Teachers"],
 )
 

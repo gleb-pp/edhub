@@ -6,7 +6,7 @@ from models.submissions import Submission, SubmissionAttachmentMetadata
 
 
 router = APIRouter(
-    prefix='courses/{course_id}/assignment/{assignment_id}/submissions',
+    prefix='/{course_id}/{assignment_id}/submissions',
     tags=["Submissions"],
 )
 
@@ -89,7 +89,7 @@ async def get_submission(
         return logic.submissions.get_submission(db_cursor, course_id, assignment_id, student_email, user_email)
 
 
-@router.post("{student_email}/attachment")
+@router.post("/{student_email}/attachment")
 async def create_submission_attachment(
     course_id: str,
     assignment_id: str,
@@ -112,7 +112,7 @@ async def create_submission_attachment(
         return await logic.submissions.create_submission_attachment(db_conn, db_cursor, storage_db_conn, storage_db_cursor, course_id, assignment_id, student_email, file, user_email)
 
 
-@router.get("/attachments")
+@router.get("/{student_email}/attachment")
 async def get_submission_attachments(
     course_id: str,
     assignment_id: str,

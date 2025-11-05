@@ -10,7 +10,7 @@ router = APIRouter(
 )
 
 
-@router.get("/parents/{course_id}/{student_email}")
+@router.get("{course_id}/parents/{student_email}")
 async def get_students_parents(
     course_id: str,
     student_email: str,
@@ -27,7 +27,7 @@ async def get_students_parents(
         return logic.parents.get_students_parents(db_cursor, course_id, student_email, user_email)
 
 
-@router.post("/parents/{course_id}/{student_email}")
+@router.post("{course_id}/parents/{student_email}")
 async def invite_parent(
     course_id: str,
     student_email: str,
@@ -45,7 +45,7 @@ async def invite_parent(
         return logic.parents.invite_parent(db_conn, db_cursor, course_id, student_email, parent_email, teacher_email)
 
 
-@router.delete("/parents/{course_id}/{student_email}/{parent_email}")
+@router.delete("{course_id}/parents/{student_email}/{parent_email}")
 async def remove_parent(
     course_id: str,
     student_email: str,
@@ -65,7 +65,7 @@ async def remove_parent(
         return logic.parents.remove_parent(db_conn, db_cursor, course_id, student_email, parent_email, user_email)
 
 
-@router.get("/children/{course_id}/{parent_email}")
+@router.get("{course_id}/children/{parent_email}")
 async def get_parents_children(
     course_id: str,
     parent_email: str,

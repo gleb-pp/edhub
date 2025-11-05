@@ -6,12 +6,12 @@ import logic.materials
 
 
 router = APIRouter(
-    prefix="/materials",
+    prefix="/{course_id}/materials",
     tags=["Materials"],
 )
 
 
-@router.post("/{course_id}/{section_id}")
+@router.post("/{section_id}")
 async def create_material(
     course_id: str,
     section_id: int,
@@ -47,7 +47,7 @@ async def create_material(
         return logic.materials.create_material(db_conn, db_cursor, course_id, section_id, title, description, user_email)
 
 
-@router.delete("/{course_id}/{material_id}")
+@router.delete("/{material_id}")
 async def remove_material(
     course_id: str,
     material_id: str,
@@ -62,7 +62,7 @@ async def remove_material(
         return logic.materials.remove_material(db_conn, db_cursor, course_id, material_id, user_email)
 
 
-@router.get("/{course_id}/{material_id}")
+@router.get("/{material_id}")
 async def get_material(
     course_id: str,
     material_id: str,
@@ -83,7 +83,7 @@ async def get_material(
         return logic.materials.get_material(db_cursor, course_id, material_id, user_email)
 
 
-@router.post("/attachment/{course_id}/{material_id}")
+@router.post("/{material_id}/attachment")
 async def create_material_attachment(
     course_id: str,
     material_id: str,
@@ -105,7 +105,7 @@ async def create_material_attachment(
         return await logic.materials.create_material_attachment(db_conn, db_cursor, storage_db_conn, storage_db_cursor, course_id, material_id, file, user_email)
 
 
-@router.get("/attachment/{course_id}/{material_id}")
+@router.get("/{material_id}/attachment")
 async def get_material_attachments(
     course_id: str,
     material_id: str,
@@ -124,7 +124,7 @@ async def get_material_attachments(
         return logic.materials.get_material_attachments(db_cursor, course_id, material_id, user_email)
 
 
-@router.get("/attachment/{course_id}/{material_id}/{file_id}")
+@router.get("/{material_id}/attachment/{file_id}")
 async def download_material_attachment(
     course_id: str,
     material_id: str,

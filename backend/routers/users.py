@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from auth import get_current_user, get_db
 import logic.users
 from models.common import Success
+from models.courses import CourseID
 from models.users import (
     User,
     CourseRole,
@@ -18,7 +19,7 @@ router = APIRouter(
 )
 
 
-@router.get("{user_email}/info")
+@router.get("/{user_email}")
 async def get_user_info(user_email: str) -> User:
     """
     Get the info about the user.
@@ -27,8 +28,8 @@ async def get_user_info(user_email: str) -> User:
         return logic.users.get_user_info(db_cursor, user_email)
 
 
-@router.get("/{course_id}/my_role")
-async def get_user_role(
+@router.get("/{course_id}")
+async def get_my_role(
     course_id: str,
     user_email: str = Depends(get_current_user)
 ) -> CourseRole:
@@ -79,7 +80,7 @@ async def change_password(user: UserNewPassword) -> Success:
 
 
 @router.get("/instructor_courses")
-async def get_instructor_courses(
+async def get_my_instructor_courses(
     user_email: str = Depends(get_current_user)
 ) -> list[CourseID]:
     """

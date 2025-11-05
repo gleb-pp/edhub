@@ -6,12 +6,12 @@ import logic.grades
 
 
 router = APIRouter(
-    prefix="/grades",
+    prefix="/{course_id}/grades",
     tags=["Grades"],
 )
 
 
-@router.put("/{course_id}/{assignment_id}/{student_email}")
+@router.put("/{assignment_id}/{student_email}")
 async def grade_submission(
     course_id: str,
     assignment_id: str,
@@ -49,7 +49,7 @@ async def grade_submission(
         )
 
 
-@router.get("/{course_id}")
+@router.get("/")
 async def get_all_course_grades(
     course_id: str,
     user_email: str = Depends(get_current_user)
@@ -75,7 +75,7 @@ async def get_all_course_grades(
         return logic.grades.get_all_course_grades(db_cursor, course_id, user_email)
 
 
-@router.get("/{course_id}/{student_email}")
+@router.get("/{student_email}")
 async def get_student_course_grades(
     course_id: str,
     student_email: str,

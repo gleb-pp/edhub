@@ -6,7 +6,7 @@ from models.sections import CoursePost, SectionID
 
 
 router = APIRouter(
-    tags=["Courses"],
+    tags=["Course Sections"],
 )
 
 
