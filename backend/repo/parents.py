@@ -7,19 +7,19 @@ from repo.base import Base
 class ParentAt(Base):
     __tablename__ = "parent_at"
 
-    parentemail: Mapped[str] = mapped_column(
+    parent_email: Mapped[str] = mapped_column(
         ForeignKey("users.email", ondelete="CASCADE"), primary_key=True
     )
-    studentemail: Mapped[str] = mapped_column(
+    student_email: Mapped[str] = mapped_column(
         ForeignKey("users.email", ondelete="CASCADE"), primary_key=True
     )
-    courseid: Mapped[str] = mapped_column(
-        ForeignKey("courses.courseid", ondelete="CASCADE"), primary_key=True
+    course_id: Mapped[str] = mapped_column(
+        ForeignKey("courses.course_id", ondelete="CASCADE"), primary_key=True
     )
     __table_args__ = (
         ForeignKeyConstraint(
-            ["studentemail", "courseid"],
-            ["student_at.email", "email.courseid"],
+            ["student_email", "course_id"],
+            ["student_at.email", "student_at.course_id"],
             ondelete="CASCADE",
         ),
     )

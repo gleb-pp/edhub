@@ -1,11 +1,16 @@
-from fastapi import APIRouter, Query, Depends
+from fastapi import APIRouter, Query, Depends, HTTPException
 from auth import get_current_user
 from models.courses import CourseID, Course
 from models.common import Success
-import logic.courses
 from typing import Annotated
 from sqlalchemy.orm import Session
 from db import get_db
+import logic.users as user_logic
+import logic.courses as course_logic
+import logic.teachers as teacher_logic
+import exceptions.teachers as teacher_errors
+import exceptions.courses as course_errors
+import exceptions.users as user_errors
 
 
 router = APIRouter(
@@ -16,35 +21,25 @@ router = APIRouter(
 
 @router.get("/")
 async def get_available_courses(
-    user_email: str = Depends(get_current_user)
+    db: Annotated[Session, Depends(get_db)],
+    user_email: str = Depends(get_current_user),
 ) -> list[Course]:
     """
     Get the list of of courses available for user (as a Primary Instructor, Teacher, Student, or Parent).
 
-    For each course, returns (course_id, title, instructor_email, instructor_name, organization, creation_time, personal emoji_id).
+    For each course, returns (course_id, title, organization, instructor_email, and creation_time).
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.courses.available_courses(db_cursor, user_email)
-
-
-# TODO: to admin.py
-@router.get("/get_all_courses")
-async def get_all_courses(
-    user_email: str = Depends(get_current_user)
-) -> list[Course]:
-    """
-    Get the list of all courses in the system.
-
-    For each course, returns (course_id, title, instructor_email, instructor_name, organization, creation_time, personal emoji_id).
-
-    Admin role required.
-    """
-    with get_db() as (db_conn, db_cursor):
-        return logic.courses.get_all_courses(db_cursor, user_email)
+    try:
+        user = user_logic.get_user(user_email, db)
+        courses = course_logic.get_available_courses(user, db)
+        return [Course.model_validate(course) for course in courses]
+    except user_errors.UserNotFoundError as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
 
 
 @router.post("/")
 async def create_course(
+    db: Annotated[Session, Depends(get_db)],
     title: str = Query(
         ...,
         min_length=3,
@@ -70,13 +65,19 @@ async def create_course(
 
     Organization parameter is optional / can be None.
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.courses.create_course(db_conn, db_cursor, title, user_email, organization)
+    try:
+        user = user_logic.get_user(user_email, db)
+        course = course_logic.create_course(title, organization, user, db)
+        db.commit()
+        return CourseID.model_validate(course)
+    except user_errors.UserNotFoundError as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
 
 
 @router.delete("/{course_id}")
 async def delete_course(
     course_id: str,
+    db: Annotated[Session, Depends(get_db)],
     user_email: str = Depends(get_current_user)
 ) -> Success:
     """
@@ -86,23 +87,42 @@ async def delete_course(
 
     Primary Instructor role required.
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.courses.remove_course(db_conn, db_cursor, course_id, user_email)
+    try:
+        user = user_logic.get_user(user_email, db)
+        course = course_logic.get_course(course_id, db)
+        teacher_logic.assert_instructor_access(user, course, db)
+        course_logic.delete_course(course, db)
+        db.commit()
+        return Success(success=True)
+    except user_errors.UserNotFoundError as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
+    except teacher_errors.InstructorRoleRequired as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e
+    except course_errors.CourseNotFoundError as e:
+        return Success(success=True)
 
 
 @router.get("/{course_id}")
 async def get_course_info(
     course_id: str,
+    db: Annotated[Session, Depends(get_db)],
     user_email: str = Depends(get_current_user)
 ) -> Course:
     """
-    Get information about the course: course_id, title, instructor_email, instructor_name, organization, creation_time, and personal emoji_id.
-
-    emoji_id is optional (can be None).
+    Get information about the course: course_id, title, organization, instructor_email, and creation_time.
 
     Organization can be None.
 
     Course role (Primary Instructor, Teacher, Student, Parent) required.
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.courses.get_course_info(db_cursor, course_id, user_email)
+    try:
+        user = user_logic.get_user(user_email, db)
+        course = course_logic.get_course(course_id, db)
+        course_logic.assert_course_access(user, course, db)
+        return Course.model_validate(course)
+    except user_errors.UserNotFoundError as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
+    except course_errors.ParticipantRoleRequired as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e
+    except course_errors.CourseNotFoundError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e

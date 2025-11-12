@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from auth import get_current_user
 from logic import users as user_logic
+from logic import courses as course_logic
 from exceptions import users as user_errors
 from models.common import Success
 from models.users import User
+from models.courses import Course
 from typing import Annotated
 from sqlalchemy.orm import Session
 from db import get_db
@@ -117,3 +119,26 @@ async def get_admins(
     """
     admins = get_admins(db)
     return [User.model_validate(a) for a in admins]
+
+
+@router.get("/get_all_courses")
+async def get_all_courses(
+    db: Annotated[Session, Depends(get_db)],
+    admin_email: str = Depends(get_current_user)
+) -> list[Course]:
+    """
+    Get the list of all courses in the system.
+
+    For each course, returns (course_id, title, organization, instructor_email, and creation_time).
+
+    Admin role required.
+    """
+    try:
+        admin = user_logic.get_user(admin_email, db)
+        user_logic.assert_user_is_admin(admin)
+        courses = course_logic.get_all_courses(db)
+        return [Course.model_validate(c) for c in courses]
+    except user_errors.UserNotFoundError as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
+    except user_errors.AdminRoleRequiredError as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e

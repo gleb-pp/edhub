@@ -9,7 +9,7 @@ def check_parent_access(user: User, course: Course, db: Session) -> bool:
     """Check whether the provided user has a parent role in the provided course."""
     return db.query(
         exists().where(
-            (ParentAt.parentemail == user.email) &
-            (ParentAt.courseid == course.course_id)
+            (ParentAt.parent_email == user.email) &
+            (ParentAt.course_id == course.course_id)
         )
     ).scalar()

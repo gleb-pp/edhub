@@ -6,17 +6,17 @@ from repo.base import Base
 class PersonalCourseInfo(Base):
     __tablename__ = "personal_course_info"
 
-    courseid: Mapped[str] = mapped_column(
-        ForeignKey("courses.courseid", ondelete="CASCADE"), primary_key=True
+    course_id: Mapped[str] = mapped_column(
+        ForeignKey("courses.course_id", ondelete="CASCADE"), primary_key=True
     )
     email: Mapped[str] = mapped_column(
         ForeignKey("users.email", ondelete="CASCADE"), primary_key=True
     )
     emojiid: Mapped[int | None] = mapped_column(Integer)
-    courseorder: Mapped[int] = mapped_column(Integer, nullable=False)
+    course_order: Mapped[int] = mapped_column(Integer, nullable=False)
 
     __table_args__ = (
-        UniqueConstraint("email", "courseorder", name="personal_course_info_email_courseorder_key"),
+        UniqueConstraint("email", "course_order", name="personal_course_info_email_course_order_key"),
         CheckConstraint("emojiid IS NULL OR (emojiid BETWEEN 0 AND 80)"),
-        CheckConstraint("courseorder >= 0"),
+        CheckConstraint("course_order >= 0"),
     )

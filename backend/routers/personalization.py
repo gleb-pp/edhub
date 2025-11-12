@@ -13,6 +13,8 @@ router = APIRouter(
     tags=["Personalization"]
 )
 
+# TODO: get_course_emoji
+
 
 @router.put("/courses/order")
 async def change_courses_order(

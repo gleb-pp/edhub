@@ -8,7 +8,7 @@ from repo.base import Base
 class MaterialFile(Base):
     __tablename__ = "material_files"
 
-    courseid: Mapped[str] = mapped_column(Uuid, primary_key=True)
+    course_id: Mapped[str] = mapped_column(Uuid, primary_key=True)
     matid: Mapped[int] = mapped_column(Integer, primary_key=True)
     fileid: Mapped[str] = mapped_column(Uuid, primary_key=True)
     filename: Mapped[str] = mapped_column(Text, nullable=False)
@@ -17,8 +17,8 @@ class MaterialFile(Base):
     __table_args__ = (
         CheckConstraint("length(filename) <= 80"),
         ForeignKeyConstraint(
-            ["courseid", "matid"],
-            ["course_materials.courseid", "course_materials.matid"],
+            ["course_id", "matid"],
+            ["course_materials.course_id", "course_materials.matid"],
             ondelete="CASCADE",
         ),
     )
@@ -27,7 +27,7 @@ class MaterialFile(Base):
 class AssignmentFile(Base):
     __tablename__ = "assignment_files"
 
-    courseid: Mapped[str] = mapped_column(Uuid, primary_key=True)
+    course_id: Mapped[str] = mapped_column(Uuid, primary_key=True)
     assid: Mapped[int] = mapped_column(Integer, primary_key=True)
     fileid: Mapped[str] = mapped_column(Uuid, primary_key=True)
     filename: Mapped[str] = mapped_column(Text, nullable=False)
@@ -36,8 +36,8 @@ class AssignmentFile(Base):
     __table_args__ = (
         CheckConstraint("length(filename) <= 80"),
         ForeignKeyConstraint(
-            ["courseid", "matid"],
-            ["course_assignments.courseid", "course_assignments.assid"],
+            ["course_id", "assid"],
+            ["course_assignments.course_id", "course_assignments.assid"],
             ondelete="CASCADE",
         ),
     )
@@ -46,7 +46,7 @@ class AssignmentFile(Base):
 class SubmissionFile(Base):
     __tablename__ = "submission_files"
 
-    courseid: Mapped[str] = mapped_column(Uuid, primary_key=True)
+    course_id: Mapped[str] = mapped_column(Uuid, primary_key=True)
     assid: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str] = mapped_column(Text, primary_key=True)
     fileid: Mapped[str] = mapped_column(Uuid, primary_key=True)
@@ -56,8 +56,8 @@ class SubmissionFile(Base):
     __table_args__ = (
         CheckConstraint("length(filename) <= 80"),
         ForeignKeyConstraint(
-            ["courseid", "assid", "email"],
-            ["course_assignments_submissions.courseid", "course_assignments_submissions.assid", "course_assignments_submissions.email"],
+            ["course_id", "assid", "email"],
+            ["course_assignments_submissions.course_id", "course_assignments_submissions.assid", "course_assignments_submissions.email"],
             ondelete="CASCADE",
         ),
     )

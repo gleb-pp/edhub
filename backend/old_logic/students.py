@@ -4,17 +4,6 @@ import repo.students as repo_students
 import logic.logging as logger
 
 
-def get_enrolled_students(db_cursor, course_id: str, user_email: str):
-    # checking constraints
-    constraints.assert_course_access(db_cursor, user_email, course_id)
-
-    # finding enrolled students
-    students = repo_students.sql_select_enrolled_students(db_cursor, course_id)
-
-    res = [{"email": st[0], "name": st[1]} for st in students]
-    return res
-
-
 def invite_student(db_conn, db_cursor, course_id: str, student_email: str, teacher_email: str):
     # checking constraints
     constraints.assert_teacher_access(db_cursor, teacher_email, course_id)

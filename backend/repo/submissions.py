@@ -8,8 +8,8 @@ from repo.base import Base
 class AssignmentSubmission(Base):
     __tablename__ = "course_assignments_submissions"
 
-    courseid: Mapped[str] = mapped_column(
-        ForeignKey("courses.courseid", ondelete="CASCADE"), primary_key=True
+    course_id: Mapped[str] = mapped_column(
+        ForeignKey("courses.course_id", ondelete="CASCADE"), primary_key=True
     )
     assid: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str] = mapped_column(
@@ -26,8 +26,8 @@ class AssignmentSubmission(Base):
 
     __table_args__ = (
         ForeignKeyConstraint(
-            ["courseid", "assid"],
-            ["course_assignments.courseid", "course_assignments.assid"],
+            ["course_id", "assid"],
+            ["course_assignments.course_id", "course_assignments.assid"],
             ondelete="CASCADE",
         ),
         CheckConstraint("timemodified >= timeadded"),
