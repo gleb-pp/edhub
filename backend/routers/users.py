@@ -1,16 +1,29 @@
-from fastapi import APIRouter, Depends
-from auth import get_current_user, get_db
-import logic.users
+from fastapi import APIRouter, Depends, HTTPException
+from auth import get_current_user
+from logic import (
+    users as user_logic,
+    courses as course_logic,
+    teachers as teacher_logic,
+    students as student_logic,
+    parents as parent_logic,
+)
+from exceptions import (
+    users as user_errors,
+    courses as course_errors,
+)
 from models.common import Success
 from models.courses import CourseID
 from models.users import (
     User,
     CourseRole,
     UserCreate,
-    Account,
+    AccessToken,
     UserLogin,
     UserNewPassword
 )
+from typing import Annotated
+from sqlalchemy.orm import Session
+from db import get_db
 
 
 router = APIRouter(
@@ -20,28 +33,50 @@ router = APIRouter(
 
 
 @router.get("/{user_email}")
-async def get_user_info(user_email: str) -> User:
+async def get_user_info(
+    user_email: str,
+    db: Annotated[Session, Depends(get_db)],
+) -> User:
     """
     Get the info about the user.
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.users.get_user_info(db_cursor, user_email)
+    try:
+        user = user_logic.get_user(user_email, db)
+        return User.model_validate(user)
+    except user_errors.UserNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 @router.get("/{course_id}")
 async def get_my_role(
     course_id: str,
-    user_email: str = Depends(get_current_user)
+    db: Annotated[Session, Depends(get_db)],
+    user_email: str = Depends(get_current_user),
 ) -> CourseRole:
     """
     Get the user's role in the provided course.
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.users.get_user_role(db_cursor, course_id, user_email)
+    try:
+        user = user_logic.get_user(user_email, db)
+        course = course_logic.get_course(course_id, db)
+        return CourseRole(
+            is_instructor=teacher_logic.check_instructor_access(user, course, db),
+            is_teacher=teacher_logic.check_teacher_access(user, course, db),
+            is_student=student_logic.check_student_access(user, course, db),
+            is_parent=parent_logic.check_parent_access(user, course, db),
+            is_admin=user.isadmin
+        )
+    except user_errors.UserNotFoundError as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
+    except course_errors.CourseNotFoundError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.post("/")
-async def create_user(user: UserCreate) -> Account:
+async def create_user(
+    user_create: UserCreate,
+    db: Annotated[Session, Depends(get_db)]
+) -> AccessToken:
     """
     Creates a user account with provided email, name, and password.
 
@@ -55,39 +90,77 @@ async def create_user(user: UserCreate) -> Account:
 
     Returns email and JWT access token for 30 minutes.
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.users.create_user(db_conn, db_cursor, user)
+    try:
+        user_logic.validate_user_email(user_create.email)
+        user_logic.validate_user_name(user_create.name)
+        user_logic.validate_password_lenght(user_create.password)
+        user = user_logic.create_user(user_create.email, user_create.name, user_create.password, db)
+        token = user_logic.get_access_token(user)
+        db.commit()
+        return AccessToken(access_token=token)
+    except (
+        user_errors.EmailFormatError,
+        user_errors.NameFormatError,
+        user_errors.WeakPasswordError,
+    ) as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+    except user_errors.UserExistsError as e:
+        raise HTTPException(status_code=409, detail=str(e)) from e
 
 
 @router.post("/login")
-async def login(user: UserLogin) -> Account:
+async def login(
+    user: UserLogin,
+    db: Annotated[Session, Depends(get_db)],
+) -> AccessToken:
     """
     Log into user account with provided email and password.
 
     Returns email and JWT access token for 30 minutes.
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.users.login(db_cursor, user)
+    try:
+        system_user = user_logic.get_user(user.email, db)
+        user_logic.verify_password(system_user, user.password)
+        token = user_logic.get_access_token(system_user)
+        return AccessToken(access_token=token)
+    except user_errors.UserError as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
 
 
 @router.patch("/change_password")
-async def change_password(user: UserNewPassword) -> Success:
+async def change_password(
+    user_new_password: UserNewPassword,
+    db: Annotated[Session, Depends(get_db)],
+) -> Success:
     """
     Change the user password to a new one.
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.users.change_password(db_conn, db_cursor, user)
+    try:
+        user = user_logic.get_user(user_new_password.email, db)
+        user_logic.verify_password(user, user_new_password.password)
+        user_logic.validate_password_lenght(user_new_password.new_password)
+        user_logic.change_password(user, user_new_password.new_password, db)
+        return Success(success=True)
+    except user_errors.UserNotFoundError as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
+    except course_errors.CourseNotFoundError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.get("/instructor_courses")
 async def get_my_instructor_courses(
-    user_email: str = Depends(get_current_user)
+    db: Annotated[Session, Depends(get_db)],
+    user_email: str = Depends(get_current_user),
 ) -> list[CourseID]:
     """
     Get the list of IDs of courses where the provided user is a Primary Instructor.
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.users.get_instructor_courses(db_cursor, user_email)
+    try:
+        user = user_logic.get_user(user_email, db)
+        courses = user_logic.get_instructor_courses(user, db)
+        return [CourseID.model_validate(course) for course in courses]
+    except user_errors.UserNotFoundError as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
 
 
 @router.delete("/{deleted_user_email}")
@@ -108,7 +181,7 @@ async def remove_user(
 
     User CAN NOT be deleted if they are the only platform administrator.
 
-    Admin can remove other users
+    Admin can remove other users.
     """
     with get_db() as (db_conn, db_cursor):
         return logic.users.remove_user(db_conn, db_cursor, deleted_user_email, user_email)

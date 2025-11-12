@@ -1,8 +1,11 @@
 from fastapi import APIRouter, Query, Depends
-from auth import get_current_user, get_db
+from auth import get_current_user
 from models.courses import CourseID, Course
 from models.common import Success
 import logic.courses
+from typing import Annotated
+from sqlalchemy.orm import Session
+from db import get_db
 
 
 router = APIRouter(

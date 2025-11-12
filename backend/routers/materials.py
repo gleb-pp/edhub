@@ -1,8 +1,11 @@
 from fastapi import APIRouter, Depends, Query, UploadFile, File
-from auth import get_current_user, get_db, get_storage_db
+from auth import get_current_user, get_storage_db
 from models.common import Success
 from models.materials import MaterialID, Material, MaterialAttachmentMetadata
 import logic.materials
+from typing import Annotated
+from sqlalchemy.orm import Session
+from db import get_db
 
 
 router = APIRouter(

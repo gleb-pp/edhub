@@ -1,8 +1,11 @@
 from fastapi import APIRouter, Query, Depends
-from auth import get_current_user, get_db
+from auth import get_current_user
 import logic.sections
 from models.common import Success
 from models.sections import CoursePost, SectionID
+from typing import Annotated
+from sqlalchemy.orm import Session
+from db import get_db
 
 
 router = APIRouter(

@@ -1,8 +1,11 @@
 from fastapi import APIRouter, Depends, Query
-from auth import get_current_user, get_db
+from auth import get_current_user
 from models.common import Success
 from models.grades import StudentsGrades, AssignmentGrade
 import logic.grades
+from typing import Annotated
+from sqlalchemy.orm import Session
+from db import get_db
 
 
 router = APIRouter(

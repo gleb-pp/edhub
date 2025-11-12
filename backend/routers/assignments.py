@@ -1,5 +1,8 @@
+from typing import Annotated
+from sqlalchemy.orm import Session
+from db import get_db
 from fastapi import APIRouter, Depends, Query, UploadFile, File
-from auth import get_current_user, get_db, get_storage_db
+from auth import get_current_user, get_storage_db
 from models.common import Success
 from models.assignments import (
     AssignmentID,
@@ -31,6 +34,7 @@ async def create_assignment(
         description="Description must contain 3-10000 symbols"
     ),
     user_email: str = Depends(get_current_user),
+    db: Annotated[Session, Depends(get_db)],
 ) -> AssignmentID:
     """
     Create the assignment with provided title and description within the section by provided section_id within the course with provided course_id.

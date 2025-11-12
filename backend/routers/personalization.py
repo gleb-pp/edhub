@@ -1,9 +1,12 @@
 from typing import List
 from fastapi import APIRouter, Query, Depends
-from auth import get_current_user, get_db
+from auth import get_current_user
 import logic.personalization
 from constants import EMOJI_COUNT
 from models.common import Success
+from typing import Annotated
+from sqlalchemy.orm import Session
+from db import get_db
 
 
 router = APIRouter(

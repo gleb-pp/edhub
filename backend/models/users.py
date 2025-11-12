@@ -1,8 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class User(BaseModel):
     email: str
     name: str
+    model_config = ConfigDict(from_attributes=True)
 
 class UserLogin(BaseModel):
     email: str
@@ -22,6 +23,5 @@ class CourseRole(BaseModel):
     is_admin: bool
 
 
-class Account(BaseModel):
-    email: str
+class AccessToken(BaseModel):
     access_token: str

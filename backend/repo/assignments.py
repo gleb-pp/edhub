@@ -1,79 +1,31 @@
-from typing import List, Tuple, Optional
-from uuid import UUID
+from sqlalchemy import Integer, DateTime, Text, CheckConstraint, ForeignKey, ForeignKeyConstraint
+from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime
 
-def sql_insert_assignment(db_cursor, course_id: str, section_id: int, title: str, description: str, user_email: str) -> int:
-    db_cursor.execute(
-        "INSERT INTO course_assignments (courseid, sectionid, name, description, timeadded, author) VALUES (%s, %s, %s, %s, now(), %s) RETURNING assid",
-        (course_id, section_id, title, description, user_email),
+from repo.base import Base
+
+
+class CourseAssignment(Base):
+    __tablename__ = "course_assignments"
+
+    courseid: Mapped[str] = mapped_column(
+        ForeignKey("courses.courseid", ondelete="CASCADE"), primary_key=True
     )
-    return db_cursor.fetchone()[0]
-
-
-def sql_delete_assignment(db_cursor, course_id: str, assignment_id: str) -> None:
-    db_cursor.execute(
-        "DELETE FROM course_assignments WHERE courseid = %s AND assid = %s",
-        (course_id, assignment_id),
+    assid: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    timeadded: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    author: Mapped[str | None] = mapped_column(
+        ForeignKey("users.email", ondelete="SET NULL"), nullable=True
     )
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    sectionid: Mapped[int] = mapped_column(Integer, nullable=False)
 
-
-def sql_select_assignment(db_cursor, course_id: str, assignment_id: str) -> Optional[Tuple[UUID, int, int, datetime, str, str, Optional[str]]]:
-    db_cursor.execute(
-        """
-        SELECT courseid, assid, sectionid, timeadded, name, description, author
-        FROM course_assignments
-        WHERE courseid = %s AND assid = %s
-        """,
-        (course_id, assignment_id),
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["courseid", "sectionid"],
+            ["course_sections.courseid", "course_sections.sectionid"],
+            ondelete="CASCADE",
+        ),
+        CheckConstraint("length(name) BETWEEN 3 AND 80"),
+        CheckConstraint("length(description) BETWEEN 3 AND 10000"),
     )
-    return db_cursor.fetchone()
-
-
-def sql_insert_assignment_attachment(db_cursor, storage_db_cursor, course_id: str, assignment_id: str, filename: str, contents: bytes) -> Tuple[UUID, datetime]:
-    storage_db_cursor.execute(
-        """
-        INSERT INTO files
-        (id, content)
-        VALUES (gen_random_uuid(), %s)
-        RETURNING id
-        """,
-        (contents, )
-    )
-    fileid = storage_db_cursor.fetchone()[0]
-
-    db_cursor.execute(
-        """
-        INSERT INTO assignment_files
-        (courseid, assid, fileid, filename, uploadtime)
-        VALUES (%s, %s, %s, %s, now())
-        RETURNING fileid, uploadtime
-        """,
-        (course_id, assignment_id, fileid, filename),
-    )
-    return db_cursor.fetchone()
-
-
-def sql_select_assignment_attachments(db_cursor, course_id: str, assignment_id: str) -> List[Tuple[UUID, str, datetime]]:
-    db_cursor.execute(
-        """
-        SELECT fileid, filename, uploadtime
-        FROM assignment_files
-        WHERE courseid = %s AND assid = %s
-        """,
-        (course_id, assignment_id),
-    )
-    return db_cursor.fetchall()
-
-
-def sql_select_course_assignments(db_cursor, course_id: str) -> List[Tuple[UUID, int, int, datetime, str, str, Optional[str]]]:
-    db_cursor.execute(
-        """
-        SELECT ca.courseid, ca.assid, ca.sectionid, ca.timeadded, ca.name, ca.description, ca.author
-        FROM course_assignments ca
-        JOIN course_sections cs ON ca.courseid = cs.courseid AND ca.sectionid = cs.sectionid
-        WHERE ca.courseid = %s
-        ORDER BY cs.sectionorder ASC, ca.timeadded ASC
-        """,
-        (course_id, ),
-    )
-    return db_cursor.fetchall()

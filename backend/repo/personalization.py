@@ -1,30 +1,22 @@
-from typing import List
+from sqlalchemy import Integer, CheckConstraint, ForeignKey, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column
+from repo.base import Base
 
-def sql_update_courses_order(db_cursor, new_order: List[str], user_email: str) -> None:
 
-    # postpone the checking of uniqueness constraints
-    db_cursor.execute("SET CONSTRAINTS personal_course_info_email_courseorder_key DEFERRED")
+class PersonalCourseInfo(Base):
+    __tablename__ = "personal_course_info"
 
-    # set correct values
-    values_to_update = [(course_id, index) for index, course_id in enumerate(new_order)]
-    values_str = ", ".join("(%s, %s)" for _ in values_to_update)
-    flat_values = [val for pair in values_to_update for val in pair]
-    db_cursor.execute(f"""
-        UPDATE personal_course_info pci
-        SET courseorder = new.courseorder
-        FROM (VALUES {values_str}) AS new(courseid, courseorder)
-        WHERE pci.email = %s AND pci.courseid = new.courseid::uuid
-        """,
-        [*flat_values, user_email]
+    courseid: Mapped[str] = mapped_column(
+        ForeignKey("courses.courseid", ondelete="CASCADE"), primary_key=True
     )
+    email: Mapped[str] = mapped_column(
+        ForeignKey("users.email", ondelete="CASCADE"), primary_key=True
+    )
+    emojiid: Mapped[int | None] = mapped_column(Integer)
+    courseorder: Mapped[int] = mapped_column(Integer, nullable=False)
 
-
-def sql_set_course_emoji(db_cursor, course_id: str, emoji_id: int, user_email: str) -> None:
-    db_cursor.execute(
-        """
-        UPDATE personal_course_info
-        SET emojiid = %s
-        WHERE email = %s AND courseid = %s::uuid
-        """,
-        (emoji_id, user_email, course_id)
+    __table_args__ = (
+        UniqueConstraint("email", "courseorder", name="personal_course_info_email_courseorder_key"),
+        CheckConstraint("emojiid IS NULL OR (emojiid BETWEEN 0 AND 80)"),
+        CheckConstraint("courseorder >= 0"),
     )
