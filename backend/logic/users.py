@@ -6,6 +6,7 @@ from auth import pwd_hasher, ACCESS_TOKEN_EXPIRE_MINUTES, JWT_SECRET_KEY, ALGORI
 import repo.users as repo_users
 from regex import match, search
 import logic.logging as logger
+from settings.user import user_settings
 
 
 def get_user_info(db_cursor, user_email: str):
@@ -34,9 +35,9 @@ def create_user(db_conn, db_cursor, user):
     pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
     if not (
         match(pattern, user.email)
-        and len(user.email) <= 254
+        and len(user.email) <= user_settings.max_email_lenght
         and ".." not in user.email
-        and len(user.email.split("@")[0]) <= 64
+        and len(user.email.split("@")[0]) <= user_settings.max_email_local_part
     ):
         raise HTTPException(status_code=422, detail="Incorrect email format")
 
@@ -45,14 +46,14 @@ def create_user(db_conn, db_cursor, user):
     user.name = user.name.strip()
     if not (
         match(pattern, user.name)
-        and 1 <= len(user.name) <= 80
+        and user_settings.min_user_name_lenght <= len(user.name) <= user_settings.max_user_name_lenght
         and not(user.name[0].isdigit())
     ):
         raise HTTPException(status_code=422, detail="Incorrect name format")
 
     # validation of password complexity (length, digit(s), letter(s), special symbol(s))
     if not (
-        len(user.password) >= 8
+        len(user.password) >= user_settings.pwd_min_lenght
         and search(r"\d", user.password)
         and search(r"\p{L}", user.password)
         and search(r"[^\p{L}\p{N}\s]", user.password)
