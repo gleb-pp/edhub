@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
 from auth import get_current_user
-import logic.students
 from models.common import Success
 from models.users import User
 from typing import Annotated
@@ -11,6 +10,10 @@ import exceptions.users as user_errors
 import logic.courses as course_logic
 import exceptions.courses as course_errors
 import logic.students as student_logic
+import exceptions.students as student_errors
+import logic.teachers as teacher_logic
+import exceptions.teachers as teacher_errors
+import logic.parents as parent_logic
 
 router = APIRouter(
     prefix='/{course_id}/students',
@@ -51,6 +54,7 @@ async def get_enrolled_students(
 async def invite_student(
     course_id: str,
     student_email: str,
+    db: Annotated[Session, Depends(get_db)],
     teacher_email: str = Depends(get_current_user)
 ) -> Success:
     """
@@ -58,22 +62,63 @@ async def invite_student(
 
     Teacher OR Primary Instructor role required.
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.students.invite_student(db_conn, db_cursor, course_id, student_email, teacher_email)
+    try:
+        teacher = user_logic.get_user(teacher_email, db)
+        course = course_logic.get_course(course_id, db)
+        teacher_logic.assert_teacher_access(teacher, course, db)
+        student = user_logic.get_user(student_email, db)
+        student_logic.assert_not_student(student, course, db)
+        teacher_logic.assert_not_teacher(student, course, db)
+        parent_logic.assert_not_parent(student, course, db)
+        student_logic.invite_student(student, course, db)
+        db.commit()
+        return Success(success=True)
+    except user_errors.UserNotFoundError as e:
+        if e.email == teacher_email:
+            raise HTTPException(status_code=401, detail=str(e)) from e
+        elif e.email == student_email:
+            raise HTTPException(status_code=404, detail=str(e)) from e
+        else:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+    except course_errors.CourseNotFoundError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except teacher_errors.TeacherRoleRequired as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e
+    except course_errors.RoleConflict as e:
+        raise HTTPException(status_code=409, detail=str(e)) from e
 
 
 @router.delete("/{student_email}")
 async def remove_student(
     course_id: str,
     student_email: str,
-    user_email: str = Depends(get_current_user)
+    db: Annotated[Session, Depends(get_db)],
+    teacher_email: str = Depends(get_current_user)
 ) -> Success:
     """
     Remove the student with provided email from the course with provided course_id.
 
-    Teacher OR Primary Instructor OR Student role required.
-
-    Student can only remove themselves.
+    Teacher OR Primary Instructor role required.
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.students.remove_student(db_conn, db_cursor, course_id, student_email, user_email)
+    try:
+        teacher = user_logic.get_user(teacher_email, db)
+        course = course_logic.get_course(course_id, db)
+        teacher_logic.assert_teacher_access(teacher, course, db)
+        student = user_logic.get_user(student_email, db)
+        student_logic.assert_student_access(student, course, db)
+        student_logic.remove_student(student, course, db)
+        db.commit()
+        return Success(success=True)
+    except user_errors.UserNotFoundError as e:
+        if e.email == teacher_email:
+            raise HTTPException(status_code=401, detail=str(e)) from e
+        elif e.email == student_email:
+            raise HTTPException(status_code=404, detail=str(e)) from e
+        else:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+    except course_errors.CourseNotFoundError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except teacher_errors.TeacherRoleRequired as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e
+    except student_errors.StudentRoleRequired as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e

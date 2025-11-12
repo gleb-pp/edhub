@@ -97,7 +97,7 @@ def change_password(user: User, new_password: str) -> None:
 def get_instructor_courses(user: User, db: Session) -> list[Course]:
     """Change the list of courses with the provided user as an instructor."""
 
-    return  db.query(Course).filter(Course.instructor == user.email).all()
+    return db.query(Course).filter(Course.instructor == user.email).all()
 
 
 def delete_user(user: User, db: Session) -> None:

@@ -99,7 +99,7 @@ async def delete_course(
     except teacher_errors.InstructorRoleRequired as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
-        return Success(success=True)
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.get("/{course_id}")

@@ -12,3 +12,7 @@ class ParticipantRoleRequired(CourseError):
 
     def __init__(self, email: str, course_id: str) -> None:
         super().__init__(f"User {email} is not a participant of a course {course_id}.")
+
+
+class RoleConflict(CourseError):
+    """Base exception for the role conflicts."""

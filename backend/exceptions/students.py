@@ -1,0 +1,18 @@
+from exceptions.courses import RoleConflict
+
+class StudentError(Exception):
+    """Base exception for student-related errors."""
+
+class StudentRoleConflict(StudentError, RoleConflict):
+    """Exception raised when the student role conflict appears."""
+
+    def __init__(self, email: str, course_id: str) -> None:
+        super().__init__(f"User {email} is already student at the course {course_id}.")
+
+class StudentRoleRequired(StudentError):
+    """Exception raised when some random user want to access student functionality."""
+
+    def __init__(self, email: str, course_title: str) -> None:
+        super().__init__(
+            f"User {email} is not a student at the course {course_title}."
+        )
