@@ -14,6 +14,7 @@ import routers.students
 import routers.teachers
 import routers.users
 import routers.personalization
+import routers.admins
 
 
 app = FastAPI(
@@ -46,6 +47,7 @@ app.include_router(routers.parents.router)
 app.include_router(routers.students.router)
 app.include_router(routers.teachers.router)
 app.include_router(routers.users.router)
+app.include_router(routers.admins.router)
 
 app.add_middleware(
     CORSMiddleware,

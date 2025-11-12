@@ -93,8 +93,38 @@ def change_password(user: User, new_password: str) -> None:
     hashed_password = pwd_hasher.hash(new_password)
     user.password_hash = hashed_password
 
+
 def get_instructor_courses(user: User, db: Session) -> list[Course]:
     """Change the list of courses with the provided user as an instructor."""
 
     return  db.query(Course).filter(Course.instructor == user.email).all()
 
+
+def delete_user(user: User, db: Session) -> None:
+    """Delete user from the system."""
+    admins = get_admins(db)
+    if len(admins) == 1 and admins[0].email == user.email:
+        raise user_errors.DeleteLastAdminError(user.email)
+
+    db.delete(user)
+
+
+def assert_user_is_admin(user: User) -> None:
+    """Check whether the user with provided email has admin role."""
+    if not user.is_admin:
+        raise user_errors.AdminRoleRequiredError(user.email)
+
+
+def give_admin_permissions(user: User) -> None:
+    """Change the user password to a new one."""
+    user.isadmin = True
+
+
+def get_all_users(db: Session) -> list[User]:
+    """Get the list of all users."""
+    return db.query(User).all()
+
+
+def get_admins(db: Session) -> list[User]:
+    """Get the list of all administrators."""
+    return db.query(User).filter(User.is_admin == True).all()

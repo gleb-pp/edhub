@@ -140,6 +140,7 @@ async def change_password(
         user_logic.verify_password(user, user_new_password.password)
         user_logic.validate_password_lenght(user_new_password.new_password)
         user_logic.change_password(user, user_new_password.new_password, db)
+        db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
@@ -163,9 +164,9 @@ async def get_my_instructor_courses(
         raise HTTPException(status_code=401, detail=str(e)) from e
 
 
-@router.delete("/{deleted_user_email}")
+@router.delete("/")
 async def remove_user(
-    deleted_user_email: str,
+    db: Annotated[Session, Depends(get_db)],
     user_email: str = Depends(get_current_user)
 ) -> Success:
     """
@@ -180,48 +181,13 @@ async def remove_user(
     The user's materials and assignments will be left but with NULL author.
 
     User CAN NOT be deleted if they are the only platform administrator.
-
-    Admin can remove other users.
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.users.remove_user(db_conn, db_cursor, deleted_user_email, user_email)
-
-
-# TODO: to admin.py
-@router.patch("/give_admin_permissions")
-async def give_admin_permissions(
-    object_email: str,
-    subject_email: str = Depends(get_current_user)
-) -> Success:
-    """
-    Give admin rights to some existing user by their email.
-
-    Admin role required.
-    """
-    with get_db() as (db_conn, db_cursor):
-        return logic.users.give_admin_permissions(db_conn, db_cursor, object_email, subject_email)
-
-
-@router.get("/")
-async def get_all_users(
-    user_email: str = Depends(get_current_user)
-) -> list[User]:
-    """
-    Get the list of all users in the system.
-
-    Return the email and name of each user.
-
-    Admin role required.
-    """
-    with get_db() as (db_conn, db_cursor):
-        return logic.users.get_all_users(db_cursor, user_email)
-
-
-# TODO: to admin.py
-@router.get("/get_admins")
-async def get_admins() -> list[User]:
-    """
-    Get the list of platform administrators.
-    """
-    with get_db() as (db_conn, db_cursor):
-        return logic.users.get_admins(db_cursor)
+    try:
+        user = user_logic.get_user(user_email, db)
+        user_logic.delete_user(user)
+        db.commit()
+        return Success(success=True)
+    except user_errors.UserNotFoundError as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
+    except user_errors.DeleteLastAdminError as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e

@@ -34,6 +34,7 @@ class UserNotFoundError(UserError):
     """Exception raised when a user is not found."""
 
     def __init__(self, email: str) -> None:
+        self.email = email
         super().__init__(f"User {email} does not exist.")
 
 
@@ -56,3 +57,10 @@ class AdminRoleRequiredError(UserError):
 
     def __init__(self, user_email: str) -> None:
         super().__init__(f"User {user_email} is not the admin.")
+
+
+class DeleteLastAdminError(UserError):
+    """Exception raised when trying to delete the last administrator."""
+
+    def __init__(self) -> None:
+        super().__init__(f"Cannot remove user the only administrator.")
