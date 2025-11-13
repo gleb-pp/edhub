@@ -9,7 +9,7 @@ class InstructorRoleRequired(TeacherError):
 
     def __init__(self, email: str, course_name: str) -> None:
         super().__init__(
-            f"User {email} does not have the instructor access within the course {course_name}."
+            f"User {email} is not an instructor in the course {course_name}."
         )
 
 class TeacherRoleRequired(TeacherError):
@@ -17,7 +17,7 @@ class TeacherRoleRequired(TeacherError):
 
     def __init__(self, email: str, course_name: str) -> None:
         super().__init__(
-            f"User {email} does not have not teacher nor instructor access within the course {course_name}."
+            f"User {email} is not a teacher nor instructor in the course {course_name}."
         )
 
 class TeacherRoleConflict(TeacherError, RoleConflict):
