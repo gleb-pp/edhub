@@ -4,7 +4,8 @@ from exceptions import users as user_errors
 from sqlalchemy.orm import Session
 from repo.users import User
 from repo.courses import Course
-from auth import pwd_hasher, ACCESS_TOKEN_EXPIRE_MINUTES, JWT_SECRET_KEY, ALGORITHM
+from auth import pwd_hasher
+from settings.auth import auth_settings
 from jose import jwt
 from datetime import datetime, timedelta, timezone
 
@@ -63,9 +64,9 @@ def get_access_token(user: User) -> str:
     # giving access token
     data = {
         "email": user.email,
-        "exp": datetime.now(tz=timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+        "exp": datetime.now(tz=timezone.utc) + timedelta(minutes=auth_settings.access_token_expire_minutes),
     }
-    return jwt.encode(data, JWT_SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(data, auth_settings.jwt_secret_key, algorithm=auth_settings.algorithm)
 
 
 def get_user(email: str, db: Session) -> User:

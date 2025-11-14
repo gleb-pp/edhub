@@ -45,13 +45,6 @@ class InvalidPasswordError(UserError):
         super().__init__("Invalid password.")
 
 
-# class InvalidTokenError(UserError):
-#     """Exception raised for invalid authentication token."""
-
-#     def __init__(self) -> None:
-#         super().__init__("Invalid authentication token.")
-
-
 class AdminRoleRequiredError(UserError):
     """Exception raised when the user does not have the admin role."""
 
