@@ -6,3 +6,4 @@ tempCodeRunnerFile.py
 database.py
 .env
 .pylintrc
+.DS_Store

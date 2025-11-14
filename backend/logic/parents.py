@@ -59,9 +59,29 @@ def invite_parent(parent: User, student: User, course: Course, db: Session) -> N
     )
     db.add(parent_of)
 
-def get_student_parents(student: User, course: Course, db: Session) -> list[User]:
+
+def get_students_parents(student: User, course: Course, db: Session) -> list[User]:
     """Get the list of parents observing the provided student within the provided course."""
+    return (
+        db.query(User)
+        .join(ParentAt, ParentAt.parent_email == User.email)
+        .filter(
+            ParentAt.student_email == student.email,
+            ParentAt.course_id == course.course_id
+        )
+        .all()
+    )
+
 
 def get_parents_children(parent: User, course: Course, db: Session) -> list[User]:
     """Get the list of students that the provided parent observes within the provided course."""
-    
+
+    return (
+        db.query(User)
+        .join(ParentAt, ParentAt.student_email == User.email)
+        .filter(
+            ParentAt.parent_email == parent.email,
+            ParentAt.course_id == course.course_id
+        )
+        .all()
+    )

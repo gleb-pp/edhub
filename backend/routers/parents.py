@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
 from auth import get_current_user
-import logic.parents
 from models.common import Success
 from models.users import User
 from typing import Annotated
@@ -138,8 +137,6 @@ async def remove_parent(
         raise HTTPException(status_code=400, detail=str(e)) from e
     except teacher_errors.TeacherRoleRequired as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
-    except parent_errors.ParentOfStudentRoleRequired as e:
-        raise HTTPException(status_code=422, detail=str(e)) from e
 
 
 @router.get("{course_id}/children/{parent_email}")
@@ -169,12 +166,13 @@ async def get_parents_children(
             raise HTTPException(status_code=401, detail=str(e)) from e
         else:
             raise HTTPException(status_code=400, detail=str(e)) from e
-    except course_errors.CourseNotFoundError as e:
+    except (
+        course_errors.CourseNotFoundError,
+        parent_errors.ParentRoleRequired
+     ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except teacher_errors.TeacherRoleRequired as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
-    except parent_errors.ParentRoleRequired as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 # TODO: get_my_children
