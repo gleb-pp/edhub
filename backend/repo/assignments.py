@@ -11,7 +11,7 @@ class CourseAssignment(Base):
     course_id: Mapped[str] = mapped_column(
         ForeignKey("courses.course_id", ondelete="CASCADE"), primary_key=True
     )
-    assid: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    assignment_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     timeadded: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     author: Mapped[str | None] = mapped_column(
         ForeignKey("users.email", ondelete="SET NULL"), nullable=True

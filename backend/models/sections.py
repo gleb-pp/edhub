@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from typing import Literal
 
 class SectionID(BaseModel):
     section_id: int
@@ -6,14 +7,15 @@ class SectionID(BaseModel):
 
 class Section(SectionID):
     title: str
+    order: int
 
 
 class CoursePost(BaseModel):
     course_id: str
-    post_id: int | None
+    post_id: int
     section_id: int
-    section_name: str
-    section_order: int
-    type: str | None
-    creation_time: str | None
-    author: str | None
+    creation_time: str
+    type: Literal["material", "assignment"]
+    author: str
+    title: str
+    model_config = ConfigDict(from_attributes=True)

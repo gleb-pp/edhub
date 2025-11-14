@@ -11,7 +11,7 @@ class AssignmentSubmission(Base):
     course_id: Mapped[str] = mapped_column(
         ForeignKey("courses.course_id", ondelete="CASCADE"), primary_key=True
     )
-    assid: Mapped[int] = mapped_column(Integer, primary_key=True)
+    assignment_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str] = mapped_column(
         ForeignKey("users.email", ondelete="CASCADE"), primary_key=True
     )
@@ -26,8 +26,8 @@ class AssignmentSubmission(Base):
 
     __table_args__ = (
         ForeignKeyConstraint(
-            ["course_id", "assid"],
-            ["course_assignments.course_id", "course_assignments.assid"],
+            ["course_id", "assignment_id"],
+            ["course_assignments.course_id", "course_assignments.assignment_id"],
             ondelete="CASCADE",
         ),
         CheckConstraint("timemodified >= timeadded"),

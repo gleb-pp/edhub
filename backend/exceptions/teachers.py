@@ -20,6 +20,7 @@ class TeacherRoleRequired(TeacherError):
             f"User {email} is not a teacher nor instructor in the course {course_name}."
         )
 
+
 class TeacherRoleConflict(TeacherError, RoleConflict):
     """Exception raised when the teacher role conflict appears."""
 

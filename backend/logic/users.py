@@ -82,13 +82,8 @@ def verify_password(user: User, password: str) -> None:
         raise user_errors.InvalidPasswordError
 
 
-def get_all_users(db: Session) -> list[User]:
-    """Get the list of all users in the system."""
-    return db.query(User).all()
-
-
 def change_password(user: User, new_password: str) -> None:
-    """Change the user password to a new one"""
+    """Change the user password to a new one."""
     
     hashed_password = pwd_hasher.hash(new_password)
     user.password_hash = hashed_password
@@ -104,7 +99,7 @@ def delete_user(user: User, db: Session) -> None:
     """Delete user from the system."""
     admins = get_admins(db)
     if len(admins) == 1 and admins[0].email == user.email:
-        raise user_errors.DeleteLastAdminError(user.email)
+        raise user_errors.DeleteLastAdminError
 
     db.delete(user)
 
