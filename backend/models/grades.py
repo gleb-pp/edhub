@@ -1,10 +1,5 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
-
-class StudentsGrades(BaseModel):
-    name: str
-    email: str
-    grades: list[int | None]
 
 
 class AssignmentGrade(BaseModel):
@@ -15,3 +10,4 @@ class AssignmentGrade(BaseModel):
     comment: str | None
     teacher_email: str | None
     time_graded: datetime
+    model_config = ConfigDict(from_attributes=True)

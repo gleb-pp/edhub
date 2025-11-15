@@ -16,10 +16,7 @@ from models.courses import CourseID
 from models.users import (
     User,
     CourseRole,
-    UserCreate,
     AccessToken,
-    UserLogin,
-    UserNewPassword
 )
 from typing import Annotated
 from sqlalchemy.orm import Session
@@ -74,7 +71,9 @@ async def get_my_role(
 
 @router.post("/")
 async def create_user(
-    user_create: UserCreate,
+    email: str,
+    name: str,
+    password: str,
     db: Annotated[Session, Depends(get_db)]
 ) -> AccessToken:
     """
@@ -91,10 +90,10 @@ async def create_user(
     Returns email and JWT access token for 30 minutes.
     """
     try:
-        user_logic.validate_user_email(user_create.email)
-        user_logic.validate_user_name(user_create.name)
-        user_logic.validate_password_lenght(user_create.password)
-        user = user_logic.create_user(user_create.email, user_create.name, user_create.password, db)
+        user_logic.validate_user_email(email)
+        user_logic.validate_user_name(name)
+        user_logic.validate_password_lenght(password)
+        user = user_logic.create_user(email, name, password, db)
         token = user_logic.get_access_token(user)
         db.commit()
         return AccessToken(access_token=token)
@@ -110,7 +109,8 @@ async def create_user(
 
 @router.post("/login")
 async def login(
-    user: UserLogin,
+    email: str,
+    password: str,
     db: Annotated[Session, Depends(get_db)],
 ) -> AccessToken:
     """
@@ -119,9 +119,9 @@ async def login(
     Returns email and JWT access token for 30 minutes.
     """
     try:
-        system_user = user_logic.get_user(user.email, db)
-        user_logic.verify_password(system_user, user.password)
-        token = user_logic.get_access_token(system_user)
+        user = user_logic.get_user(email, db)
+        user_logic.verify_password(user, password)
+        token = user_logic.get_access_token(user)
         return AccessToken(access_token=token)
     except user_errors.UserError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
@@ -129,17 +129,19 @@ async def login(
 
 @router.patch("/change_password")
 async def change_password(
-    user_new_password: UserNewPassword,
+    email: str,
+    password: str,
+    new_password: str,
     db: Annotated[Session, Depends(get_db)],
 ) -> Success:
     """
     Change the user password to a new one.
     """
     try:
-        user = user_logic.get_user(user_new_password.email, db)
-        user_logic.verify_password(user, user_new_password.password)
-        user_logic.validate_password_lenght(user_new_password.new_password)
-        user_logic.change_password(user, user_new_password.new_password)
+        user = user_logic.get_user(email, db)
+        user_logic.verify_password(user, password)
+        user_logic.validate_password_lenght(new_password)
+        user_logic.change_password(user, new_password)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:

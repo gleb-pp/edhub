@@ -5,15 +5,6 @@ class User(BaseModel):
     name: str
     model_config = ConfigDict(from_attributes=True)
 
-class UserLogin(BaseModel):
-    email: str
-    password: str
-
-class UserCreate(User):
-    password: str
-
-class UserNewPassword(UserLogin):
-    new_password: str
 
 class CourseRole(BaseModel):
     is_instructor: bool
