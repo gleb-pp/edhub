@@ -4,6 +4,9 @@ from repo.students import StudentAt
 from sqlalchemy.orm import Session
 from sqlalchemy import exists
 import exceptions.students as student_errors
+import logic.parents as parent_logic
+import logic.teachers as teacher_logic
+import logic.courses as course_logic
 
 
 def check_student_access(user: User, course: Course, db: Session) -> bool:
@@ -16,7 +19,7 @@ def check_student_access(user: User, course: Course, db: Session) -> bool:
     ).scalar()
 
 
-def assert_student_access(user: User, course: Course, db: Session) -> bool:
+def assert_student_access(user: User, course: Course, db: Session) -> None:
     """Asserts that the provided user has a student role in the provided course."""
     if not check_student_access(user, course, db):
         raise student_errors.StudentRoleRequired(user.email, course.title)
@@ -55,3 +58,15 @@ def remove_student(student: User, course: Course, db: Session) -> None:
             StudentAt.course_id == course.course_id
         ).first()
     )
+
+
+def assert_access_to_student(student: User, user: User, course: Course, db: Session) -> None:
+    """Asserts that the provided user has access to the provided student."""
+    course_logic.assert_course_access(user, course, db)
+    assert_student_access(student, course, db)
+    if not (
+        teacher_logic.check_teacher_access(user, course, db) or
+        user.email == student.email or
+        parent_logic.check_parent_of_student(user, student, course, db)
+    ):
+        raise student_errors.NoAccessToStudentInfo(student.email, user.email, course.id)

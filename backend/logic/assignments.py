@@ -2,7 +2,7 @@ from repo.assignments import CourseAssignment
 from repo.sections import CourseSection
 from repo.courses import Course
 from repo.users import User
-import exceptions.assignments as assignment_error 
+import exceptions.assignments as assignment_errors
 from sqlalchemy.orm import Session
 
 def get_section_assignments(section: CourseSection, db: Session) -> list[CourseAssignment]:
@@ -28,7 +28,7 @@ def get_assignment(course: Course, assignment_id: int, db: Session) -> CourseAss
     """Get the assignment by the provided course and assignment_id."""
     assignment = db.query(CourseAssignment).filter(CourseAssignment.course_id == course.course_id, CourseAssignment.assignment_id == assignment_id).first()
     if not assignment:
-        raise assignment_error.AssignmentNotFoundError(course_id=course.course_id, assignment_id=assignment_id)
+        raise assignment_errors.AssignmentNotFoundError(course_id=course.course_id, assignment_id=assignment_id)
     return assignment
 
 

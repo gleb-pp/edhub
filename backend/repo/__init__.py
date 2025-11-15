@@ -9,6 +9,7 @@ from .students import StudentAt
 from .submissions import AssignmentSubmission
 from .teachers import Teaches
 from .users import User
+from.grades import Grade
 
 __all__ = [
     "CourseAssignment",
@@ -24,4 +25,5 @@ __all__ = [
     "AssignmentSubmission",
     "Teaches",
     "User",
+    "Grade"
 ]

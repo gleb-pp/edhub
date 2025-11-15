@@ -18,3 +18,10 @@ class StudentRoleRequired(StudentError):
         super().__init__(
             f"User {email} is not a student at the course {course_title}."
         )
+
+
+class NoAccessToStudentInfo(StudentError):
+    """Exception raised when some random user want to access the student information."""
+
+    def __init__(self, student_email: str, user_email: str, course_id: str) -> None:
+        super().__init__(f"User {user_email} has no access to the student {student_email} within the course {course_id}.")

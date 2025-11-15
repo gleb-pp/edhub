@@ -17,12 +17,7 @@ class AssignmentSubmission(Base):
     )
     timeadded: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now(tz=timezone.utc))
     timemodified: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now(tz=timezone.utc))
-    submissiontext: Mapped[str] = mapped_column(Text, nullable=False)
-    grade: Mapped[int | None] = mapped_column(Integer)
-    comment: Mapped[str | None] = mapped_column(Text)
-    gradedby: Mapped[str | None] = mapped_column(
-        ForeignKey("users.email", ondelete="SET NULL"), nullable=True
-    )
+    submission_text: Mapped[str] = mapped_column(Text, nullable=False)
 
     __table_args__ = (
         ForeignKeyConstraint(
@@ -32,5 +27,4 @@ class AssignmentSubmission(Base):
         ),
         CheckConstraint("timemodified >= timeadded"),
         CheckConstraint("length(submissiontext) BETWEEN 3 AND 10000"),
-        CheckConstraint("comment IS NULL OR length(comment) BETWEEN 3 AND 10000"),
     )

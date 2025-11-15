@@ -113,7 +113,7 @@ async def remove_assignment(
 @router.get("/{assignment_id}")
 async def get_assignment(
     course_id: str,
-    assignment_id: str,
+    assignment_id: int,
     db: Annotated[Session, Depends(get_db)],
     user_email: str = Depends(get_current_user),
 ) -> Assignment:
