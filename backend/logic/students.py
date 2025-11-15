@@ -29,7 +29,9 @@ def assert_not_student(user: User, course: Course, db: Session) -> None:
 
 
 def get_enrolled_students(course: Course, db: Session) -> list[User]:
-    """Get the list of students enrolled to the provided course."""
+    """Get the list of students enrolled to the provided course.
+    
+    Students are ordered by name, then by email."""
     return (
         db.query(User)
         .join(StudentAt, StudentAt.email == User.email)

@@ -19,11 +19,11 @@ class CourseSection(Base):
     __table_args__ = (
         UniqueConstraint(
             "course_id",
-            "section_order",
-            name="course_sections_course_id_section_order_key",
+            "order",
+            name="course_sections_course_id_order_key",
             deferrable=True,
             initially="DEFERRED"
         ),
         CheckConstraint("length(name) BETWEEN 3 AND 80"),
-        CheckConstraint("section_order >= 0"),
+        CheckConstraint("order >= 0"),
     )
