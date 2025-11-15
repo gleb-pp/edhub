@@ -22,8 +22,6 @@ services:
     depends_on:
       system_db:
         condition: service_healthy
-      filestorage_db:
-        condition: service_healthy
 
   frontend:
     build: ./frontend
@@ -42,4 +40,3 @@ services:
 
 volumes:
   edhub_system_storage:
-  edhub_filestorage_storage:
