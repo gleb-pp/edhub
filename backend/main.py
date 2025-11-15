@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import logic.users
 from auth import get_db
 
 import routers.assignments
@@ -59,6 +58,7 @@ app.add_middleware(
 
 
 # app startup
+# TODO
 @app.on_event("startup")
 async def startup_event():
     with get_db() as (conn, cur):

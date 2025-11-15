@@ -9,7 +9,6 @@ from models.assignments import (
     Assignment,
     AssignmentAttachmentMetadata
 )
-import logic.assignments
 
 
 router = APIRouter(

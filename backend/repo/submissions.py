@@ -1,6 +1,6 @@
 from sqlalchemy import Integer, DateTime, Text, CheckConstraint, ForeignKey, ForeignKeyConstraint
 from sqlalchemy.orm import Mapped, mapped_column
-from datetime import datetime
+from datetime import datetime, timezone
 
 from repo.base import Base
 
@@ -15,8 +15,8 @@ class AssignmentSubmission(Base):
     email: Mapped[str] = mapped_column(
         ForeignKey("users.email", ondelete="CASCADE"), primary_key=True
     )
-    timeadded: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    timemodified: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    timeadded: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now(tz=timezone.utc))
+    timemodified: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now(tz=timezone.utc))
     submissiontext: Mapped[str] = mapped_column(Text, nullable=False)
     grade: Mapped[int | None] = mapped_column(Integer)
     comment: Mapped[str | None] = mapped_column(Text)

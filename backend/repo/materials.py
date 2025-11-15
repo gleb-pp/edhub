@@ -1,6 +1,6 @@
 from sqlalchemy import Integer, DateTime, Text, CheckConstraint, ForeignKey, ForeignKeyConstraint
 from sqlalchemy.orm import Mapped, mapped_column
-from datetime import datetime
+from datetime import datetime, timezone
 
 from repo.base import Base
 
@@ -13,7 +13,7 @@ class CourseMaterial(Base):
     )
     material_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     section_id: Mapped[int] = mapped_column(Integer, nullable=False)
-    creation_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    creation_time: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now(tz=timezone.utc))
     author: Mapped[str | None] = mapped_column(
         ForeignKey("users.email", ondelete="SET NULL"), nullable=True
     )

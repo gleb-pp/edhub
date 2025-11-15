@@ -3,7 +3,7 @@ class SectionError(Exception):
 
 
 class SectionNotFoundError(SectionError):
-    """Exception raised when a sections is not found."""
+    """Exception raised when a section is not found."""
 
     def __init__(self, section_id: int, course_id: str) -> None:
         super().__init__(f"Section {section_id} does not exist in the course {course_id}.")

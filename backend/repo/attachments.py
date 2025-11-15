@@ -1,6 +1,6 @@
 from sqlalchemy import Integer, DateTime, Text, CheckConstraint, Uuid, ForeignKeyConstraint
 from sqlalchemy.orm import Mapped, mapped_column
-from datetime import datetime
+from datetime import datetime, timezone
 
 from repo.base import Base
 
@@ -12,7 +12,7 @@ class MaterialFile(Base):
     material_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     fileid: Mapped[str] = mapped_column(Uuid, primary_key=True)
     filename: Mapped[str] = mapped_column(Text, nullable=False)
-    uploadtime: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    uploadtime: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now(tz=timezone.utc))
 
     __table_args__ = (
         CheckConstraint("length(filename) <= 80"),
@@ -31,7 +31,7 @@ class AssignmentFile(Base):
     assignment_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     fileid: Mapped[str] = mapped_column(Uuid, primary_key=True)
     filename: Mapped[str] = mapped_column(Text, nullable=False)
-    uploadtime: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    uploadtime: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now(tz=timezone.utc))
 
     __table_args__ = (
         CheckConstraint("length(filename) <= 80"),
@@ -51,7 +51,7 @@ class SubmissionFile(Base):
     email: Mapped[str] = mapped_column(Text, primary_key=True)
     fileid: Mapped[str] = mapped_column(Uuid, primary_key=True)
     filename: Mapped[str] = mapped_column(Text, nullable=False)
-    uploadtime: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    uploadtime: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now(tz=timezone.utc))
 
     __table_args__ = (
         CheckConstraint("length(filename) <= 80"),
