@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Query, Depends, HTTPException
 from auth import get_current_user
-import logic.sections
 from models.common import Success
 from models.sections import CoursePost, SectionID, Section
 from typing import Annotated

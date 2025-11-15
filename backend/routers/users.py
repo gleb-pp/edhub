@@ -139,7 +139,7 @@ async def change_password(
         user = user_logic.get_user(user_new_password.email, db)
         user_logic.verify_password(user, user_new_password.password)
         user_logic.validate_password_lenght(user_new_password.new_password)
-        user_logic.change_password(user, user_new_password.new_password, db)
+        user_logic.change_password(user, user_new_password.new_password)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
@@ -184,7 +184,7 @@ async def remove_user(
     """
     try:
         user = user_logic.get_user(user_email, db)
-        user_logic.delete_user(user)
+        user_logic.delete_user(user, db)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:

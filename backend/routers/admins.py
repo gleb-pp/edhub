@@ -41,7 +41,7 @@ async def remove_user(
         user = user_logic.get_user(user_email, db)
         user_logic.assert_user_is_admin(user)
         deleted_user = user_logic.get_user(deleted_user_email, db)
-        user_logic.delete_user(deleted_user)
+        user_logic.delete_user(deleted_user, db)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
@@ -117,7 +117,7 @@ async def get_admins(
     """
     Get the list of platform administrators.
     """
-    admins = get_admins(db)
+    admins = user_logic.get_admins(db)
     return [User.model_validate(a) for a in admins]
 
 

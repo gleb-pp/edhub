@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
 from auth import get_current_user
-import logic.teachers
 from models.common import Success
 from models.users import User
 from typing import Annotated
@@ -143,7 +142,7 @@ async def change_course_instructor(
         course = course_logic.get_course(course_id, db)
         teacher_logic.assert_instructor_access(instructor, course, db)
         teacher = user_logic.get_user(teacher_email, db)
-        teacher_logic.assert_teacher_access(teacher_email, course, db)
+        teacher_logic.assert_teacher_access(teacher, course, db)
         teacher_logic.change_course_instructor(instructor, teacher, course, db)
         db.commit()
         return Success(success=True)

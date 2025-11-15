@@ -43,7 +43,7 @@ def get_all_courses(db: Session) -> list[Course]:
     return db.query(Course).all()
 
 
-def create_course(title: str, organization: str, user: User, db: Session) -> Course:
+def create_course(title: str, organization: str | None, user: User, db: Session) -> Course:
     """Create the course with the provided parameters."""
     course = Course(title=title, organization=organization, instructor=user.email)
     db.add(course)
