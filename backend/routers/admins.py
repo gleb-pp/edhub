@@ -3,6 +3,7 @@ from auth import get_current_user
 from logic import users as user_logic
 from logic import courses as course_logic
 from exceptions import users as user_errors
+import exceptions.admins as admin_errors
 from models.common import Success
 from models.users import User
 from models.courses import Course
@@ -52,8 +53,8 @@ async def remove_user(
         else:
             raise HTTPException(status_code=400, detail=str(e)) from e
     except (
-        user_errors.AdminRoleRequiredError,
-        user_errors.DeleteLastAdminError
+        admin_errors.AdminRoleRequiredError,
+        admin_errors.DeleteLastAdminError
     ) as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
 
@@ -83,7 +84,7 @@ async def give_admin_permissions(
             raise HTTPException(status_code=404, detail=str(e)) from e
         else:
             raise HTTPException(status_code=400, detail=str(e)) from e
-    except user_errors.AdminRoleRequiredError as e:
+    except admin_errors.AdminRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
@@ -106,7 +107,7 @@ async def get_all_users(
         return [User.model_validate(u) for u in users]
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
-    except user_errors.AdminRoleRequiredError as e:
+    except admin_errors.AdminRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
@@ -140,5 +141,5 @@ async def get_all_courses(
         return [Course.model_validate(c) for c in courses]
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
-    except user_errors.AdminRoleRequiredError as e:
+    except admin_errors.AdminRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e

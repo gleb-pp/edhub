@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from auth import get_db
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+from db import create_tables, create_default_admin_account
 
 import routers.assignments
 import routers.submissions
@@ -57,9 +59,9 @@ app.add_middleware(
 )
 
 
-# app startup
-# TODO
-@app.on_event("startup")
-async def startup_event():
-    with get_db() as (conn, cur):
-        await logic.users.create_admin_account_if_not_exists(conn, cur)
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    """Create database tables on application startup."""
+    create_tables()
+    create_default_admin_account()
+    yield

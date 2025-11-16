@@ -43,17 +43,3 @@ class InvalidPasswordError(UserError):
 
     def __init__(self) -> None:
         super().__init__("Invalid password.")
-
-
-class AdminRoleRequiredError(UserError):
-    """Exception raised when the user does not have the admin role."""
-
-    def __init__(self, user_email: str) -> None:
-        super().__init__(f"User {user_email} is not the admin.")
-
-
-class DeleteLastAdminError(UserError):
-    """Exception raised when trying to delete the last administrator."""
-
-    def __init__(self) -> None:
-        super().__init__(f"Cannot remove user the only administrator.")

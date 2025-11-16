@@ -10,6 +10,7 @@ from logic import (
 from exceptions import (
     users as user_errors,
     courses as course_errors,
+    admins as admin_errors
 )
 from models.common import Success
 from models.courses import CourseID
@@ -191,5 +192,5 @@ async def remove_user(
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
-    except user_errors.DeleteLastAdminError as e:
+    except admin_errors.DeleteLastAdminError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e

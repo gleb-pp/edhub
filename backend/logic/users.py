@@ -1,6 +1,7 @@
 from regex import match, search
 from settings.user import user_settings
 from exceptions import users as user_errors
+import exceptions.admins as admin_errors
 from sqlalchemy.orm import Session
 from repo.users import User
 from repo.courses import Course
@@ -100,7 +101,7 @@ def delete_user(user: User, db: Session) -> None:
     """Delete user from the system."""
     admins = get_admins(db)
     if len(admins) == 1 and admins[0].email == user.email:
-        raise user_errors.DeleteLastAdminError
+        raise admin_errors.DeleteLastAdminError
 
     db.delete(user)
 
@@ -108,7 +109,7 @@ def delete_user(user: User, db: Session) -> None:
 def assert_user_is_admin(user: User) -> None:
     """Check whether the user with provided email has admin role."""
     if not user.is_admin:
-        raise user_errors.AdminRoleRequiredError(user.email)
+        raise admin_errors.AdminRoleRequiredError(user.email)
 
 
 def give_admin_permissions(user: User) -> None:
