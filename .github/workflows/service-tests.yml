@@ -35,20 +35,6 @@ jobs:
           echo "system_db failed to start"
           exit 1
 
-      - name: Check filestorage_db health  
-        run: |
-          echo "Waiting for filestorage_db to be ready..."
-          for i in {1..30}; do
-            if docker compose exec filestorage_db pg_isready -U postgres; then
-              echo "filestorage_db is ready!"
-              exit 0
-            fi
-            echo "Waiting for filestorage_db... ($i/30)"
-            sleep 2
-          done
-          echo "filestorage_db failed to start"
-          exit 1
-
       - name: Check backend health
         run: |
           for i in {1..30}; do
