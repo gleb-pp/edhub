@@ -17,9 +17,6 @@ jobs:
       - name: Create Docker network
         run: docker network create edhub-network
 
-      - name: Build system_db
-        run: docker build -t edhub-system-db ./database/system
-
       - name: Build backend
         run: docker build -t edhub-backend ./backend
 
@@ -31,7 +28,7 @@ jobs:
             -e POSTGRES_USER=postgres \
             -e POSTGRES_PASSWORD=12345678 \
             -e POSTGRES_DB=edhub \
-            edhub-system-db
+            postgres:16
 
       - name: Wait for system_db to be ready
         run: |
@@ -105,7 +102,7 @@ jobs:
             -e POSTGRES_USER=postgres \
             -e POSTGRES_PASSWORD=12345678 \
             -e POSTGRES_DB=edhub \
-            edhub-system-db
+            postgres:16
 
       - name: Wait for system_db to be ready
         run: |
