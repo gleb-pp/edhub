@@ -11,6 +11,8 @@ import logic.teachers as teacher_logic
 import exceptions.teachers as teacher_errors
 import exceptions.courses as course_errors
 import exceptions.users as user_errors
+import logic.personalization as personalization_logic
+import logic.sections as section_logic
 
 
 router = APIRouter(
@@ -68,6 +70,8 @@ async def create_course(
     try:
         user = user_logic.get_user(user_email, db)
         course = course_logic.create_course(title, organization, user, db)
+        personalization_logic.add_course_participant(course, user, db)
+        section_logic.create_section("General", course, db)
         db.commit()
         return CourseID.model_validate(course)
     except user_errors.UserNotFoundError as e:

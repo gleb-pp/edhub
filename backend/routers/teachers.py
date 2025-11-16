@@ -13,6 +13,7 @@ import logic.teachers as teacher_logic
 import exceptions.teachers as teacher_errors
 import logic.students as student_logic
 import logic.parents as parent_logic
+import logic.personalization as personalization_logic
 
 
 router = APIRouter(
@@ -70,6 +71,7 @@ async def invite_teacher(
         student_logic.assert_not_student(new_teacher, course, db)
         parent_logic.assert_not_parent(new_teacher, course, db)
         teacher_logic.invite_teacher(new_teacher, course, db)
+        personalization_logic.add_course_participant(course, new_teacher, db)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
@@ -108,6 +110,7 @@ async def remove_teacher(
         teacher = user_logic.get_user(teacher_email, db)
         teacher_logic.assert_teacher_access(teacher, course, db)
         teacher_logic.remove_teacher(teacher, course, db)
+        personalization_logic.remove_course_participant(course, teacher, db)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:

@@ -60,6 +60,18 @@ def invite_parent(parent: User, student: User, course: Course, db: Session) -> N
     db.add(parent_of)
 
 
+def remove_parent(parent: User, student: User, course: Course, db: Session) -> None:
+    """Remove the provided parent from observing the provided student within the provided course."""
+    db.delete(
+        db.query(ParentAt).filter(
+            ParentAt.parent_email == parent.email,
+            ParentAt.student_email == student.email,
+            ParentAt.course_id == course.course_id
+        ).first()
+    )
+    db.flush()
+
+
 def get_students_parents(student: User, course: Course, db: Session) -> list[User]:
     """Get the list of parents observing the provided student within the provided course."""
     return (
