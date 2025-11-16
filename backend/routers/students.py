@@ -100,6 +100,8 @@ async def remove_student(
     """
     Remove the student with provided email from the course with provided course_id.
 
+    All the student's submissions will be deleted.
+
     Teacher OR Primary Instructor role required.
     """
     try:

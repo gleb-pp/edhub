@@ -28,37 +28,38 @@ async def get_students_parents(
     course_id: str,
     student_email: str,
     db: Annotated[Session, Depends(get_db)],
-    teacher_email: str = Depends(get_current_user)
+    user_email: str = Depends(get_current_user)
 ) -> list[User]:
     """
     Get the list of parents observing the student with provided email on course with provided course_id.
 
-    Teacher OR Primary Instructor role required.
+    - Teacher OR Primary Instructor can get the list of parents for all students
+    - Parent can get the list of parents for their children
+    - Student can get the list of their parents
     """
     try:
-        teacher = user_logic.get_user(teacher_email, db)
+        user = user_logic.get_user(user_email, db)
         course = course_logic.get_course(course_id, db)
-        teacher_logic.assert_teacher_access(teacher, course, db)
         student = user_logic.get_user(student_email, db)
-        student_logic.assert_student_access(student, course, db)
+        student_logic.assert_access_to_student(student, user, course, db)
         parents = parent_logic.get_students_parents(student, course, db)
         return [User.model_validate(par) for par in parents]
     except user_errors.UserNotFoundError as e:
-        if e.email == teacher_email:
+        if e.email == user_email:
             raise HTTPException(status_code=401, detail=str(e)) from e
-        elif e.email == student_email:
-            raise HTTPException(status_code=404, detail=str(e)) from e
         else:
             raise HTTPException(status_code=400, detail=str(e)) from e
-    except course_errors.CourseNotFoundError as e:
+    except (
+        course_errors.CourseNotFoundError,
+        student_errors.StudentRoleRequired
+     ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
-    except teacher_errors.TeacherRoleRequired as e:
+    except (
+        course_errors.ParticipantRoleRequired,
+        student_errors.NoAccessToStudentInfo,
+    ) as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
-    except student_errors.StudentRoleRequired as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
 
-
-# TODO: get_my_parents
 
 @router.post("{course_id}/parents/{student_email}")
 async def invite_parent(
@@ -126,7 +127,7 @@ async def remove_parent(
         student_logic.assert_student_access(student, course, db)
         parent = user_logic.get_user(parent_email, db)
         parent_logic.assert_parent_of_student(parent, student, course, db)
-        parent_logic.remove_parent(parent, student, course, db)
+        parent_logic.remove_parent_student(parent, student, course, db)
         if not parent_logic.check_parent_access(parent, course, db):
             personalization_logic.remove_course_participant(course, parent, db)
         db.commit()
@@ -150,25 +151,25 @@ async def get_parents_children(
     course_id: str,
     parent_email: str,
     db: Annotated[Session, Depends(get_db)],
-    teacher_email: str = Depends(get_current_user)
+    user_email: str = Depends(get_current_user)
 ) -> list[User]:
     """
     Get the list of students for the parent with provided email on course with provided course_id.
 
     Returns email and name for each child.
 
-    Teacher OR Primary Instructor role required.
+    - Teacher OR Primary Instructor can get the list of children for all parents
+    - Parent can get the list of their children
     """
     try:
-        teacher = user_logic.get_user(teacher_email, db)
+        user = user_logic.get_user(user_email, db)
         course = course_logic.get_course(course_id, db)
-        teacher_logic.assert_teacher_access(teacher, course, db)
         parent = user_logic.get_user(parent_email, db)
-        parent_logic.assert_parent_access(parent, course, db)
+        parent_logic.assert_access_to_parent(parent, user, course, db)
         students = parent_logic.get_parents_children(parent, course, db)
         return [User.model_validate(st) for st in students]
     except user_errors.UserNotFoundError as e:
-        if e.email == teacher_email:
+        if e.email == user_email:
             raise HTTPException(status_code=401, detail=str(e)) from e
         else:
             raise HTTPException(status_code=400, detail=str(e)) from e
@@ -177,8 +178,8 @@ async def get_parents_children(
         parent_errors.ParentRoleRequired
      ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
-    except teacher_errors.TeacherRoleRequired as e:
+    except (
+        course_errors.ParticipantRoleRequired,
+        parent_errors.NoAccessToParentInfo,
+    ) as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
-
-
-# TODO: get_my_children

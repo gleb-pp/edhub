@@ -25,6 +25,11 @@ class AssignmentSubmission(Base):
             ["course_assignments.course_id", "course_assignments.assignment_id"],
             ondelete="CASCADE",
         ),
+        ForeignKeyConstraint(
+            ["email", "course_id"],
+            ["student_at.email", "student_at.course_id"],
+            ondelete="CASCADE",
+        ),
         CheckConstraint("timemodified >= timeadded"),
         CheckConstraint("length(submissiontext) BETWEEN 3 AND 10000"),
     )

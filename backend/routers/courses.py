@@ -13,6 +13,8 @@ import exceptions.courses as course_errors
 import exceptions.users as user_errors
 import logic.personalization as personalization_logic
 import logic.sections as section_logic
+import logic.students as student_logic
+import logic.parents as parent_logic
 
 
 router = APIRouter(
@@ -130,3 +132,45 @@ async def get_course_info(
         raise HTTPException(status_code=403, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@router.post("/{course_id}/exit")
+async def exit_course(
+    course_id: str,
+    db: Annotated[Session, Depends(get_db)],
+    user_email: str = Depends(get_current_user)
+) -> Success:
+    """
+    Remove user from the course with provided course_id.
+
+    If the user is student, all their submissions will be deleted.
+
+    Course role (Primary Instructor, Teacher, Student, Parent) required.
+    """
+    try:
+        user = user_logic.get_user(user_email, db)
+        course = course_logic.get_course(course_id, db)
+        if student_logic.check_student_access(user, course, db):
+            student_logic.remove_student(user, course, db)
+            db.commit()
+            return Success(success=True)
+        if teacher_logic.check_teacher_access(user, course, db):
+            teacher_logic.remove_teacher(user, course, db)
+            db.commit()
+            return Success(success=True)
+        if parent_logic.check_parent_access(user, course, db):
+            parent_logic.remove_parent(user, course, db)
+            db.commit()
+            return Success(success=True)
+        if teacher_logic.check_instructor_access(user, course, db):
+            raise teacher_errors.DeleteInstructorError(user.email, course.course_id)
+        raise course_errors.ParticipantRoleRequired(user.email, course_id)
+    except user_errors.UserNotFoundError as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
+    except course_errors.CourseNotFoundError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except (
+        teacher_errors.DeleteInstructorError,
+        course_errors.ParticipantRoleRequired
+    ):
+        raise HTTPException(status_code=403, detail=str(e)) from e

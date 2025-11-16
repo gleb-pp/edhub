@@ -26,3 +26,10 @@ class TeacherRoleConflict(TeacherError, RoleConflict):
 
     def __init__(self, email: str, course_id: str) -> None:
         super().__init__(f"User {email} is already teacher at the course {course_id}.")
+
+
+class DeleteInstructorError(TeacherError):
+    """Exception raised when trying to delete the course instuctor."""
+
+    def __init__(self, email: str, course_id: str) -> None:
+        super().__init__(f"User {email} can't exit the course {course_id} since they are the primary instructor.")

@@ -140,6 +140,7 @@ async def get_submission(
             raise HTTPException(status_code=400, detail=str(e)) from e
     except (
         course_errors.CourseNotFoundError,
+        student_errors.StudentRoleRequired,
         assignment_errors.AssignmentNotFoundError
     ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -147,7 +148,6 @@ async def get_submission(
         raise HTTPException(status_code=404, detail=str(e)) from e
     except (
         course_errors.ParticipantRoleRequired,
-        student_errors.StudentRoleRequired,
         student_errors.NoAccessToStudentInfo,
     ) as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
