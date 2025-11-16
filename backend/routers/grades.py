@@ -54,7 +54,8 @@ async def grade_submission(
     try:
         teacher = user_logic.get_user(teacher_email, db)
         course = course_logic.get_course(course_id, db)
-        teacher_logic.assert_teacher_access(teacher, course, db)
+        if not teacher.isadmin:
+            teacher_logic.assert_teacher_access(teacher, course, db)
         student = user_logic.get_user(student_email, db)
         student_logic.assert_student_access(student, course, db)
         assignment = assignment_logic.get_assignment(course, assignment_id, db)

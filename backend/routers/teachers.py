@@ -39,7 +39,8 @@ async def get_course_teachers(
     try:
         user = user_logic.get_user(user_email, db)
         course = course_logic.get_course(course_id, db)
-        course_logic.assert_course_access(user, course, db)
+        if not user.isadmin:
+            course_logic.assert_course_access(user, course, db)
         teachers = teacher_logic.get_course_teachers(course, db)
         return [User.model_validate(tchr) for tchr in teachers]
     except user_errors.UserNotFoundError as e:
@@ -65,7 +66,8 @@ async def invite_teacher(
     try:
         teacher = user_logic.get_user(teacher_email, db)
         course = course_logic.get_course(course_id, db)
-        teacher_logic.assert_instructor_access(teacher, course, db)
+        if not teacher.isadmin:
+            teacher_logic.assert_instructor_access(teacher, course, db)
         new_teacher = user_logic.get_user(new_teacher_email, db)
         teacher_logic.assert_not_teacher(new_teacher, course, db)
         student_logic.assert_not_student(new_teacher, course, db)
@@ -106,7 +108,10 @@ async def remove_teacher(
     try:
         instructor = user_logic.get_user(instructor_email, db)
         course = course_logic.get_course(course_id, db)
-        teacher_logic.assert_instructor_access(instructor, course, db)
+        if instructor.isadmin:
+            instructor = user_logic.get_user(course.instructor, db)
+        else:
+            teacher_logic.assert_instructor_access(instructor, course, db)
         teacher = user_logic.get_user(teacher_email, db)
         teacher_logic.assert_teacher_access(teacher, course, db)
         teacher_logic.remove_teacher(teacher, course, db)
@@ -116,8 +121,6 @@ async def remove_teacher(
     except user_errors.UserNotFoundError as e:
         if e.email == instructor_email:
             raise HTTPException(status_code=401, detail=str(e)) from e
-        elif e.email == teacher_email:
-            raise HTTPException(status_code=404, detail=str(e)) from e
         else:
             raise HTTPException(status_code=400, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:

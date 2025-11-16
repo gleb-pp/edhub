@@ -93,7 +93,8 @@ async def get_assignment_submissions(
     try:
         teacher = user_logic.get_user(teacher_email, db)
         course = course_logic.get_course(course_id, db)
-        teacher_logic.assert_teacher_access(teacher, course, db)
+        if not teacher.isadmin:
+            teacher_logic.assert_teacher_access(teacher, course, db)
         assignment = assignment_logic.get_assignment(course, assignment_id, db)
         submissions = submission_logic.get_assignment_submissions(assignment, db)
         return [Submission.model_validate(sub) for sub in submissions]

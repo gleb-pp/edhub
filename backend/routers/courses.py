@@ -97,7 +97,8 @@ async def delete_course(
     try:
         user = user_logic.get_user(user_email, db)
         course = course_logic.get_course(course_id, db)
-        teacher_logic.assert_instructor_access(user, course, db)
+        if not user.isadmin:
+            teacher_logic.assert_instructor_access(user, course, db)
         course_logic.delete_course(course, db)
         db.commit()
         return Success(success=True)
@@ -125,7 +126,8 @@ async def get_course_info(
     try:
         user = user_logic.get_user(user_email, db)
         course = course_logic.get_course(course_id, db)
-        course_logic.assert_course_access(user, course, db)
+        if not user.isadmin:
+            course_logic.assert_course_access(user, course, db)
         return Course.model_validate(course)
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e

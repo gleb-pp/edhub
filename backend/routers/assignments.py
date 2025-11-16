@@ -64,7 +64,8 @@ async def create_assignment(
     try:
         teacher = user_logic.get_user(teacher_email, db)
         course = course_logic.get_course(course_id, db)
-        teacher_logic.assert_teacher_access(teacher, course, db)
+        if not teacher.isadmin:
+            teacher_logic.assert_teacher_access(teacher, course, db)
         section = section_logic.get_section(course, section_id, db)
         assignment = assignment_logic.create_assignment(section, title, description, teacher, db)
         db.commit()
@@ -95,7 +96,8 @@ async def remove_assignment(
     try:
         teacher = user_logic.get_user(teacher_email, db)
         course = course_logic.get_course(course_id, db)
-        teacher_logic.assert_teacher_access(teacher, course, db)
+        if not teacher.isadmin:
+            teacher_logic.assert_teacher_access(teacher, course, db)
         assignment = assignment_logic.get_assignment(course, assignment_id, db)
         assignment_logic.delete_assignment(assignment, db)
         db.commit()
@@ -132,7 +134,8 @@ async def get_assignment(
     try:
         user = user_logic.get_user(user_email, db)
         course = course_logic.get_course(course_id, db)
-        course_logic.assert_course_access(user, course, db)
+        if not user.isadmin:
+            course_logic.assert_course_access(user, course, db)
         assignment = assignment_logic.get_assignment(course, assignment_id, db)
         return Assignment.model_validate(assignment)
     except user_errors.UserNotFoundError as e:
@@ -166,7 +169,8 @@ async def get_course_assignments(
     try:
         user = user_logic.get_user(user_email, db)
         course = course_logic.get_course(course_id, db)
-        course_logic.assert_course_access(user, course, db)
+        if not user.isadmin:
+            course_logic.assert_course_access(user, course, db)
         assignments = assignment_logic.get_course_assignments(course, db)
         return [Assignment.model_validate(ass) for ass in assignments]
     except user_errors.UserNotFoundError as e:

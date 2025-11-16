@@ -117,6 +117,7 @@ def assert_access_to_parent(parent: User, user: User, course: Course, db: Sessio
     assert_parent_access(parent, course, db)
     if not (
         teacher_logic.check_teacher_access(user, course, db) or
-        user.email == parent.email
+        user.email == parent.email or
+        user.isadmin
     ):
         raise parent_errors.NoAccessToParentInfo(parent.email, user.email, course.id)

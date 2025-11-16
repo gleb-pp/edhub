@@ -60,7 +60,8 @@ async def create_material(
     try:
         teacher = user_logic.get_user(teacher_email, db)
         course = course_logic.get_course(course_id, db)
-        teacher_logic.assert_teacher_access(teacher, course, db)
+        if not teacher.isadmin:
+            teacher_logic.assert_teacher_access(teacher, course, db)
         section = section_logic.get_section(course, section_id, db)
         material = material_logic.create_material(section, title, description, teacher, db)
         db.commit()
@@ -91,7 +92,8 @@ async def remove_material(
     try:
         teacher = user_logic.get_user(teacher_email, db)
         course = course_logic.get_course(course_id, db)
-        teacher_logic.assert_teacher_access(teacher, course, db)
+        if not teacher.isadmin:
+            teacher_logic.assert_teacher_access(teacher, course, db)
         material = material_logic.get_material(course, material_id, db)
         material_logic.delete_material(material, db)
         db.commit()
@@ -128,7 +130,8 @@ async def get_material(
     try:
         user = user_logic.get_user(user_email, db)
         course = course_logic.get_course(course_id, db)
-        course_logic.assert_course_access(user, course, db)
+        if not user.isadmin:
+            course_logic.assert_course_access(user, course, db)
         material = material_logic.get_material(course, material_id, db)
         return Material.model_validate(material)
     except user_errors.UserNotFoundError as e:

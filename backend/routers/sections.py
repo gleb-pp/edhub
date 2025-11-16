@@ -42,7 +42,8 @@ async def get_course_sections(
     try:
         user = user_logic.get_user(user_email, db)
         course = course_logic.get_course(course_id, db)
-        course_logic.assert_course_access(user, course, db)
+        if not user.isadmin:
+            course_logic.assert_course_access(user, course, db)
         sections = section_logic.get_course_sections(course, db)
         return [Section.model_validate(sec) for sec in sections]
     except user_errors.UserNotFoundError as e:
@@ -74,7 +75,8 @@ async def get_section_feed(
     try:
         user = user_logic.get_user(user_email, db)
         course = course_logic.get_course(course_id, db)
-        course_logic.assert_course_access(user, course, db)
+        if not user.isadmin:
+            course_logic.assert_course_access(user, course, db)
         section = section_logic.get_section(course, section_id, db)
         materials = material_logic.get_section_materials(section, db)
         materials_posts = [{
@@ -132,7 +134,8 @@ async def create_section(
     try:
         teacher = user_logic.get_user(teacher_email, db)
         course = course_logic.get_course(course_id, db)
-        teacher_logic.assert_teacher_access(teacher, course, db)
+        if not teacher.isadmin:
+            teacher_logic.assert_teacher_access(teacher, course, db)
         section = section_logic.create_section(title, course, db)
         db.commit()
         return SectionID.model_validate(section)
@@ -161,7 +164,8 @@ async def change_section_order(
     try:
         teacher = user_logic.get_user(teacher_email, db)
         course = course_logic.get_course(course_id, db)
-        teacher_logic.assert_teacher_access(teacher, course, db)
+        if not teacher.isadmin:
+            teacher_logic.assert_teacher_access(teacher, course, db)
         section_logic.change_section_order(course, new_order, db)
         db.commit()
         return Success(success=True)
@@ -196,7 +200,8 @@ async def remove_section(
     try:
         teacher = user_logic.get_user(teacher_email, db)
         course = course_logic.get_course(course_id, db)
-        teacher_logic.assert_teacher_access(teacher, course, db)
+        if not teacher.isadmin:
+            teacher_logic.assert_teacher_access(teacher, course, db)
         section = section_logic.get_section(course, section_id, db)
         section_logic.remove_section(section, db)
         db.commit()

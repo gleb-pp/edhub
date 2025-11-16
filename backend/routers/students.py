@@ -40,7 +40,8 @@ async def get_enrolled_students(
     try:
         user = user_logic.get_user(user_email, db)
         course = course_logic.get_course(course_id, db)
-        course_logic.assert_course_access(user, course, db)
+        if not user.isadmin:
+            course_logic.assert_course_access(user, course, db)
         students = student_logic.get_enrolled_students(course, db)
         return [User.model_validate(st) for st in students]
     except user_errors.UserNotFoundError as e:
@@ -66,7 +67,8 @@ async def invite_student(
     try:
         teacher = user_logic.get_user(teacher_email, db)
         course = course_logic.get_course(course_id, db)
-        teacher_logic.assert_teacher_access(teacher, course, db)
+        if not teacher.isadmin:
+            teacher_logic.assert_teacher_access(teacher, course, db)
         student = user_logic.get_user(student_email, db)
         student_logic.assert_not_student(student, course, db)
         teacher_logic.assert_not_teacher(student, course, db)
@@ -107,7 +109,8 @@ async def remove_student(
     try:
         teacher = user_logic.get_user(teacher_email, db)
         course = course_logic.get_course(course_id, db)
-        teacher_logic.assert_teacher_access(teacher, course, db)
+        if not teacher.isadmin:
+            teacher_logic.assert_teacher_access(teacher, course, db)
         student = user_logic.get_user(student_email, db)
         student_logic.assert_student_access(student, course, db)
         student_logic.remove_student(student, course, db)

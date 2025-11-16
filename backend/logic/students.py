@@ -67,6 +67,7 @@ def assert_access_to_student(student: User, user: User, course: Course, db: Sess
     if not (
         teacher_logic.check_teacher_access(user, course, db) or
         user.email == student.email or
-        parent_logic.check_parent_of_student(user, student, course, db)
+        parent_logic.check_parent_of_student(user, student, course, db) or
+        user.isadmin
     ):
         raise student_errors.NoAccessToStudentInfo(student.email, user.email, course.id)
