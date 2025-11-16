@@ -1,6 +1,7 @@
 from sqlalchemy import Integer, DateTime, Text, CheckConstraint, ForeignKey, ForeignKeyConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime, timezone
+from settings.submissions import submission_settings
 
 from repo.base import Base
 
@@ -31,5 +32,5 @@ class AssignmentSubmission(Base):
             ondelete="CASCADE",
         ),
         CheckConstraint("timemodified >= timeadded"),
-        CheckConstraint("length(submissiontext) BETWEEN 3 AND 10000"),
+        CheckConstraint(f"length(submission_text) BETWEEN {submission_settings.submission_text_min_length} AND {submission_settings.submission_text_max_length}"),
     )

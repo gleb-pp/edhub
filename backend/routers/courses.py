@@ -15,6 +15,7 @@ import logic.personalization as personalization_logic
 import logic.sections as section_logic
 import logic.students as student_logic
 import logic.parents as parent_logic
+from settings.course import course_settings
 
 
 router = APIRouter(
@@ -46,17 +47,17 @@ async def create_course(
     db: Annotated[Session, Depends(get_db)],
     title: str = Query(
         ...,
-        min_length=3,
-        max_length=80,
+        min_length=course_settings.course_name_min_lenght,
+        max_length=course_settings.course_name_max_lenght,
         pattern=r"^[\p{L}0-9_ ]+$",
-        description="Title can contain only letters, digits, spaces, and underscores, 3-80 symbols"
+        description=f"Title can contain only letters, digits, spaces, and underscores, {course_settings.course_name_min_lenght}-{course_settings.course_name_max_lenght} symbols"
     ),
     organization: str | None = Query(
         None,
-        min_length=3,
-        max_length=80,
+        min_length=course_settings.course_organization_min_lenght,
+        max_length=course_settings.course_organization_max_lenght,
         pattern=r"^[\p{L}0-9_ ]+$",
-        description="Organization can contain only letters, digits, spaces, and underscores, 3-80 symbols"
+        description=f"Organization can contain only letters, digits, spaces, and underscores, {course_settings.course_organization_min_lenght}-{course_settings.course_organization_max_lenght} symbols"
     ),
     user_email: str = Depends(get_current_user),
 ) -> CourseID:

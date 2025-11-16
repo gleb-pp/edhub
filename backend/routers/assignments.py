@@ -19,6 +19,7 @@ import logic.teachers as teacher_logic
 import exceptions.teachers as teacher_errors
 import logic.assignments as assignment_logic
 import exceptions.assignments as assignment_errors
+from settings.assignments import assignment_settings
 
 
 router = APIRouter(
@@ -34,16 +35,16 @@ async def create_assignment(
     db: Annotated[Session, Depends(get_db)],
     title: str = Query(
         ...,
-        min_length=3,
-        max_length=80,
+        min_length=assignment_settings.name_min_lenght,
+        max_length=assignment_settings.name_max_lenght,
         pattern=r"^[\p{L}0-9_ ]+$",
-        description="Title can contain only letters, digits, spaces, and underscores, 3-80 symbols"
+        description=f"Title can contain only letters, digits, spaces, and underscores, {assignment_settings.name_min_lenght}-{assignment_settings.name_max_lenght} symbols"
     ),
     description: str = Query(
         ...,
-        min_length=3,
-        max_length=10000,
-        description="Description must contain 3-10000 symbols"
+        min_length=assignment_settings.description_min_lenght,
+        max_length=assignment_settings.description_max_lenght,
+        description=f"Description must contain {assignment_settings.description_min_lenght}-{assignment_settings.description_max_lenght} symbols"
     ),
     teacher_email: str = Depends(get_current_user),
 ) -> AssignmentID:

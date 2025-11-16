@@ -18,6 +18,7 @@ import exceptions.assignments as assignment_errors
 import logic.submissions as submission_logic
 import exceptions.submissions as submission_errors
 import logic.grades as grade_logic
+from settings.submissions import submission_settings
 
 
 router = APIRouter(
@@ -35,9 +36,9 @@ async def grade_submission(
     db: Annotated[Session, Depends(get_db)],
     comment: str | None = Query(
         None,
-        min_length=3,
-        max_length=10000,
-        description="Comment must contain 3-10000 symbols"
+        min_length=submission_settings.grade_comment_min_lenght,
+        max_length=submission_settings.grade_comment_max_lenght,
+        description=f"Comment must contain {submission_settings.grade_comment_min_lenght}-{submission_settings.grade_comment_max_lenght} symbols"
     ),
     teacher_email: str = Depends(get_current_user),
 ) -> Success:

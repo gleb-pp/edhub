@@ -1,7 +1,7 @@
 from sqlalchemy import Integer, CheckConstraint, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 from repo.base import Base
-from settings.personalization import personalization_settings
+from settings.course import course_settings
 
 
 class PersonalCourseInfo(Base):
@@ -24,6 +24,6 @@ class PersonalCourseInfo(Base):
             deferrable=True,
             initially="DEFERRED"
         ),
-        CheckConstraint(f"emojiid IS NULL OR (emojiid BETWEEN 0 AND {personalization_settings.emoji_count - 1})"),
+        CheckConstraint(f"emojiid IS NULL OR (emojiid BETWEEN 0 AND {course_settings.emoji_count - 1})"),
         CheckConstraint("course_order >= 0"),
     )

@@ -12,7 +12,7 @@ import logic.courses as course_logic
 import exceptions.courses as course_errors
 import logic.personalization as personalization_logic
 import exceptions.personalization as personalization_errors
-from settings.personalization import personalization_settings
+from settings.course import course_settings
 
 
 router = APIRouter(
@@ -70,7 +70,7 @@ async def change_courses_order(
 async def set_course_emoji(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
-    emoji_id: int | None = Query(None, ge=0, le=(personalization_settings.emoji_count - 1)),
+    emoji_id: int | None = Query(None, ge=0, le=(course_settings.emoji_count - 1)),
     user_email: str = Depends(get_current_user)
 ) -> Success:
     """

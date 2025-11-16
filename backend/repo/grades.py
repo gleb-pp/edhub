@@ -1,6 +1,7 @@
 from sqlalchemy import Integer, DateTime, Text, CheckConstraint, ForeignKey, ForeignKeyConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime, timezone
+from settings.submissions import submission_settings
 
 from repo.base import Base
 
@@ -28,5 +29,5 @@ class Grade(Base):
             ["course_assignments_submissions.course_id", "course_assignments_submissions.assignment_id", "course_assignments_submissions.email"],
             ondelete="CASCADE",
         ),
-        CheckConstraint("comment IS NULL OR length(comment) BETWEEN 3 AND 10000"),
+        CheckConstraint(f"comment IS NULL OR length(comment) BETWEEN {submission_settings.grade_comment_min_lenght} AND {submission_settings.grade_comment_max_lenght}"),
     )

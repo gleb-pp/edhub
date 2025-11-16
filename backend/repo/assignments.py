@@ -1,6 +1,7 @@
 from sqlalchemy import Integer, DateTime, Text, CheckConstraint, ForeignKey, ForeignKeyConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime, timezone
+from settings.assignments import assignment_settings
 
 from repo.base import Base
 
@@ -26,6 +27,6 @@ class CourseAssignment(Base):
             ["course_sections.course_id", "course_sections.section_id"],
             ondelete="CASCADE",
         ),
-        CheckConstraint("length(title) BETWEEN 3 AND 80"),
-        CheckConstraint("length(description) BETWEEN 3 AND 10000"),
+        CheckConstraint(f"length(title) BETWEEN {assignment_settings.name_min_lenght} AND {assignment_settings.name_max_lenght}"),
+        CheckConstraint(f"length(description) BETWEEN {assignment_settings.description_min_lenght} AND {assignment_settings.description_max_lenght}"),
     )

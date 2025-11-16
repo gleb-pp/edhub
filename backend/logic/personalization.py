@@ -2,7 +2,7 @@ from repo.courses import Course
 from repo.users import User
 from sqlalchemy.orm import Session
 from repo.personalization import PersonalCourseInfo
-from settings.personalization import personalization_settings
+from settings.course import course_settings
 from random import randint
 from sqlalchemy import func
 import exceptions.courses as course_errors
@@ -18,7 +18,7 @@ def add_course_participant(course: Course, user: User, db: Session) -> None:
     personal_info = PersonalCourseInfo(
         course_id=course.course_id, 
         email=user.email,
-        emoji_id=randint(0, personalization_settings.emoji_count - 1),
+        emoji_id=randint(0, course_settings.emoji_count - 1),
         course_order=new_order
     )
     db.add(personal_info)

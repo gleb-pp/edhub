@@ -1,5 +1,6 @@
 from sqlalchemy import Integer, Text, CheckConstraint, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
+from settings.sections import section_settings
 
 from repo.base import Base
 
@@ -24,6 +25,6 @@ class CourseSection(Base):
             deferrable=True,
             initially="DEFERRED"
         ),
-        CheckConstraint("length(name) BETWEEN 3 AND 80"),
+        CheckConstraint(f"length(title) BETWEEN {section_settings.name_min_lenght} AND {section_settings.name_max_lenght}"),
         CheckConstraint("order >= 0"),
     )

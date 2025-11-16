@@ -2,6 +2,7 @@ from sqlalchemy import DateTime, Text, CheckConstraint, ForeignKey, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 from uuid import uuid4
 from datetime import datetime, timezone
+from settings.course import course_settings
 
 from repo.base import Base
 
@@ -20,6 +21,6 @@ class Course(Base):
     creation_time: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now(tz=timezone.utc))
 
     __table_args__ = (
-        CheckConstraint("length(title) BETWEEN 3 AND 80"),
-        CheckConstraint("organization IS NULL OR length(organization) BETWEEN 3 AND 80"),
+        CheckConstraint(f"length(title) BETWEEN {course_settings.course_name_min_lenght} AND {course_settings.course_name_max_lenght}"),
+        CheckConstraint(f"organization IS NULL OR length(organization) BETWEEN {course_settings.course_organization_min_lenght} AND {course_settings.course_organization_max_lenght}"),
     )

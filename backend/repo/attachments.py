@@ -1,6 +1,7 @@
 from sqlalchemy import Integer, DateTime, Text, CheckConstraint, Uuid, ForeignKeyConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime, timezone
+from settings.course import course_settings
 
 from repo.base import Base
 
@@ -15,7 +16,7 @@ class MaterialFile(Base):
     uploadtime: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now(tz=timezone.utc))
 
     __table_args__ = (
-        CheckConstraint("length(filename) <= 80"),
+        CheckConstraint(f"length(filename) <= {course_settings.filename_max_lenght}"),
         ForeignKeyConstraint(
             ["course_id", "material_id"],
             ["course_materials.course_id", "course_materials.material_id"],
@@ -34,7 +35,7 @@ class AssignmentFile(Base):
     uploadtime: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now(tz=timezone.utc))
 
     __table_args__ = (
-        CheckConstraint("length(filename) <= 80"),
+        CheckConstraint(f"length(filename) <= {course_settings.filename_max_lenght}"),
         ForeignKeyConstraint(
             ["course_id", "assignment_id"],
             ["course_assignments.course_id", "course_assignments.assignment_id"],
@@ -54,7 +55,7 @@ class SubmissionFile(Base):
     uploadtime: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now(tz=timezone.utc))
 
     __table_args__ = (
-        CheckConstraint("length(filename) <= 80"),
+        CheckConstraint(f"length(filename) <= {course_settings.filename_max_lenght}"),
         ForeignKeyConstraint(
             ["course_id", "assignment_id", "email"],
             ["course_assignments_submissions.course_id", "course_assignments_submissions.assignment_id", "course_assignments_submissions.email"],

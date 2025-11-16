@@ -15,6 +15,7 @@ import logic.assignments as assignment_logic
 import exceptions.sections as section_errors
 import logic.teachers as teacher_logic
 import exceptions.teachers as teacher_errors
+from settings.sections import section_settings
 
 
 router = APIRouter(
@@ -112,10 +113,10 @@ async def create_section(
     db: Annotated[Session, Depends(get_db)],
     title: str = Query(
         ...,
-        min_length=3,
-        max_length=80,
+        min_length=section_settings.name_min_lenght,
+        max_length=section_settings.name_max_lenght,
         pattern=r"^[\p{L}0-9_ ]+$",
-        description="Section title can contain only letters, digits, spaces, and underscores, 3-80 symbols"
+        description=f"Section title can contain only letters, digits, spaces, and underscores, {section_settings.name_min_lenght}-{section_settings.name_max_lenght} symbols"
     ),
     teacher_email: str = Depends(get_current_user),
 ) -> SectionID:
