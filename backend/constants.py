@@ -1,2 +1,0 @@
-TIME_FORMAT = "%m-%d-%Y %H:%M:%S"
-EMOJI_COUNT = 80

@@ -18,6 +18,14 @@ import routers.personalization
 import routers.admins
 
 
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    """Create database tables on application startup."""
+    create_tables()
+    create_default_admin_account()
+    yield
+
+
 app = FastAPI(
     title="EdHub",
     description="**Open API for platform management**\n\n"
@@ -36,6 +44,7 @@ app = FastAPI(
     "a self-contained and clear design, supporting all the necessary "
     "features but not bogging the user down with complex customizations.",
     version="1.0",
+    lifespan=lifespan
 )
 app.include_router(routers.assignments.router)
 app.include_router(routers.submissions.router)
@@ -57,11 +66,3 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@asynccontextmanager
-async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
-    """Create database tables on application startup."""
-    create_tables()
-    create_default_admin_account()
-    yield

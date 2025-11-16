@@ -24,6 +24,6 @@ class PersonalCourseInfo(Base):
             deferrable=True,
             initially="DEFERRED"
         ),
-        CheckConstraint(f"emojiid IS NULL OR (emojiid BETWEEN 0 AND {course_settings.emoji_count - 1})"),
+        CheckConstraint(f"emoji_id IS NULL OR (emoji_id BETWEEN 0 AND {course_settings.emoji_count - 1})"),
         CheckConstraint("course_order >= 0"),
     )

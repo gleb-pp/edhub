@@ -15,16 +15,16 @@ class CourseSection(Base):
     )
     section_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     title: Mapped[str] = mapped_column(Text, nullable=False)
-    order: Mapped[int] = mapped_column(Integer, nullable=False)
+    section_order: Mapped[int] = mapped_column(Integer, nullable=False)
 
     __table_args__ = (
         UniqueConstraint(
             "course_id",
-            "order",
-            name="course_sections_course_id_order_key",
+            "section_order",
+            name="course_sections_course_id_section_order_key",
             deferrable=True,
             initially="DEFERRED"
         ),
         CheckConstraint(f"length(title) BETWEEN {section_settings.name_min_lenght} AND {section_settings.name_max_lenght}"),
-        CheckConstraint("order >= 0"),
+        CheckConstraint("section_order >= 0"),
     )

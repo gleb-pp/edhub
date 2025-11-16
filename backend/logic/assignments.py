@@ -44,7 +44,7 @@ def get_course_assignments(course: Course, db: Session) -> list[CourseAssignment
             & (CourseSection.section_id == CourseAssignment.section_id)
         )
         .filter(CourseAssignment.course_id == course.course_id)
-        .order_by(CourseSection.order.asc(), CourseAssignment.creation_time.asc())
+        .order_by(CourseSection.section_order.asc(), CourseAssignment.creation_time.asc())
         .all()
     )
 

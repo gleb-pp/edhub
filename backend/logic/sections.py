@@ -26,7 +26,7 @@ def create_section(title: str, course: Course, db: Session) -> CourseSection:
     section = CourseSection(
         course_id=course.course_id, 
         title=title,
-        order=new_order
+        section_order=new_order
     )
     db.add(section)
     db.flush()
@@ -55,4 +55,4 @@ def change_section_order(course: Course, new_order: list[int], db: Session) -> N
         db.query(CourseSection).filter(
             CourseSection.section_id == section_id,
             CourseSection.course_id == course.course_id
-        ).update({"order": index})
+        ).update({"section_order": index})
