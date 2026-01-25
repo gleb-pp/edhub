@@ -5,17 +5,17 @@ from models.users import User
 from typing import Annotated
 from sqlalchemy.orm import Session
 from db import get_db
-import logic.parents as parent_logic
-import logic.users as user_logic
-import logic.students as student_logic
+import services.parents as parent_logic
+import services.users as user_logic
+import services.students as student_logic
 import exceptions.courses as course_errors
-import logic.courses as course_logic
-import logic.teachers as teacher_logic
+import services.courses as course_logic
+import services.teachers as teacher_logic
 import exceptions.users as user_errors
 import exceptions.teachers as teacher_errors
 import exceptions.students as student_errors
 import exceptions.parents as parent_errors
-import logic.personalization as personalization_logic
+import services.personalization as personalization_logic
 
 
 router = APIRouter(

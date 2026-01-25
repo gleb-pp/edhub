@@ -5,16 +5,16 @@ from models.common import Success
 from typing import Annotated
 from sqlalchemy.orm import Session
 from db import get_db
-import logic.users as user_logic
-import logic.courses as course_logic
-import logic.teachers as teacher_logic
+import services.users as user_logic
+import services.courses as course_logic
+import services.teachers as teacher_logic
 import exceptions.teachers as teacher_errors
 import exceptions.courses as course_errors
 import exceptions.users as user_errors
-import logic.personalization as personalization_logic
-import logic.sections as section_logic
-import logic.students as student_logic
-import logic.parents as parent_logic
+import services.personalization as personalization_logic
+import services.sections as section_logic
+import services.students as student_logic
+import services.parents as parent_logic
 from settings.course import course_settings
 
 

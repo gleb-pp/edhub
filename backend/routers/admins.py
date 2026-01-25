@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from auth import get_current_user
-from logic import users as user_logic
-from logic import courses as course_logic
+from services import users as user_logic
+from services import courses as course_logic
 from exceptions import users as user_errors
 import exceptions.admins as admin_errors
 from models.common import Success

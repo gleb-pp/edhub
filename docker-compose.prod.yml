@@ -24,13 +24,13 @@ services:
       system_db:
         condition: service_healthy
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.prod
-    restart: always
-    depends_on:
-      - backend
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile.prod
+  #   restart: always
+  #   depends_on:
+  #     - backend
 
   nginx:
     build: ./nginx-prod
@@ -42,7 +42,7 @@ services:
       - /etc/letsencrypt/live/edhub.space/fullchain.pem:/etc/letsencrypt/live/edhub.space/fullchain.pem:ro
       - /etc/letsencrypt/live/edhub.space/privkey.pem:/etc/letsencrypt/live/edhub.space/privkey.pem:ro
     depends_on:
-      - frontend
+      # - frontend
       - backend
 
 volumes:

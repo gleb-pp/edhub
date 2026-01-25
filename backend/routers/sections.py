@@ -5,15 +5,15 @@ from models.sections import CoursePost, SectionID, Section
 from typing import Annotated
 from sqlalchemy.orm import Session
 from db import get_db
-import logic.users as user_logic
-import logic.courses as course_logic
-import logic.sections as section_logic
+import services.users as user_logic
+import services.courses as course_logic
+import services.sections as section_logic
 import exceptions.users as user_errors
 import exceptions.courses as course_errors
-import logic.materials as material_logic
-import logic.assignments as assignment_logic
+import services.materials as material_logic
+import services.assignments as assignment_logic
 import exceptions.sections as section_errors
-import logic.teachers as teacher_logic
+import services.teachers as teacher_logic
 import exceptions.teachers as teacher_errors
 from settings.sections import section_settings
 

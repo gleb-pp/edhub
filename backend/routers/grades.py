@@ -5,19 +5,19 @@ from models.grades import AssignmentGrade
 from typing import Annotated
 from sqlalchemy.orm import Session
 from db import get_db
-import logic.users as user_logic
+import services.users as user_logic
 import exceptions.users as user_errors
-import logic.courses as course_logic
+import services.courses as course_logic
 import exceptions.courses as course_errors
-import logic.students as student_logic
+import services.students as student_logic
 import exceptions.students as student_errors
-import logic.teachers as teacher_logic
+import services.teachers as teacher_logic
 import exceptions.teachers as teacher_errors
-import logic.assignments as assignment_logic
+import services.assignments as assignment_logic
 import exceptions.assignments as assignment_errors
-import logic.submissions as submission_logic
+import services.submissions as submission_logic
 import exceptions.submissions as submission_errors
-import logic.grades as grade_logic
+import services.grades as grade_logic
 from settings.submissions import submission_settings
 
 

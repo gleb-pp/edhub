@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from auth import get_current_user
-from logic import (
+from services import (
     users as user_logic,
     courses as course_logic,
     teachers as teacher_logic,

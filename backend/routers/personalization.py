@@ -6,11 +6,11 @@ from typing import Annotated
 from sqlalchemy.orm import Session
 from db import get_db
 from models.personalization import EmojiID
-import logic.users as user_logic
+import services.users as user_logic
 import exceptions.users as user_errors
-import logic.courses as course_logic
+import services.courses as course_logic
 import exceptions.courses as course_errors
-import logic.personalization as personalization_logic
+import services.personalization as personalization_logic
 import exceptions.personalization as personalization_errors
 from settings.course import course_settings
 

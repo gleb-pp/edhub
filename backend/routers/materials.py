@@ -5,15 +5,15 @@ from models.materials import MaterialID, Material, MaterialAttachmentMetadata
 from typing import Annotated
 from sqlalchemy.orm import Session
 from db import get_db
-import logic.users as user_logic
-import logic.courses as course_logic
-import logic.sections as section_logic
+import services.users as user_logic
+import services.courses as course_logic
+import services.sections as section_logic
 import exceptions.users as user_errors
 import exceptions.courses as course_errors
 import exceptions.sections as section_errors
-import logic.teachers as teacher_logic
+import services.teachers as teacher_logic
 import exceptions.teachers as teacher_errors
-import logic.materials as material_logic
+import services.materials as material_logic
 import exceptions.materials as material_errors
 from settings.materials import material_settings
 

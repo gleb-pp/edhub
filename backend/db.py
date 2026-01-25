@@ -8,7 +8,7 @@ from repo.users import User
 from settings.admins import admin_settings
 from auth import pwd_hasher
 
-DATABASE_URL = "postgresql://postgres:12345678@system_db:5432/edhub"
+DATABASE_URL = "postgresql+psycopg://postgres:12345678@system_db:5432/edhub"
 engine = create_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

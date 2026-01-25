@@ -27,6 +27,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(
+    root_path="/api",
     title="EdHub",
     description="**Open API for platform management**\n\n"
     "EdHub is a Learning Management System for interaction between "

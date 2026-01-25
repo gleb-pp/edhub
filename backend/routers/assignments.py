@@ -9,15 +9,15 @@ from models.assignments import (
     Assignment,
     AssignmentAttachmentMetadata
 )
-import logic.users as user_logic
-import logic.courses as course_logic
-import logic.sections as section_logic
+import services.users as user_logic
+import services.courses as course_logic
+import services.sections as section_logic
 import exceptions.users as user_errors
 import exceptions.courses as course_errors
 import exceptions.sections as section_errors
-import logic.teachers as teacher_logic
+import services.teachers as teacher_logic
 import exceptions.teachers as teacher_errors
-import logic.assignments as assignment_logic
+import services.assignments as assignment_logic
 import exceptions.assignments as assignment_errors
 from settings.assignments import assignment_settings
 
