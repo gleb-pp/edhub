@@ -175,5 +175,5 @@ async def exit_course(
     except (
         teacher_errors.DeleteInstructorError,
         course_errors.ParticipantRoleRequired
-    ):
+    ) as e:
         raise HTTPException(status_code=403, detail=str(e)) from e

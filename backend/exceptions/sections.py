@@ -20,4 +20,4 @@ class IncorrectSectionOrderError(SectionError):
     """Exception raised when trying to insert incorrect section order to change."""
 
     def __init__(self) -> None:
-        super().__init__(f"New list of sections passed does not match with the original one.")
+        super().__init__("New list of sections passed does not match with the original one.")
