@@ -21,6 +21,6 @@ class Course(Base):
     creation_time: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now(tz=timezone.utc))
 
     __table_args__ = (
-        CheckConstraint(f"length(title) BETWEEN {course_settings.course_name_min_lenght} AND {course_settings.course_name_max_lenght}"),
-        CheckConstraint(f"organization IS NULL OR length(organization) BETWEEN {course_settings.course_organization_min_lenght} AND {course_settings.course_organization_max_lenght}"),
+        CheckConstraint(f"length(title) BETWEEN {course_settings.name_min_lenght} AND {course_settings.name_max_lenght}"),
+        CheckConstraint(f"organization IS NULL OR length(organization) BETWEEN {course_settings.organization_min_lenght} AND {course_settings.organization_max_lenght}"),
     )

@@ -4,11 +4,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class AdminSettings(BaseSettings):
     """Admin settings."""
 
-    default_admin_account_email: str = 'admin'
-    default_admin_account_name: str = 'admin'
-    default_admin_account_password: str = 'admin'
+    default_account_email: str = 'admin'
+    default_account_name: str = 'admin'
+    default_account_password: str = 'admin'
 
-    model_config = SettingsConfigDict()
+    model_config = SettingsConfigDict(env_prefix="admin_")
 
 
 admin_settings = AdminSettings()

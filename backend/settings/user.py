@@ -10,7 +10,7 @@ class UserSettings(BaseSettings):
     min_user_name_lenght: int = 1
     pwd_min_lenght: int = 8
 
-    model_config = SettingsConfigDict()
+    model_config = SettingsConfigDict(env_prefix="user_")
 
 
 user_settings = UserSettings()

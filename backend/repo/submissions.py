@@ -32,5 +32,5 @@ class AssignmentSubmission(Base):
             ondelete="CASCADE",
         ),
         CheckConstraint("timemodified >= timeadded"),
-        CheckConstraint(f"length(submission_text) BETWEEN {submission_settings.submission_text_min_length} AND {submission_settings.submission_text_max_length}"),
+        CheckConstraint(f"length(submission_text) BETWEEN {submission_settings.text_min_length} AND {submission_settings.text_max_length}"),
     )

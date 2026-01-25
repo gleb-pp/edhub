@@ -47,17 +47,17 @@ async def create_course(
     db: Annotated[Session, Depends(get_db)],
     title: str = Query(
         ...,
-        min_length=course_settings.course_name_min_lenght,
-        max_length=course_settings.course_name_max_lenght,
+        min_length=course_settings.name_min_lenght,
+        max_length=course_settings.name_max_lenght,
         pattern=r"^[\p{L}0-9_ ]+$",
-        description=f"Title can contain only letters, digits, spaces, and underscores, {course_settings.course_name_min_lenght}-{course_settings.course_name_max_lenght} symbols"
+        description=f"Title can contain only letters, digits, spaces, and underscores, {course_settings.name_min_lenght}-{course_settings.name_max_lenght} symbols"
     ),
     organization: str | None = Query(
         None,
-        min_length=course_settings.course_organization_min_lenght,
-        max_length=course_settings.course_organization_max_lenght,
+        min_length=course_settings.organization_min_lenght,
+        max_length=course_settings.organization_max_lenght,
         pattern=r"^[\p{L}0-9_ ]+$",
-        description=f"Organization can contain only letters, digits, spaces, and underscores, {course_settings.course_organization_min_lenght}-{course_settings.course_organization_max_lenght} symbols"
+        description=f"Organization can contain only letters, digits, spaces, and underscores, {course_settings.organization_min_lenght}-{course_settings.organization_max_lenght} symbols"
     ),
     user_email: str = Depends(get_current_user),
 ) -> CourseID:
