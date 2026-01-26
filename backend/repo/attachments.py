@@ -1,4 +1,11 @@
-from sqlalchemy import Integer, DateTime, Text, CheckConstraint, Uuid, ForeignKeyConstraint
+from sqlalchemy import (
+    Integer,
+    DateTime,
+    Text,
+    CheckConstraint,
+    Uuid,
+    ForeignKeyConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime, timezone
 from settings.course import course_settings
@@ -13,7 +20,9 @@ class MaterialFile(Base):
     material_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     fileid: Mapped[str] = mapped_column(Uuid, primary_key=True)
     filename: Mapped[str] = mapped_column(Text, nullable=False)
-    uploadtime: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now(tz=timezone.utc))
+    uploadtime: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.now(tz=timezone.utc)
+    )
 
     __table_args__ = (
         CheckConstraint(f"length(filename) <= {course_settings.filename_max_lenght}"),
@@ -32,7 +41,9 @@ class AssignmentFile(Base):
     assignment_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     fileid: Mapped[str] = mapped_column(Uuid, primary_key=True)
     filename: Mapped[str] = mapped_column(Text, nullable=False)
-    uploadtime: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now(tz=timezone.utc))
+    uploadtime: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.now(tz=timezone.utc)
+    )
 
     __table_args__ = (
         CheckConstraint(f"length(filename) <= {course_settings.filename_max_lenght}"),
@@ -52,13 +63,19 @@ class SubmissionFile(Base):
     email: Mapped[str] = mapped_column(Text, primary_key=True)
     fileid: Mapped[str] = mapped_column(Uuid, primary_key=True)
     filename: Mapped[str] = mapped_column(Text, nullable=False)
-    uploadtime: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now(tz=timezone.utc))
+    uploadtime: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.now(tz=timezone.utc)
+    )
 
     __table_args__ = (
         CheckConstraint(f"length(filename) <= {course_settings.filename_max_lenght}"),
         ForeignKeyConstraint(
             ["course_id", "assignment_id", "email"],
-            ["course_assignments_submissions.course_id", "course_assignments_submissions.assignment_id", "course_assignments_submissions.email"],
+            [
+                "course_assignments_submissions.course_id",
+                "course_assignments_submissions.assignment_id",
+                "course_assignments_submissions.email",
+            ],
             ondelete="CASCADE",
         ),
     )

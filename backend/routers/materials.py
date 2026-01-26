@@ -1,22 +1,20 @@
-from fastapi import APIRouter, Depends, Query, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException
 from auth import get_current_user
 from models.common import Success
-from models.materials import MaterialID, Material, MaterialAttachmentMetadata
+from models.materials import MaterialID, Material
 from typing import Annotated
 from sqlalchemy.orm import Session
 from db import get_db
-import services.users as user_logic
-import services.courses as course_logic
-import services.sections as section_logic
-import exceptions.users as user_errors
-import exceptions.courses as course_errors
-import exceptions.sections as section_errors
-import services.teachers as teacher_logic
-import exceptions.teachers as teacher_errors
-import services.materials as material_logic
-import exceptions.materials as material_errors
+from services import UserService, CourseService, SectionService, MaterialService
+from policies import CoursePolicy, TeacherPolicy
+from exceptions import (
+    users as user_errors,
+    courses as course_errors,
+    sections as section_errors,
+    teachers as teacher_errors,
+    materials as material_errors,
+)
 from settings.materials import material_settings
-
 
 router = APIRouter(
     prefix="/{course_id}/materials",
@@ -34,13 +32,13 @@ async def create_material(
         min_length=material_settings.name_min_lenght,
         max_length=material_settings.name_max_lenght,
         pattern=r"^[\p{L}0-9_ ]+$",
-        description=f"Title can contain only letters, digits, spaces, and underscores, {material_settings.name_min_lenght}-{material_settings.name_max_lenght} symbols"
+        description=f"Title can contain only letters, digits, spaces, and underscores, {material_settings.name_min_lenght}-{material_settings.name_max_lenght} symbols",
     ),
     description: str = Query(
         ...,
         min_length=material_settings.description_min_lenght,
         max_length=material_settings.description_max_lenght,
-        description=f"Description must contain {material_settings.description_min_lenght}-{material_settings.description_max_lenght} symbols"
+        description=f"Description must contain {material_settings.description_min_lenght}-{material_settings.description_max_lenght} symbols",
     ),
     teacher_email: str = Depends(get_current_user),
 ) -> MaterialID:
@@ -57,21 +55,27 @@ async def create_material(
 
     Returns the (course_id, material_id, section_id) for the new material in case of success.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    section_service = SectionService(db)
+    material_service = MaterialService(db)
     try:
-        teacher = user_logic.get_user(teacher_email, db)
-        course = course_logic.get_course(course_id, db)
+        teacher = user_service.get_user(teacher_email)
+        course = course_service.get_course(course_id)
         if not teacher.isadmin:
-            teacher_logic.assert_teacher_access(teacher, course, db)
-        section = section_logic.get_section(course, section_id, db)
-        material = material_logic.create_material(section, title, description, teacher, db)
+            TeacherPolicy.assert_teacher_access(teacher, course, db)
+        section = section_service.get_section(course, section_id)
+        material = material_service.create_material(
+            section, title, description, teacher
+        )
         db.commit()
         return MaterialID.model_validate(material)
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
     except (
         course_errors.CourseNotFoundError,
-        section_errors.SectionNotFoundError
-     ) as e:
+        section_errors.SectionNotFoundError,
+    ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except teacher_errors.TeacherRoleRequired as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
@@ -89,21 +93,24 @@ async def remove_material(
 
     Teacher OR Primary Instructor role required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    material_service = MaterialService(db)
     try:
-        teacher = user_logic.get_user(teacher_email, db)
-        course = course_logic.get_course(course_id, db)
+        teacher = user_service.get_user(teacher_email)
+        course = course_service.get_course(course_id)
         if not teacher.isadmin:
-            teacher_logic.assert_teacher_access(teacher, course, db)
-        material = material_logic.get_material(course, material_id, db)
-        material_logic.delete_material(material, db)
+            TeacherPolicy.assert_teacher_access(teacher, course, db)
+        material = material_service.get_material(course, material_id)
+        material_service.delete_material(material)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
     except (
         course_errors.CourseNotFoundError,
-        material_errors.MaterialNotFoundError
-     ) as e:
+        material_errors.MaterialNotFoundError,
+    ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except teacher_errors.TeacherRoleRequired as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
@@ -114,7 +121,7 @@ async def get_material(
     course_id: str,
     material_id: int,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user)
+    user_email: str = Depends(get_current_user),
 ) -> Material:
     """
     Get the material details by the provided (course_id, material_id).
@@ -127,12 +134,15 @@ async def get_material(
 
     Course role (Primary Instructor, Teacher, Student, Parent) required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    material_service = MaterialService(db)
     try:
-        user = user_logic.get_user(user_email, db)
-        course = course_logic.get_course(course_id, db)
+        user = user_service.get_user(user_email)
+        course = course_service.get_course(course_id)
         if not user.isadmin:
-            course_logic.assert_course_access(user, course, db)
-        material = material_logic.get_material(course, material_id, db)
+            CoursePolicy.assert_course_access(user, course, db)
+        material = material_service.get_material(course, material_id)
         return Material.model_validate(material)
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e

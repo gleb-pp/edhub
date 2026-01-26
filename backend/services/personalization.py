@@ -6,7 +6,6 @@ from settings.course import course_settings
 from random import randint
 from sqlalchemy import func
 import exceptions.courses as course_errors
-import services.courses as course_logic
 import exceptions.personalization as personalization_errors
 import logging
 
@@ -79,7 +78,13 @@ class PersonalizationService:
         """Set the new section order within the provided course by the list of ordered section_ids."""
         self.logger.info(f"Changing courses order for user {user.email}")
         courses = [
-            crs.course_id for crs in course_logic.get_available_courses(user, self.db)
+            crs.course_id
+            for crs in (
+                self.db.query(PersonalCourseInfo)
+                .filter(PersonalCourseInfo.email == user.email)
+                .order_by(PersonalCourseInfo.course_order.asc())
+                .all()
+            )
         ]
         if len(courses) != len(new_order) or set(courses) != set(new_order):
             self.logger.warning(

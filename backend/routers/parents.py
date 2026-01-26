@@ -5,18 +5,15 @@ from models.users import User
 from typing import Annotated
 from sqlalchemy.orm import Session
 from db import get_db
-import services.parents as parent_logic
-import services.users as user_logic
-import services.students as student_logic
-import exceptions.courses as course_errors
-import services.courses as course_logic
-import services.teachers as teacher_logic
-import exceptions.users as user_errors
-import exceptions.teachers as teacher_errors
-import exceptions.students as student_errors
-import exceptions.parents as parent_errors
-import services.personalization as personalization_logic
-
+from services import ParentService, CourseService, UserService, PersonalizationService
+from policies import ParentPolicy, TeacherPolicy, StudentPolicy
+from exceptions import (
+    courses as course_errors,
+    users as user_errors,
+    teachers as teacher_errors,
+    students as student_errors,
+    parents as parent_errors,
+)
 
 router = APIRouter(
     tags=["Parents"],
@@ -28,7 +25,7 @@ async def get_students_parents(
     course_id: str,
     student_email: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user)
+    user_email: str = Depends(get_current_user),
 ) -> list[User]:
     """
     Get the list of parents observing the student with provided email on course with provided course_id.
@@ -37,22 +34,22 @@ async def get_students_parents(
     - Parent can get the list of parents for their children
     - Student can get the list of their parents
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    parent_service = ParentService(db)
     try:
-        user = user_logic.get_user(user_email, db)
-        course = course_logic.get_course(course_id, db)
-        student = user_logic.get_user(student_email, db)
-        student_logic.assert_access_to_student(student, user, course, db)
-        parents = parent_logic.get_students_parents(student, course, db)
+        user = user_service.get_user(user_email)
+        course = course_service.get_course(course_id)
+        student = user_service.get_user(student_email)
+        StudentPolicy.assert_access_to_student(student, user, course, db)
+        parents = parent_service.get_students_parents(student, course)
         return [User.model_validate(par) for par in parents]
     except user_errors.UserNotFoundError as e:
         if e.email == user_email:
             raise HTTPException(status_code=401, detail=str(e)) from e
         else:
             raise HTTPException(status_code=400, detail=str(e)) from e
-    except (
-        course_errors.CourseNotFoundError,
-        student_errors.StudentRoleRequired
-     ) as e:
+    except (course_errors.CourseNotFoundError, student_errors.StudentRoleRequired) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except (
         course_errors.ParticipantRoleRequired,
@@ -74,20 +71,24 @@ async def invite_parent(
 
     Teacher OR Primary Instructor role required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    parent_service = ParentService(db)
+    personalization_service = PersonalizationService(db)
     try:
-        teacher = user_logic.get_user(teacher_email, db)
-        course = course_logic.get_course(course_id, db)
+        teacher = user_service.get_user(teacher_email)
+        course = course_service.get_course(course_id)
         if not teacher.isadmin:
-            teacher_logic.assert_teacher_access(teacher, course, db)
-        student = user_logic.get_user(student_email, db)
-        student_logic.assert_student_access(student, course, db)
-        parent = user_logic.get_user(parent_email, db)
-        teacher_logic.assert_not_teacher(parent, course, db)
-        student_logic.assert_not_student(parent, course, db)
-        parent_logic.assert_not_parent_of_student(parent, student, course, db)
-        if not parent_logic.check_parent_access(parent, course, db):
-            personalization_logic.add_course_participant(course, parent, db)
-        parent_logic.invite_parent(parent, student, course, db)
+            TeacherPolicy.assert_teacher_access(teacher, course, db)
+        student = user_service.get_user(student_email)
+        StudentPolicy.assert_student_access(student, course, db)
+        parent = user_service.get_user(parent_email)
+        TeacherPolicy.assert_not_teacher(parent, course, db)
+        StudentPolicy.assert_not_student(parent, course, db)
+        ParentPolicy.assert_not_parent_of_student(parent, student, course, db)
+        if not ParentPolicy.check_parent_access(parent, course, db):
+            personalization_service.add_course_participant(course, parent)
+        parent_service.invite_parent(parent, student, course)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
@@ -120,18 +121,22 @@ async def remove_parent(
 
     Parent can only remove themselves.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    parent_service = ParentService(db)
+    personalization_service = PersonalizationService(db)
     try:
-        teacher = user_logic.get_user(teacher_email, db)
-        course = course_logic.get_course(course_id, db)
+        teacher = user_service.get_user(teacher_email)
+        course = course_service.get_course(course_id)
         if not teacher.isadmin:
-            teacher_logic.assert_teacher_access(teacher, course, db)
-        student = user_logic.get_user(student_email, db)
-        student_logic.assert_student_access(student, course, db)
-        parent = user_logic.get_user(parent_email, db)
-        parent_logic.assert_parent_of_student(parent, student, course, db)
-        parent_logic.remove_parent_student(parent, student, course, db)
-        if not parent_logic.check_parent_access(parent, course, db):
-            personalization_logic.remove_course_participant(course, parent, db)
+            TeacherPolicy.assert_teacher_access(teacher, course, db)
+        student = user_service.get_user(student_email)
+        StudentPolicy.assert_student_access(student, course, db)
+        parent = user_service.get_user(parent_email)
+        ParentPolicy.assert_parent_of_student(parent, student, course, db)
+        parent_service.remove_parent_student(parent, student, course)
+        if not ParentPolicy.check_parent_access(parent, course, db):
+            personalization_service.remove_course_participant(course, parent)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
@@ -141,8 +146,8 @@ async def remove_parent(
             raise HTTPException(status_code=400, detail=str(e)) from e
     except (
         course_errors.CourseNotFoundError,
-        parent_errors.ParentOfStudentRoleRequired
-     ) as e:
+        parent_errors.ParentOfStudentRoleRequired,
+    ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except teacher_errors.TeacherRoleRequired as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
@@ -153,7 +158,7 @@ async def get_parents_children(
     course_id: str,
     parent_email: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user)
+    user_email: str = Depends(get_current_user),
 ) -> list[User]:
     """
     Get the list of students for the parent with provided email on course with provided course_id.
@@ -163,22 +168,22 @@ async def get_parents_children(
     - Teacher OR Primary Instructor can get the list of children for all parents
     - Parent can get the list of their children
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    parent_service = ParentService(db)
     try:
-        user = user_logic.get_user(user_email, db)
-        course = course_logic.get_course(course_id, db)
-        parent = user_logic.get_user(parent_email, db)
-        parent_logic.assert_access_to_parent(parent, user, course, db)
-        students = parent_logic.get_parents_children(parent, course, db)
+        user = user_service.get_user(user_email)
+        course = course_service.get_course(course_id)
+        parent = user_service.get_user(parent_email)
+        ParentPolicy.assert_access_to_parent(parent, user, course, db)
+        students = parent_service.get_parents_children(parent, course)
         return [User.model_validate(st) for st in students]
     except user_errors.UserNotFoundError as e:
         if e.email == user_email:
             raise HTTPException(status_code=401, detail=str(e)) from e
         else:
             raise HTTPException(status_code=400, detail=str(e)) from e
-    except (
-        course_errors.CourseNotFoundError,
-        parent_errors.ParentRoleRequired
-     ) as e:
+    except (course_errors.CourseNotFoundError, parent_errors.ParentRoleRequired) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except (
         course_errors.ParticipantRoleRequired,

@@ -1,5 +1,6 @@
 from exceptions.courses import RoleConflict
 
+
 class TeacherError(Exception):
     """Base exception for teacher-related errors."""
 
@@ -11,6 +12,7 @@ class InstructorRoleRequired(TeacherError):
         super().__init__(
             f"User {email} is not an instructor in the course {course_name}."
         )
+
 
 class TeacherRoleRequired(TeacherError):
     """Exception raised when some random user want to access teacher functionality."""
@@ -32,4 +34,6 @@ class DeleteInstructorError(TeacherError):
     """Exception raised when trying to delete the course instuctor."""
 
     def __init__(self, email: str, course_id: str) -> None:
-        super().__init__(f"User {email} can't exit the course {course_id} since they are the primary instructor.")
+        super().__init__(
+            f"User {email} can't exit the course {course_id} since they are the primary instructor."
+        )

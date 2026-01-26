@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from auth import get_current_user
-from services import users as user_logic
-from services import courses as course_logic
-from exceptions import users as user_errors
-import exceptions.admins as admin_errors
+from services import UserService, CourseService
+from policies import AdminPolicy
+from exceptions import users as user_errors, admins as admin_errors
 from models.common import Success
 from models.users import User
 from models.courses import Course
@@ -11,17 +10,17 @@ from typing import Annotated
 from sqlalchemy.orm import Session
 from db import get_db
 
-
 router = APIRouter(
-    prefix='/admin',
+    prefix="/admin",
     tags=["Admin"],
 )
+
 
 @router.delete("/user")
 async def remove_user(
     deleted_user_email: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user)
+    user_email: str = Depends(get_current_user),
 ) -> Success:
     """
     Delete user account from the system.
@@ -38,11 +37,12 @@ async def remove_user(
 
     Admin can remove other users.
     """
+    user_service = UserService(db)
     try:
-        user = user_logic.get_user(user_email, db)
-        user_logic.assert_user_is_admin(user)
-        deleted_user = user_logic.get_user(deleted_user_email, db)
-        user_logic.delete_user(deleted_user, db)
+        user = user_service.get_user(user_email)
+        AdminPolicy.assert_user_is_admin(user)
+        deleted_user = user_service.get_user(deleted_user_email)
+        user_service.delete_user(deleted_user)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
@@ -54,7 +54,7 @@ async def remove_user(
             raise HTTPException(status_code=400, detail=str(e)) from e
     except (
         admin_errors.AdminRoleRequiredError,
-        admin_errors.DeleteLastAdminError
+        admin_errors.DeleteLastAdminError,
     ) as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
 
@@ -63,18 +63,19 @@ async def remove_user(
 async def give_admin_permissions(
     new_admin_email: str,
     db: Annotated[Session, Depends(get_db)],
-    admin_email: str = Depends(get_current_user)
+    admin_email: str = Depends(get_current_user),
 ) -> Success:
     """
     Give admin rights to some existing user by their email.
 
     Admin role required.
     """
+    user_service = UserService(db)
     try:
-        admin = user_logic.get_user(admin_email, db)
-        user_logic.assert_user_is_admin(admin)
-        new_admin = user_logic.get_user(new_admin_email, db)
-        user_logic.give_admin_permissions(new_admin)
+        admin = user_service.get_user(admin_email)
+        AdminPolicy.assert_user_is_admin(admin)
+        new_admin = user_service.get_user(new_admin_email)
+        user_service.give_admin_permissions(new_admin)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
@@ -100,10 +101,11 @@ async def get_all_users(
 
     Admin role required.
     """
+    user_service = UserService(db)
     try:
-        admin = user_logic.get_user(admin_email, db)
-        user_logic.assert_user_is_admin(admin)
-        users = user_logic.get_all_users(db)
+        admin = user_service.get_user(admin_email)
+        AdminPolicy.assert_user_is_admin(admin)
+        users = user_service.get_all_users()
         return [User.model_validate(u) for u in users]
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
@@ -118,14 +120,15 @@ async def get_admins(
     """
     Get the list of platform administrators.
     """
-    admins = user_logic.get_admins(db)
+    user_service = UserService(db)
+    admins = user_service.get_admins()
     return [User.model_validate(a) for a in admins]
 
 
 @router.get("/get_all_courses")
 async def get_all_courses(
     db: Annotated[Session, Depends(get_db)],
-    admin_email: str = Depends(get_current_user)
+    admin_email: str = Depends(get_current_user),
 ) -> list[Course]:
     """
     Get the list of all courses in the system.
@@ -134,10 +137,12 @@ async def get_all_courses(
 
     Admin role required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
     try:
-        admin = user_logic.get_user(admin_email, db)
-        user_logic.assert_user_is_admin(admin)
-        courses = course_logic.get_all_courses(db)
+        admin = user_service.get_user(admin_email)
+        AdminPolicy.assert_user_is_admin(admin)
+        courses = course_service.get_all_courses()
         return [Course.model_validate(c) for c in courses]
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e

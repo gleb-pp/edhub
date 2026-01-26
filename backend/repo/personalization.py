@@ -18,12 +18,14 @@ class PersonalCourseInfo(Base):
 
     __table_args__ = (
         UniqueConstraint(
-            "email", 
-            "course_order", 
+            "email",
+            "course_order",
             name="personal_course_info_email_course_order_key",
             deferrable=True,
-            initially="DEFERRED"
+            initially="DEFERRED",
         ),
-        CheckConstraint(f"emoji_id IS NULL OR (emoji_id BETWEEN 0 AND {course_settings.emoji_count - 1})"),
+        CheckConstraint(
+            f"emoji_id IS NULL OR (emoji_id BETWEEN 0 AND {course_settings.emoji_count - 1})"
+        ),
         CheckConstraint("course_order >= 0"),
     )

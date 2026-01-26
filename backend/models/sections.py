@@ -2,6 +2,7 @@ from pydantic import BaseModel, ConfigDict
 from typing import Literal
 from datetime import datetime
 
+
 class SectionID(BaseModel):
     course_id: int
     section_id: int

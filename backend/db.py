@@ -23,15 +23,20 @@ def create_default_admin_account() -> None:
     db_gen = get_db()
     db = next(db_gen)
     try:
-        if db.query(User).filter(User.email == admin_settings.default_account_email).first() is not None:
+        if (
+            db.query(User)
+            .filter(User.email == admin_settings.default_account_email)
+            .first()
+            is not None
+        ):
             print("Default admin account exists, skipping...")
             return
         hashed_password = pwd_hasher.hash(admin_settings.default_account_password)
         user = User(
-            email=admin_settings.default_account_email, 
-            name=admin_settings.default_account_name, 
-            password_hash=hashed_password, 
-            isadmin=True
+            email=admin_settings.default_account_email,
+            name=admin_settings.default_account_name,
+            password_hash=hashed_password,
+            isadmin=True,
         )
         db.add(user)
         db.commit()
@@ -44,7 +49,7 @@ def create_default_admin_account() -> None:
         try:
             next(db_gen)
         except StopIteration:
-            pass  
+            pass
 
 
 def get_db() -> Generator[Session, None, None]:

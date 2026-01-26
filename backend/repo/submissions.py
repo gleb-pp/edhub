@@ -1,4 +1,11 @@
-from sqlalchemy import Integer, DateTime, Text, CheckConstraint, ForeignKey, ForeignKeyConstraint
+from sqlalchemy import (
+    Integer,
+    DateTime,
+    Text,
+    CheckConstraint,
+    ForeignKey,
+    ForeignKeyConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime, timezone
 from settings.submissions import submission_settings
@@ -16,8 +23,12 @@ class AssignmentSubmission(Base):
     email: Mapped[str] = mapped_column(
         ForeignKey("users.email", ondelete="CASCADE"), primary_key=True
     )
-    timeadded: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now(tz=timezone.utc))
-    timemodified: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now(tz=timezone.utc))
+    timeadded: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.now(tz=timezone.utc)
+    )
+    timemodified: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.now(tz=timezone.utc)
+    )
     submission_text: Mapped[str] = mapped_column(Text, nullable=False)
 
     __table_args__ = (
@@ -32,5 +43,7 @@ class AssignmentSubmission(Base):
             ondelete="CASCADE",
         ),
         CheckConstraint("timemodified >= timeadded"),
-        CheckConstraint(f"length(submission_text) BETWEEN {submission_settings.text_min_length} AND {submission_settings.text_max_length}"),
+        CheckConstraint(
+            f"length(submission_text) BETWEEN {submission_settings.text_min_length} AND {submission_settings.text_max_length}"
+        ),
     )

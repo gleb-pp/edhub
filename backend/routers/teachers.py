@@ -5,29 +5,25 @@ from models.users import User
 from typing import Annotated
 from sqlalchemy.orm import Session
 from db import get_db
-import services.users as user_logic
-import exceptions.users as user_errors
-import services.courses as course_logic
-import exceptions.courses as course_errors
-import services.teachers as teacher_logic
-import exceptions.teachers as teacher_errors
-import services.students as student_logic
-import services.parents as parent_logic
-import services.personalization as personalization_logic
-
-
-router = APIRouter(
-    prefix='/{course_id}/teachers',
-    tags=["Teachers"],
+from services import CourseService, UserService, TeacherService, PersonalizationService
+from policies import CoursePolicy, TeacherPolicy, ParentPolicy, StudentPolicy
+from exceptions import (
+    users as user_errors,
+    courses as course_errors,
+    teachers as teacher_errors,
 )
 
+router = APIRouter(
+    prefix="/{course_id}/teachers",
+    tags=["Teachers"],
+)
 
 
 @router.get("/")
 async def get_course_teachers(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user)
+    user_email: str = Depends(get_current_user),
 ) -> list[User]:
     """
     Get the list of teachers teaching the course with the provided course_id.
@@ -36,12 +32,15 @@ async def get_course_teachers(
 
     Course role (Primary Instructor, Teacher, Student, Parent) required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    teacher_service = TeacherService(db)
     try:
-        user = user_logic.get_user(user_email, db)
-        course = course_logic.get_course(course_id, db)
+        user = user_service.get_user(user_email)
+        course = course_service.get_course(course_id)
         if not user.isadmin:
-            course_logic.assert_course_access(user, course, db)
-        teachers = teacher_logic.get_course_teachers(course, db)
+            CoursePolicy.assert_course_access(user, course, db)
+        teachers = teacher_service.get_course_teachers(course)
         return [User.model_validate(tchr) for tchr in teachers]
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
@@ -63,17 +62,21 @@ async def invite_teacher(
 
     Primary Instructor role required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    teacher_service = TeacherService(db)
     try:
-        teacher = user_logic.get_user(teacher_email, db)
-        course = course_logic.get_course(course_id, db)
+        personalization_service = PersonalizationService(db)
+        teacher = user_service.get_user(teacher_email)
+        course = course_service.get_course(course_id)
         if not teacher.isadmin:
-            teacher_logic.assert_instructor_access(teacher, course, db)
-        new_teacher = user_logic.get_user(new_teacher_email, db)
-        teacher_logic.assert_not_teacher(new_teacher, course, db)
-        student_logic.assert_not_student(new_teacher, course, db)
-        parent_logic.assert_not_parent(new_teacher, course, db)
-        teacher_logic.invite_teacher(new_teacher, course, db)
-        personalization_logic.add_course_participant(course, new_teacher, db)
+            TeacherPolicy.assert_instructor_access(teacher, course, db)
+        new_teacher = user_service.get_user(new_teacher_email)
+        TeacherPolicy.assert_not_teacher(new_teacher, course, db)
+        StudentPolicy.assert_not_student(new_teacher, course, db)
+        ParentPolicy.assert_not_parent(new_teacher, course, db)
+        teacher_service.invite_teacher(new_teacher, course)
+        personalization_service.add_course_participant(course, new_teacher)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
@@ -105,17 +108,21 @@ async def remove_teacher(
 
     Primary Instructor can't remove themself until they are Primary Instructor.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    teacher_service = TeacherService(db)
+    personalization_service = PersonalizationService(db)
     try:
-        instructor = user_logic.get_user(instructor_email, db)
-        course = course_logic.get_course(course_id, db)
+        instructor = user_service.get_user(instructor_email)
+        course = course_service.get_course(course_id)
         if instructor.isadmin:
-            instructor = user_logic.get_user(course.instructor, db)
+            instructor = user_service.get_user(course.instructor)
         else:
-            teacher_logic.assert_instructor_access(instructor, course, db)
-        teacher = user_logic.get_user(teacher_email, db)
-        teacher_logic.assert_teacher_access(teacher, course, db)
-        teacher_logic.remove_teacher(teacher, course, db)
-        personalization_logic.remove_course_participant(course, teacher, db)
+            TeacherPolicy.assert_instructor_access(instructor, course, db)
+        teacher = user_service.get_user(teacher_email)
+        TeacherPolicy.assert_teacher_access(teacher, course, db)
+        teacher_service.remove_teacher(teacher, course)
+        personalization_service.remove_course_participant(course, teacher)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
@@ -136,20 +143,23 @@ async def change_course_instructor(
     course_id: str,
     teacher_email: str,
     db: Annotated[Session, Depends(get_db)],
-    instructor_email: str = Depends(get_current_user)
+    instructor_email: str = Depends(get_current_user),
 ) -> Success:
     """
     Transfer the course ownership (Primary Instructor role) to other Teacher within the course.
 
     Primary Instructor role required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    teacher_service = TeacherService(db)
     try:
-        instructor = user_logic.get_user(instructor_email, db)
-        course = course_logic.get_course(course_id, db)
-        teacher_logic.assert_instructor_access(instructor, course, db)
-        teacher = user_logic.get_user(teacher_email, db)
-        teacher_logic.assert_teacher_access(teacher, course, db)
-        teacher_logic.change_course_instructor(instructor, teacher, course, db)
+        instructor = user_service.get_user(instructor_email)
+        course = course_service.get_course(course_id)
+        TeacherPolicy.assert_instructor_access(instructor, course, db)
+        teacher = user_service.get_user(teacher_email)
+        TeacherPolicy.assert_teacher_access(teacher, course, db)
+        teacher_service.change_course_instructor(instructor, teacher, course)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:

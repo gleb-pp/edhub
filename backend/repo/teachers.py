@@ -11,5 +11,5 @@ class Teaches(Base):
         ForeignKey("users.email", ondelete="CASCADE"), primary_key=True
     )
     course_id: Mapped[str] = mapped_column(
-        ForeignKey("courses.course_id", ondelete="CASCADE"), primary_key=True   
+        ForeignKey("courses.course_id", ondelete="CASCADE"), primary_key=True
     )

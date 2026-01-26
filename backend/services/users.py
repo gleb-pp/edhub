@@ -120,14 +120,6 @@ class UserService:
         self.db.flush()
         self.logger.info(f"Deleting user with email: {user.email}")
 
-    def assert_user_is_admin(self, user: User) -> None:
-        """Check whether the user with provided email has admin role."""
-        if not user.is_admin:
-            self.logger.warning(
-                f"Attempt to perform admin action by non-admin user: {user.email}"
-            )
-            raise admin_errors.AdminRoleRequiredError(user.email)
-
     def give_admin_permissions(self, user: User) -> None:
         """Change the user password to a new one."""
         user.isadmin = True

@@ -5,19 +5,17 @@ from models.users import User
 from typing import Annotated
 from sqlalchemy.orm import Session
 from db import get_db
-import services.users as user_logic
-import exceptions.users as user_errors
-import services.courses as course_logic
-import exceptions.courses as course_errors
-import services.students as student_logic
-import exceptions.students as student_errors
-import services.teachers as teacher_logic
-import exceptions.teachers as teacher_errors
-import services.parents as parent_logic
-import services.personalization as personalization_logic
+from services import UserService, CourseService, StudentService, PersonalizationService
+from policies import CoursePolicy, StudentPolicy, ParentPolicy, TeacherPolicy
+from exceptions import (
+    users as user_errors,
+    courses as course_errors,
+    students as student_errors,
+    teachers as teacher_errors,
+)
 
 router = APIRouter(
-    prefix='/{course_id}/students',
+    prefix="/{course_id}/students",
     tags=["Courses"],
 )
 
@@ -26,7 +24,7 @@ router = APIRouter(
 async def get_enrolled_students(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user)
+    user_email: str = Depends(get_current_user),
 ) -> list[User]:
     """
     Get the list of enrolled students by course_id.
@@ -37,12 +35,15 @@ async def get_enrolled_students(
 
     Course role (Primary Instructor, Teacher, Student, Parent) required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    student_service = StudentService(db)
     try:
-        user = user_logic.get_user(user_email, db)
-        course = course_logic.get_course(course_id, db)
+        user = user_service.get_user(user_email)
+        course = course_service.get_course(course_id)
         if not user.isadmin:
-            course_logic.assert_course_access(user, course, db)
-        students = student_logic.get_enrolled_students(course, db)
+            CoursePolicy.assert_course_access(user, course, db)
+        students = student_service.get_enrolled_students(course)
         return [User.model_validate(st) for st in students]
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
@@ -57,24 +58,28 @@ async def invite_student(
     course_id: str,
     student_email: str,
     db: Annotated[Session, Depends(get_db)],
-    teacher_email: str = Depends(get_current_user)
+    teacher_email: str = Depends(get_current_user),
 ) -> Success:
     """
     Add the student with provided email to the course with provided course_id.
 
     Teacher OR Primary Instructor role required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    student_service = StudentService(db)
+    personalization_service = PersonalizationService(db)
     try:
-        teacher = user_logic.get_user(teacher_email, db)
-        course = course_logic.get_course(course_id, db)
+        teacher = user_service.get_user(teacher_email)
+        course = course_service.get_course(course_id)
         if not teacher.isadmin:
-            teacher_logic.assert_teacher_access(teacher, course, db)
-        student = user_logic.get_user(student_email, db)
-        student_logic.assert_not_student(student, course, db)
-        teacher_logic.assert_not_teacher(student, course, db)
-        parent_logic.assert_not_parent(student, course, db)
-        student_logic.invite_student(student, course, db)
-        personalization_logic.add_course_participant(course, student, db)
+            TeacherPolicy.assert_teacher_access(teacher, course, db)
+        student = user_service.get_user(student_email)
+        StudentPolicy.assert_not_student(student, course, db)
+        TeacherPolicy.assert_not_teacher(student, course, db)
+        ParentPolicy.assert_not_parent(student, course, db)
+        student_service.invite_student(student, course)
+        personalization_service.add_course_participant(course, student)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
@@ -97,7 +102,7 @@ async def remove_student(
     course_id: str,
     student_email: str,
     db: Annotated[Session, Depends(get_db)],
-    teacher_email: str = Depends(get_current_user)
+    teacher_email: str = Depends(get_current_user),
 ) -> Success:
     """
     Remove the student with provided email from the course with provided course_id.
@@ -106,15 +111,19 @@ async def remove_student(
 
     Teacher OR Primary Instructor role required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    student_service = StudentService(db)
+    personalization_service = PersonalizationService(db)
     try:
-        teacher = user_logic.get_user(teacher_email, db)
-        course = course_logic.get_course(course_id, db)
+        teacher = user_service.get_user(teacher_email)
+        course = course_service.get_course(course_id)
         if not teacher.isadmin:
-            teacher_logic.assert_teacher_access(teacher, course, db)
-        student = user_logic.get_user(student_email, db)
-        student_logic.assert_student_access(student, course, db)
-        student_logic.remove_student(student, course, db)
-        personalization_logic.remove_course_participant(course, student, db)
+            TeacherPolicy.assert_teacher_access(teacher, course, db)
+        student = user_service.get_user(student_email)
+        StudentPolicy.assert_student_access(student, course, db)
+        student_service.remove_student(student, course)
+        personalization_service.remove_course_participant(course, student)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:

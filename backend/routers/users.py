@@ -1,31 +1,21 @@
 from fastapi import APIRouter, Depends, HTTPException
 from auth import get_current_user
-from services import (
-    users as user_logic,
-    courses as course_logic,
-    teachers as teacher_logic,
-    students as student_logic,
-    parents as parent_logic,
-)
+from services import UserService, CourseService
+from policies import TeacherPolicy, StudentPolicy, ParentPolicy
 from exceptions import (
     users as user_errors,
     courses as course_errors,
-    admins as admin_errors
+    admins as admin_errors,
 )
 from models.common import Success
 from models.courses import CourseID
-from models.users import (
-    User,
-    CourseRole,
-    AccessToken,
-)
+from models.users import User, CourseRole, AccessToken
 from typing import Annotated
 from sqlalchemy.orm import Session
 from db import get_db
 
-
 router = APIRouter(
-    prefix='/users',
+    prefix="/users",
     tags=["Users"],
 )
 
@@ -39,7 +29,8 @@ async def get_user_info(
     Get the info about the user.
     """
     try:
-        user = user_logic.get_user(user_email, db)
+        user_service = UserService(db)
+        user = user_service.get_user(user_email)
         return User.model_validate(user)
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
@@ -54,15 +45,17 @@ async def get_my_role(
     """
     Get the user's role in the provided course.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
     try:
-        user = user_logic.get_user(user_email, db)
-        course = course_logic.get_course(course_id, db)
+        user = user_service.get_user(user_email)
+        course = course_service.get_course(course_id)
         return CourseRole(
-            is_instructor=teacher_logic.check_instructor_access(user, course, db),
-            is_teacher=teacher_logic.check_teacher_access(user, course, db),
-            is_student=student_logic.check_student_access(user, course, db),
-            is_parent=parent_logic.check_parent_access(user, course, db),
-            is_admin=user.isadmin
+            is_instructor=TeacherPolicy.check_instructor_access(user, course, db),
+            is_teacher=TeacherPolicy.check_teacher_access(user, course, db),
+            is_student=StudentPolicy.check_student_access(user, course, db),
+            is_parent=ParentPolicy.check_parent_access(user, course, db),
+            is_admin=user.isadmin,
         )
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
@@ -72,10 +65,7 @@ async def get_my_role(
 
 @router.post("/")
 async def create_user(
-    email: str,
-    name: str,
-    password: str,
-    db: Annotated[Session, Depends(get_db)]
+    email: str, name: str, password: str, db: Annotated[Session, Depends(get_db)]
 ) -> AccessToken:
     """
     Creates a user account with provided email, name, and password.
@@ -90,12 +80,13 @@ async def create_user(
 
     Returns email and JWT access token for 30 minutes.
     """
+    user_service = UserService(db)
     try:
-        user_logic.validate_user_email(email)
-        user_logic.validate_user_name(name)
-        user_logic.validate_password_lenght(password)
-        user = user_logic.create_user(email, name, password, db)
-        token = user_logic.get_access_token(user)
+        user_service.validate_user_email(email)
+        user_service.validate_user_name(name)
+        user_service.validate_password_lenght(password)
+        user = user_service.create_user(email, name, password)
+        token = user_service.get_access_token(user)
         db.commit()
         return AccessToken(access_token=token)
     except (
@@ -119,10 +110,11 @@ async def login(
 
     Returns email and JWT access token for 30 minutes.
     """
+    user_service = UserService(db)
     try:
-        user = user_logic.get_user(email, db)
-        user_logic.verify_password(user, password)
-        token = user_logic.get_access_token(user)
+        user = user_service.get_user(email)
+        user_service.verify_password(user, password)
+        token = user_service.get_access_token(user)
         return AccessToken(access_token=token)
     except user_errors.UserError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
@@ -138,11 +130,12 @@ async def change_password(
     """
     Change the user password to a new one.
     """
+    user_service = UserService(db)
     try:
-        user = user_logic.get_user(email, db)
-        user_logic.verify_password(user, password)
-        user_logic.validate_password_lenght(new_password)
-        user_logic.change_password(user, new_password)
+        user = user_service.get_user(email)
+        user_service.verify_password(user, password)
+        user_service.validate_password_lenght(new_password)
+        user_service.change_password(user, new_password)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
@@ -159,9 +152,10 @@ async def get_my_instructor_courses(
     """
     Get the list of IDs of courses where the provided user is a Primary Instructor.
     """
+    user_service = UserService(db)
     try:
-        user = user_logic.get_user(user_email, db)
-        courses = user_logic.get_instructor_courses(user, db)
+        user = user_service.get_user(user_email)
+        courses = user_service.get_instructor_courses(user)
         return [CourseID.model_validate(course) for course in courses]
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
@@ -169,8 +163,7 @@ async def get_my_instructor_courses(
 
 @router.delete("/")
 async def remove_user(
-    db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user)
+    db: Annotated[Session, Depends(get_db)], user_email: str = Depends(get_current_user)
 ) -> Success:
     """
     Delete user account from the system.
@@ -185,9 +178,10 @@ async def remove_user(
 
     User CAN NOT be deleted if they are the only platform administrator.
     """
+    user_service = UserService(db)
     try:
-        user = user_logic.get_user(user_email, db)
-        user_logic.delete_user(user, db)
+        user = user_service.get_user(user_email)
+        user_service.delete_user(user)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:

@@ -1,4 +1,11 @@
-from sqlalchemy import Integer, DateTime, Text, CheckConstraint, ForeignKey, ForeignKeyConstraint
+from sqlalchemy import (
+    Integer,
+    DateTime,
+    Text,
+    CheckConstraint,
+    ForeignKey,
+    ForeignKeyConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime, timezone
 from settings.assignments import assignment_settings
@@ -12,8 +19,12 @@ class CourseAssignment(Base):
     course_id: Mapped[str] = mapped_column(
         ForeignKey("courses.course_id", ondelete="CASCADE"), primary_key=True
     )
-    assignment_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    creation_time: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now(tz=timezone.utc))
+    assignment_id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True
+    )
+    creation_time: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.now(tz=timezone.utc)
+    )
     author: Mapped[str | None] = mapped_column(
         ForeignKey("users.email", ondelete="SET NULL"), nullable=True
     )
@@ -27,6 +38,10 @@ class CourseAssignment(Base):
             ["course_sections.course_id", "course_sections.section_id"],
             ondelete="CASCADE",
         ),
-        CheckConstraint(f"length(title) BETWEEN {assignment_settings.name_min_lenght} AND {assignment_settings.name_max_lenght}"),
-        CheckConstraint(f"length(description) BETWEEN {assignment_settings.description_min_lenght} AND {assignment_settings.description_max_lenght}"),
+        CheckConstraint(
+            f"length(title) BETWEEN {assignment_settings.name_min_lenght} AND {assignment_settings.name_max_lenght}"
+        ),
+        CheckConstraint(
+            f"length(description) BETWEEN {assignment_settings.description_min_lenght} AND {assignment_settings.description_max_lenght}"
+        ),
     )

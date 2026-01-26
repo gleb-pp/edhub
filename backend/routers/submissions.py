@@ -1,26 +1,23 @@
-from fastapi import APIRouter, Depends, Query, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException
 from auth import get_current_user
 from models.common import Success
-from models.submissions import Submission, SubmissionAttachmentMetadata
+from models.submissions import Submission
 from typing import Annotated
 from sqlalchemy.orm import Session
 from db import get_db
-import services.users as user_logic
-import exceptions.users as user_errors
-import services.courses as course_logic
-import exceptions.courses as course_errors
-import services.students as student_logic
-import exceptions.students as student_errors
-import services.teachers as teacher_logic
-import exceptions.teachers as teacher_errors
-import services.assignments as assignment_logic
-import exceptions.assignments as assignment_errors
-import services.submissions as submission_logic
-import exceptions.submissions as submission_errors
-import services.grades as grade_logic
+from services import UserService, CourseService, AssignmentService, SubmissionService
+from policies import GradePolicy, StudentPolicy, TeacherPolicy
+from exceptions import (
+    users as user_errors,
+    courses as course_errors,
+    students as student_errors,
+    teachers as teacher_errors,
+    assignments as assignment_errors,
+    submissions as submission_errors,
+)
 
 router = APIRouter(
-    prefix='/{course_id}/{assignment_id}/submissions',
+    prefix="/{course_id}/{assignment_id}/submissions",
     tags=["Submissions"],
 )
 
@@ -34,7 +31,7 @@ async def submit_assignment(
         ...,
         min_length=3,
         max_length=10000,
-        description="Submission text must contain 3-10000 symbols"
+        description="Submission text must contain 3-10000 symbols",
     ),
     student_email: str = Depends(get_current_user),
 ) -> Success:
@@ -47,21 +44,25 @@ async def submit_assignment(
 
     Student cannot submit already graded assignment.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    assignment_service = AssignmentService(db)
+    submission_service = SubmissionService(db)
     try:
-        student = user_logic.get_user(student_email, db)
-        course = course_logic.get_course(course_id, db)
-        student_logic.assert_student_access(student, course, db)
-        assignment = assignment_logic.get_assignment(course, assignment_id, db)
-        submission = submission_logic.get_submission(assignment, student, db)
-        grade_logic.assert_not_graded(submission, db)
-        submission_logic.update_submission(submission, submission_text)
+        student = user_service.get_user(student_email)
+        course = course_service.get_course(course_id)
+        StudentPolicy.assert_student_access(student, course, db)
+        assignment = assignment_service.get_assignment(course, assignment_id)
+        submission = submission_service.get_submission(assignment, student)
+        GradePolicy.assert_not_graded(submission, db)
+        submission_service.update_submission(submission, submission_text)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
     except (
         course_errors.CourseNotFoundError,
-        assignment_errors.AssignmentNotFoundError
+        assignment_errors.AssignmentNotFoundError,
     ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except student_errors.StudentRoleRequired as e:
@@ -69,7 +70,7 @@ async def submit_assignment(
     except submission_errors.SubmissionGradedError as e:
         raise HTTPException(status_code=409, detail=str(e)) from e
     except submission_errors.SubmissionNotFoundError:
-        submission_logic.create_submission(assignment, student, submission_text, db)
+        submission_service.create_submission(assignment, student, submission_text)
         db.commit()
         return Success(success=True)
 
@@ -79,7 +80,7 @@ async def get_assignment_submissions(
     course_id: str,
     assignment_id: int,
     db: Annotated[Session, Depends(get_db)],
-    teacher_email: str = Depends(get_current_user)
+    teacher_email: str = Depends(get_current_user),
 ) -> list[Submission]:
     """
     Get the list of students submissions for the provided assignment.
@@ -90,19 +91,23 @@ async def get_assignment_submissions(
 
     Teacher OR Primary Instructor role required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    assignment_service = AssignmentService(db)
+    submission_service = SubmissionService(db)
     try:
-        teacher = user_logic.get_user(teacher_email, db)
-        course = course_logic.get_course(course_id, db)
+        teacher = user_service.get_user(teacher_email)
+        course = course_service.get_course(course_id)
         if not teacher.isadmin:
-            teacher_logic.assert_teacher_access(teacher, course, db)
-        assignment = assignment_logic.get_assignment(course, assignment_id, db)
-        submissions = submission_logic.get_assignment_submissions(assignment, db)
+            TeacherPolicy.assert_teacher_access(teacher, course, db)
+        assignment = assignment_service.get_assignment(course, assignment_id)
+        submissions = submission_service.get_assignment_submissions(assignment)
         return [Submission.model_validate(sub) for sub in submissions]
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
     except (
         course_errors.CourseNotFoundError,
-        assignment_errors.AssignmentNotFoundError
+        assignment_errors.AssignmentNotFoundError,
     ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except teacher_errors.TeacherRoleRequired as e:
@@ -126,13 +131,17 @@ async def get_submission(
 
     Returns the submission (course_id, assignment_id, email, timeadded, timemodified, and submission_text).
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    assignment_service = AssignmentService(db)
+    submission_service = SubmissionService(db)
     try:
-        user = user_logic.get_user(user_email, db)
-        student = user_logic.get_user(student_email, db)
-        course = course_logic.get_course(course_id, db)
-        student_logic.assert_access_to_student(student, user, course, db)
-        assignment = assignment_logic.get_assignment(course, assignment_id, db)
-        submission = submission_logic.get_submission(assignment, student, db)
+        user = user_service.get_user(user_email)
+        student = user_service.get_user(student_email)
+        course = course_service.get_course(course_id)
+        StudentPolicy.assert_access_to_student(student, user, course, db)
+        assignment = assignment_service.get_assignment(course, assignment_id)
+        submission = submission_service.get_submission(assignment, student)
         return Submission.model_validate(submission)
     except user_errors.UserNotFoundError as e:
         if e.email == user_email:
@@ -142,7 +151,7 @@ async def get_submission(
     except (
         course_errors.CourseNotFoundError,
         student_errors.StudentRoleRequired,
-        assignment_errors.AssignmentNotFoundError
+        assignment_errors.AssignmentNotFoundError,
     ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except submission_errors.SubmissionNotFoundError as e:

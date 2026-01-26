@@ -5,18 +5,22 @@ from models.common import Success
 from typing import Annotated
 from sqlalchemy.orm import Session
 from db import get_db
-import services.users as user_logic
-import services.courses as course_logic
-import services.teachers as teacher_logic
-import exceptions.teachers as teacher_errors
-import exceptions.courses as course_errors
-import exceptions.users as user_errors
-import services.personalization as personalization_logic
-import services.sections as section_logic
-import services.students as student_logic
-import services.parents as parent_logic
+from services import (
+    UserService,
+    CourseService,
+    PersonalizationService,
+    SectionService,
+    StudentService,
+    TeacherService,
+    ParentService,
+)
+from policies import TeacherPolicy, CoursePolicy, StudentPolicy, ParentPolicy
+from exceptions import (
+    teachers as teacher_errors,
+    courses as course_errors,
+    users as user_errors,
+)
 from settings.course import course_settings
-
 
 router = APIRouter(
     prefix="/courses",
@@ -34,9 +38,11 @@ async def get_available_courses(
 
     For each course, returns (course_id, title, organization, instructor_email, and creation_time).
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
     try:
-        user = user_logic.get_user(user_email, db)
-        courses = course_logic.get_available_courses(user, db)
+        user = user_service.get_user(user_email)
+        courses = course_service.get_available_courses(user)
         return [Course.model_validate(course) for course in courses]
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
@@ -50,14 +56,14 @@ async def create_course(
         min_length=course_settings.name_min_lenght,
         max_length=course_settings.name_max_lenght,
         pattern=r"^[\p{L}0-9_ ]+$",
-        description=f"Title can contain only letters, digits, spaces, and underscores, {course_settings.name_min_lenght}-{course_settings.name_max_lenght} symbols"
+        description=f"Title can contain only letters, digits, spaces, and underscores, {course_settings.name_min_lenght}-{course_settings.name_max_lenght} symbols",
     ),
     organization: str | None = Query(
         None,
         min_length=course_settings.organization_min_lenght,
         max_length=course_settings.organization_max_lenght,
         pattern=r"^[\p{L}0-9_ ]+$",
-        description=f"Organization can contain only letters, digits, spaces, and underscores, {course_settings.organization_min_lenght}-{course_settings.organization_max_lenght} symbols"
+        description=f"Organization can contain only letters, digits, spaces, and underscores, {course_settings.organization_min_lenght}-{course_settings.organization_max_lenght} symbols",
     ),
     user_email: str = Depends(get_current_user),
 ) -> CourseID:
@@ -70,11 +76,15 @@ async def create_course(
 
     Organization parameter is optional / can be None.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    personalization_service = PersonalizationService(db)
+    section_service = SectionService(db)
     try:
-        user = user_logic.get_user(user_email, db)
-        course = course_logic.create_course(title, organization, user, db)
-        personalization_logic.add_course_participant(course, user, db)
-        section_logic.create_section("General", course, db)
+        user = user_service.get_user(user_email)
+        course = course_service.create_course(title, organization, user)
+        personalization_service.add_course_participant(course, user)
+        section_service.create_section("General", course)
         db.commit()
         return CourseID.model_validate(course)
     except user_errors.UserNotFoundError as e:
@@ -85,7 +95,7 @@ async def create_course(
 async def delete_course(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user)
+    user_email: str = Depends(get_current_user),
 ) -> Success:
     """
     Remove the course with provided course_id.
@@ -94,12 +104,14 @@ async def delete_course(
 
     Primary Instructor role required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
     try:
-        user = user_logic.get_user(user_email, db)
-        course = course_logic.get_course(course_id, db)
+        user = user_service.get_user(user_email)
+        course = course_service.get_course(course_id)
         if not user.isadmin:
-            teacher_logic.assert_instructor_access(user, course, db)
-        course_logic.delete_course(course, db)
+            TeacherPolicy.assert_instructor_access(user, course, db)
+        course_service.delete_course(course)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
@@ -114,7 +126,7 @@ async def delete_course(
 async def get_course_info(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user)
+    user_email: str = Depends(get_current_user),
 ) -> Course:
     """
     Get information about the course: course_id, title, organization, instructor_email, and creation_time.
@@ -123,11 +135,13 @@ async def get_course_info(
 
     Course role (Primary Instructor, Teacher, Student, Parent) required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
     try:
-        user = user_logic.get_user(user_email, db)
-        course = course_logic.get_course(course_id, db)
+        user = user_service.get_user(user_email)
+        course = course_service.get_course(course_id)
         if not user.isadmin:
-            course_logic.assert_course_access(user, course, db)
+            CoursePolicy.assert_course_access(user, course, db)
         return Course.model_validate(course)
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
@@ -141,7 +155,7 @@ async def get_course_info(
 async def exit_course(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user)
+    user_email: str = Depends(get_current_user),
 ) -> Success:
     """
     Remove user from the course with provided course_id.
@@ -150,22 +164,27 @@ async def exit_course(
 
     Course role (Primary Instructor, Teacher, Student, Parent) required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    student_service = StudentService(db)
+    teacher_service = TeacherService(db)
+    parent_service = ParentService(db)
     try:
-        user = user_logic.get_user(user_email, db)
-        course = course_logic.get_course(course_id, db)
-        if student_logic.check_student_access(user, course, db):
-            student_logic.remove_student(user, course, db)
+        user = user_service.get_user(user_email)
+        course = course_service.get_course(course_id)
+        if StudentPolicy.check_student_access(user, course, db):
+            student_service.remove_student(user, course)
             db.commit()
             return Success(success=True)
-        if teacher_logic.check_teacher_access(user, course, db):
-            teacher_logic.remove_teacher(user, course, db)
+        if TeacherPolicy.check_teacher_access(user, course, db):
+            teacher_service.remove_teacher(user, course)
             db.commit()
             return Success(success=True)
-        if parent_logic.check_parent_access(user, course, db):
-            parent_logic.remove_parent(user, course, db)
+        if ParentPolicy.check_parent_access(user, course, db):
+            parent_service.remove_parent(user, course)
             db.commit()
             return Success(success=True)
-        if teacher_logic.check_instructor_access(user, course, db):
+        if TeacherPolicy.check_instructor_access(user, course, db):
             raise teacher_errors.DeleteInstructorError(user.email, course.course_id)
         raise course_errors.ParticipantRoleRequired(user.email, course_id)
     except user_errors.UserNotFoundError as e:
@@ -174,6 +193,6 @@ async def exit_course(
         raise HTTPException(status_code=400, detail=str(e)) from e
     except (
         teacher_errors.DeleteInstructorError,
-        course_errors.ParticipantRoleRequired
+        course_errors.ParticipantRoleRequired,
     ) as e:
         raise HTTPException(status_code=403, detail=str(e)) from e

@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from repo.courses import Course
 from repo.users import User
 from repo.personalization import PersonalCourseInfo
-from sqlalchemy import exists
 import logging
 
 
@@ -32,20 +31,6 @@ class CourseService:
             .order_by(PersonalCourseInfo.course_order.asc())
             .all()
         )
-
-    def assert_course_access(self, user: User, course: Course) -> None:
-        """Asserts that the provided user has an access to the provided course."""
-        access = self.db.query(
-            exists().where(
-                (PersonalCourseInfo.email == user.email)
-                & (PersonalCourseInfo.course_id == course.course_id)
-            )
-        ).scalar()
-        if not access:
-            self.logger.warning(
-                f"Access denied for user {user.email} to course {course.course_id}"
-            )
-            raise course_errors.ParticipantRoleRequired(user.email, course.course_id)
 
     def get_all_courses(self) -> list[Course]:
         """Get the list of all courses within the platform."""

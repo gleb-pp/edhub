@@ -5,21 +5,23 @@ from models.grades import AssignmentGrade
 from typing import Annotated
 from sqlalchemy.orm import Session
 from db import get_db
-import services.users as user_logic
-import exceptions.users as user_errors
-import services.courses as course_logic
-import exceptions.courses as course_errors
-import services.students as student_logic
-import exceptions.students as student_errors
-import services.teachers as teacher_logic
-import exceptions.teachers as teacher_errors
-import services.assignments as assignment_logic
-import exceptions.assignments as assignment_errors
-import services.submissions as submission_logic
-import exceptions.submissions as submission_errors
-import services.grades as grade_logic
+from services import (
+    CourseService,
+    UserService,
+    GradeService,
+    AssignmentService,
+    SubmissionService,
+)
+from policies import TeacherPolicy, StudentPolicy
+from exceptions import (
+    users as user_errors,
+    courses as course_errors,
+    students as student_errors,
+    teachers as teacher_errors,
+    assignments as assignment_errors,
+    submissions as submission_errors,
+)
 from settings.submissions import submission_settings
-
 
 router = APIRouter(
     prefix="/{course_id}/grades",
@@ -38,7 +40,7 @@ async def grade_submission(
         None,
         min_length=submission_settings.grade_comment_min_lenght,
         max_length=submission_settings.grade_comment_max_lenght,
-        description=f"Comment must contain {submission_settings.grade_comment_min_lenght}-{submission_settings.grade_comment_max_lenght} symbols"
+        description=f"Comment must contain {submission_settings.grade_comment_min_lenght}-{submission_settings.grade_comment_max_lenght} symbols",
     ),
     teacher_email: str = Depends(get_current_user),
 ) -> Success:
@@ -51,16 +53,21 @@ async def grade_submission(
 
     Comment must be None or contain from 3 to 10000 symbols.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    assignment_service = AssignmentService(db)
+    submission_service = SubmissionService(db)
+    grade_service = GradeService(db)
     try:
-        teacher = user_logic.get_user(teacher_email, db)
-        course = course_logic.get_course(course_id, db)
+        teacher = user_service.get_user(teacher_email)
+        course = course_service.get_course(course_id)
         if not teacher.isadmin:
-            teacher_logic.assert_teacher_access(teacher, course, db)
-        student = user_logic.get_user(student_email, db)
-        student_logic.assert_student_access(student, course, db)
-        assignment = assignment_logic.get_assignment(course, assignment_id, db)
-        submission = submission_logic.get_submission(assignment, student, db)
-        grade_logic.update_submission_grade(submission, grade, comment, teacher, db)
+            TeacherPolicy.assert_teacher_access(teacher, course, db)
+        student = user_service.get_user(student_email)
+        StudentPolicy.assert_student_access(student, course, db)
+        assignment = assignment_service.get_assignment(course, assignment_id)
+        submission = submission_service.get_submission(assignment, student)
+        grade_service.update_submission_grade(submission, grade, comment, teacher)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
@@ -74,8 +81,8 @@ async def grade_submission(
         course_errors.CourseNotFoundError,
         student_errors.StudentRoleRequired,
         assignment_errors.AssignmentNotFoundError,
-        submission_errors.SubmissionNotFoundError
-     ) as e:
+        submission_errors.SubmissionNotFoundError,
+    ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except teacher_errors.TeacherRoleRequired as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
@@ -98,14 +105,19 @@ async def get_submission_grade(
     - Parent can get the grades for submissions of their children
     - Student can get the grade for their submision
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    assignment_service = AssignmentService(db)
+    submission_service = SubmissionService(db)
+    grade_service = GradeService(db)
     try:
-        user = user_logic.get_user(user_email, db)
-        student = user_logic.get_user(student_email, db)
-        course = course_logic.get_course(course_id, db)
-        student_logic.assert_access_to_student(student, user, course, db)
-        assignment = assignment_logic.get_assignment(course, assignment_id, db)
-        submission = submission_logic.get_submission(assignment, student, db)
-        grade = grade_logic.get_submission_grade(submission, db)
+        user = user_service.get_user(user_email)
+        student = user_service.get_user(student_email)
+        course = course_service.get_course(course_id)
+        StudentPolicy.assert_access_to_student(student, user, course, db)
+        assignment = assignment_service.get_assignment(course, assignment_id)
+        submission = submission_service.get_submission(assignment, student)
+        grade = grade_service.get_submission_grade(submission)
         return AssignmentGrade.model_validate(grade)
     except user_errors.UserNotFoundError as e:
         if e.email == user_email:
@@ -115,7 +127,7 @@ async def get_submission_grade(
     except (
         course_errors.CourseNotFoundError,
         assignment_errors.AssignmentNotFoundError,
-        submission_errors.SubmissionNotFoundError
+        submission_errors.SubmissionNotFoundError,
     ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except submission_errors.GradeNotFoundError as e:

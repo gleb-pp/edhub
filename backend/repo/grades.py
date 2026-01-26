@@ -1,4 +1,11 @@
-from sqlalchemy import Integer, DateTime, Text, CheckConstraint, ForeignKey, ForeignKeyConstraint
+from sqlalchemy import (
+    Integer,
+    DateTime,
+    Text,
+    CheckConstraint,
+    ForeignKey,
+    ForeignKeyConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime, timezone
 from settings.submissions import submission_settings
@@ -21,13 +28,21 @@ class Grade(Base):
     teacher_email: Mapped[str | None] = mapped_column(
         ForeignKey("users.email", ondelete="SET NULL"), nullable=True
     )
-    time_graded: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now(tz=timezone.utc))
+    time_graded: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.now(tz=timezone.utc)
+    )
 
     __table_args__ = (
         ForeignKeyConstraint(
             ["course_id", "assignment_id", "student_email"],
-            ["course_assignments_submissions.course_id", "course_assignments_submissions.assignment_id", "course_assignments_submissions.email"],
+            [
+                "course_assignments_submissions.course_id",
+                "course_assignments_submissions.assignment_id",
+                "course_assignments_submissions.email",
+            ],
             ondelete="CASCADE",
         ),
-        CheckConstraint(f"comment IS NULL OR length(comment) BETWEEN {submission_settings.grade_comment_min_lenght} AND {submission_settings.grade_comment_max_lenght}"),
+        CheckConstraint(
+            f"comment IS NULL OR length(comment) BETWEEN {submission_settings.grade_comment_min_lenght} AND {submission_settings.grade_comment_max_lenght}"
+        ),
     )

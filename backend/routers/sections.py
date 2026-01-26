@@ -5,18 +5,21 @@ from models.sections import CoursePost, SectionID, Section
 from typing import Annotated
 from sqlalchemy.orm import Session
 from db import get_db
-import services.users as user_logic
-import services.courses as course_logic
-import services.sections as section_logic
-import exceptions.users as user_errors
-import exceptions.courses as course_errors
-import services.materials as material_logic
-import services.assignments as assignment_logic
-import exceptions.sections as section_errors
-import services.teachers as teacher_logic
-import exceptions.teachers as teacher_errors
+from services import (
+    UserService,
+    CourseService,
+    SectionService,
+    MaterialService,
+    AssignmentService,
+)
+from policies import CoursePolicy, TeacherPolicy
+from exceptions import (
+    users as user_errors,
+    courses as course_errors,
+    sections as section_errors,
+    teachers as teacher_errors,
+)
 from settings.sections import section_settings
-
 
 router = APIRouter(
     tags=["Course Sections"],
@@ -28,7 +31,7 @@ router = APIRouter(
 async def get_course_sections(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user)
+    user_email: str = Depends(get_current_user),
 ) -> list[Section]:
     """
     Get the list of course sections.
@@ -39,12 +42,15 @@ async def get_course_sections(
 
     Course role (Primary Instructor, Teacher, Student, Parent) required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    section_service = SectionService(db)
     try:
-        user = user_logic.get_user(user_email, db)
-        course = course_logic.get_course(course_id, db)
+        user = user_service.get_user(user_email)
+        course = course_service.get_course(course_id)
         if not user.isadmin:
-            course_logic.assert_course_access(user, course, db)
-        sections = section_logic.get_course_sections(course, db)
+            CoursePolicy.assert_course_access(user, course, db)
+        sections = section_service.get_course_sections(course)
         return [Section.model_validate(sec) for sec in sections]
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
@@ -59,7 +65,7 @@ async def get_section_feed(
     course_id: str,
     section_id: int,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user)
+    user_email: str = Depends(get_current_user),
 ) -> list[CoursePost]:
     """
     Get the list of materials and assignments for the provided section_id in the provided course_id.
@@ -72,22 +78,29 @@ async def get_section_feed(
 
     Course role (Primary Instructor, Teacher, Student, Parent) required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    section_service = SectionService(db)
+    material_service = MaterialService(db)
+    assignment_service = AssignmentService(db)
     try:
-        user = user_logic.get_user(user_email, db)
-        course = course_logic.get_course(course_id, db)
+        user = user_service.get_user(user_email)
+        course = course_service.get_course(course_id)
         if not user.isadmin:
-            course_logic.assert_course_access(user, course, db)
-        section = section_logic.get_section(course, section_id, db)
-        materials = material_logic.get_section_materials(section, db)
-        materials_posts = [{
+            CoursePolicy.assert_course_access(user, course, db)
+        section = section_service.get_section(course, section_id)
+        materials = material_service.get_section_materials(section)
+        materials_posts = [
+            {
                 **mat.__dict__,
                 "type": "material",
                 "post_id": mat.material_id,
             }
             for mat in materials
         ]
-        assignments = assignment_logic.get_section_assignments(section, db)
-        assignments_posts = [{
+        assignments = assignment_service.get_section_assignments(section)
+        assignments_posts = [
+            {
                 **ass.__dict__,
                 "type": "assignment",
                 "post_id": ass.assignment_id,
@@ -95,8 +108,7 @@ async def get_section_feed(
             for ass in assignments
         ]
         course_feed = sorted(
-            materials_posts + assignments_posts,
-            key=lambda p: p["creation_time"]
+            materials_posts + assignments_posts, key=lambda p: p["creation_time"]
         )
         return [CoursePost.model_validate(post) for post in course_feed]
     except user_errors.UserNotFoundError as e:
@@ -118,7 +130,7 @@ async def create_section(
         min_length=section_settings.name_min_lenght,
         max_length=section_settings.name_max_lenght,
         pattern=r"^[\p{L}0-9_ ]+$",
-        description=f"Section title can contain only letters, digits, spaces, and underscores, {section_settings.name_min_lenght}-{section_settings.name_max_lenght} symbols"
+        description=f"Section title can contain only letters, digits, spaces, and underscores, {section_settings.name_min_lenght}-{section_settings.name_max_lenght} symbols",
     ),
     teacher_email: str = Depends(get_current_user),
 ) -> SectionID:
@@ -131,12 +143,15 @@ async def create_section(
 
     Teacher OR Primary Instructor role required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    section_service = SectionService(db)
     try:
-        teacher = user_logic.get_user(teacher_email, db)
-        course = course_logic.get_course(course_id, db)
+        teacher = user_service.get_user(teacher_email)
+        course = course_service.get_course(course_id)
         if not teacher.isadmin:
-            teacher_logic.assert_teacher_access(teacher, course, db)
-        section = section_logic.create_section(title, course, db)
+            TeacherPolicy.assert_teacher_access(teacher, course, db)
+        section = section_service.create_section(title, course)
         db.commit()
         return SectionID.model_validate(section)
     except user_errors.UserNotFoundError as e:
@@ -161,12 +176,15 @@ async def change_section_order(
 
     Teacher OR Primary Instructor role required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    section_service = SectionService(db)
     try:
-        teacher = user_logic.get_user(teacher_email, db)
-        course = course_logic.get_course(course_id, db)
+        teacher = user_service.get_user(teacher_email)
+        course = course_service.get_course(course_id)
         if not teacher.isadmin:
-            teacher_logic.assert_teacher_access(teacher, course, db)
-        section_logic.change_section_order(course, new_order, db)
+            TeacherPolicy.assert_teacher_access(teacher, course, db)
+        section_service.change_section_order(course, new_order)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
@@ -174,8 +192,8 @@ async def change_section_order(
     except (
         course_errors.CourseNotFoundError,
         section_errors.SectionNotFoundError,
-        section_errors.IncorrectSectionOrderError
-     ) as e:
+        section_errors.IncorrectSectionOrderError,
+    ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except teacher_errors.TeacherRoleRequired as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
@@ -197,21 +215,24 @@ async def remove_section(
 
     Teacher OR Primary Instructor role required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    section_service = SectionService(db)
     try:
-        teacher = user_logic.get_user(teacher_email, db)
-        course = course_logic.get_course(course_id, db)
+        teacher = user_service.get_user(teacher_email)
+        course = course_service.get_course(course_id)
         if not teacher.isadmin:
-            teacher_logic.assert_teacher_access(teacher, course, db)
-        section = section_logic.get_section(course, section_id, db)
-        section_logic.remove_section(section, db)
+            TeacherPolicy.assert_teacher_access(teacher, course, db)
+        section = section_service.get_section(course, section_id)
+        section_service.remove_section(section)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
     except (
         course_errors.CourseNotFoundError,
-        section_errors.SectionNotFoundError
-     ) as e:
+        section_errors.SectionNotFoundError,
+    ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except teacher_errors.TeacherRoleRequired as e:
         raise HTTPException(status_code=403, detail=str(e)) from e

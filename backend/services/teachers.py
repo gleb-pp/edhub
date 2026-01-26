@@ -2,8 +2,6 @@ from repo.users import User
 from repo.courses import Course
 from repo.teachers import Teaches
 from sqlalchemy.orm import Session
-from sqlalchemy import exists
-import exceptions.teachers as teacher_errors
 import logging
 
 
@@ -14,50 +12,6 @@ class TeacherService:
 
     def __init__(self, db: Session):
         self.db = db
-
-    def check_instructor_access(self, user: User, course: Course) -> bool:
-        """Check whether the provided user has an instructor role in the provided course."""
-        return self.db.query(
-            exists().where(
-                (Course.instructor == user.email)
-                & (Course.course_id == course.course_id)
-            )
-        ).scalar()
-
-    def check_teacher_access(self, user: User, course: Course) -> bool:
-        """Check whether the provided user has a teacher or instructor role in the provided course."""
-        if course.instructor == user.email:
-            return True
-
-        return self.db.query(
-            exists().where(
-                (Teaches.email == user.email) & (Teaches.course_id == course.course_id)
-            )
-        ).scalar()
-
-    def assert_instructor_access(self, user: User, course: Course) -> None:
-        """Asserts that the provided user has an instructor role in the provided course."""
-        if not self.check_instructor_access(user, course):
-            self.logger.warning(
-                f"Attempt to access instructor-only actions by user {user.email} on course {course.name}"
-            )
-            raise teacher_errors.InstructorRoleRequired(user.email, course.name)
-
-    def assert_teacher_access(self, user: User, course: Course) -> None:
-        """Asserts that the provided user has a teacher or an instructor role in the provided course."""
-        if not self.check_teacher_access(user, course):
-            self.logger.warning(
-                f"Attempt to access teacher-only actions by user {user.email} on course {course.name}"
-            )
-            raise teacher_errors.TeacherRoleRequired(user.email, course.name)
-
-    def assert_not_teacher(self, user: User, course: Course) -> None:
-        """Asserts that the provided user is already a teacher in the provided course."""
-        if self.check_teacher_access(user, course):
-            self.logger.warning(
-                f"Attempt to assign teacher role to user {user.email} who is already a teacher in course {course.name}"
-            )
-            raise teacher_errors.TeacherRoleConflict(user.email, course.course_id)
 
     def get_course_teachers(self, course: Course) -> list[User]:
         """Get the list of students enrolled to the provided course."""

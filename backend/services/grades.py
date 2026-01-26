@@ -50,23 +50,6 @@ class GradeService:
         graded.comment = comment
         graded.gradedby = teacher.email
 
-    def assert_not_graded(self, submission: AssignmentSubmission) -> None:
-        """Assert that the provided submission is not graded yet."""
-        grade = (
-            self.db.query(Grade)
-            .filter(
-                Grade.course_id == submission.course_id,
-                Grade.assignment_id == submission.assignment_id,
-                Grade.student_email == submission.email,
-            )
-            .first()
-        )
-        if grade:
-            self.logger.warning("Attempt to submit already graded submission.")
-            raise submission_errors.SubmissionGradedError(
-                submission.course_id, submission.assignment_id, submission.email
-            )
-
     def get_submission_grade(self, submission: AssignmentSubmission) -> Grade:
         """Get the grade for the provided submission."""
         grade = (

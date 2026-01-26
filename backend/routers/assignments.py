@@ -1,26 +1,20 @@
 from typing import Annotated
 from sqlalchemy.orm import Session
 from db import get_db
-from fastapi import APIRouter, Depends, Query, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException
 from auth import get_current_user
 from models.common import Success
-from models.assignments import (
-    AssignmentID,
-    Assignment,
-    AssignmentAttachmentMetadata
+from models.assignments import AssignmentID, Assignment
+from services import UserService, CourseService, SectionService, AssignmentService
+from policies import CoursePolicy, TeacherPolicy
+from exceptions import (
+    users as user_errors,
+    courses as course_errors,
+    sections as section_errors,
+    teachers as teacher_errors,
+    assignments as assignment_errors,
 )
-import services.users as user_logic
-import services.courses as course_logic
-import services.sections as section_logic
-import exceptions.users as user_errors
-import exceptions.courses as course_errors
-import exceptions.sections as section_errors
-import services.teachers as teacher_logic
-import exceptions.teachers as teacher_errors
-import services.assignments as assignment_logic
-import exceptions.assignments as assignment_errors
 from settings.assignments import assignment_settings
-
 
 router = APIRouter(
     prefix="/{course_id}/assignments",
@@ -38,13 +32,13 @@ async def create_assignment(
         min_length=assignment_settings.name_min_lenght,
         max_length=assignment_settings.name_max_lenght,
         pattern=r"^[\p{L}0-9_ ]+$",
-        description=f"Title can contain only letters, digits, spaces, and underscores, {assignment_settings.name_min_lenght}-{assignment_settings.name_max_lenght} symbols"
+        description=f"Title can contain only letters, digits, spaces, and underscores, {assignment_settings.name_min_lenght}-{assignment_settings.name_max_lenght} symbols",
     ),
     description: str = Query(
         ...,
         min_length=assignment_settings.description_min_lenght,
         max_length=assignment_settings.description_max_lenght,
-        description=f"Description must contain {assignment_settings.description_min_lenght}-{assignment_settings.description_max_lenght} symbols"
+        description=f"Description must contain {assignment_settings.description_min_lenght}-{assignment_settings.description_max_lenght} symbols",
     ),
     teacher_email: str = Depends(get_current_user),
 ) -> AssignmentID:
@@ -61,21 +55,27 @@ async def create_assignment(
 
     Returns the (course_id, assignment_id, section_id) for the new assignment in case of success.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    section_service = SectionService(db)
+    assignment_service = AssignmentService(db)
     try:
-        teacher = user_logic.get_user(teacher_email, db)
-        course = course_logic.get_course(course_id, db)
+        teacher = user_service.get_user(teacher_email)
+        course = course_service.get_course(course_id)
         if not teacher.isadmin:
-            teacher_logic.assert_teacher_access(teacher, course, db)
-        section = section_logic.get_section(course, section_id, db)
-        assignment = assignment_logic.create_assignment(section, title, description, teacher, db)
+            TeacherPolicy.assert_teacher_access(teacher, course, db)
+        section = section_service.get_section(course, section_id)
+        assignment = assignment_service.create_assignment(
+            section, title, description, teacher
+        )
         db.commit()
         return AssignmentID.model_validate(assignment)
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
     except (
         course_errors.CourseNotFoundError,
-        section_errors.SectionNotFoundError
-     ) as e:
+        section_errors.SectionNotFoundError,
+    ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except teacher_errors.TeacherRoleRequired as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
@@ -93,21 +93,24 @@ async def remove_assignment(
 
     Teacher OR Primary Instructor role required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    assignment_service = AssignmentService(db)
     try:
-        teacher = user_logic.get_user(teacher_email, db)
-        course = course_logic.get_course(course_id, db)
+        teacher = user_service.get_user(teacher_email)
+        course = course_service.get_course(course_id)
         if not teacher.isadmin:
-            teacher_logic.assert_teacher_access(teacher, course, db)
-        assignment = assignment_logic.get_assignment(course, assignment_id, db)
-        assignment_logic.delete_assignment(assignment, db)
+            TeacherPolicy.assert_teacher_access(teacher, course, db)
+        assignment = assignment_service.get_assignment(course, assignment_id)
+        assignment_service.delete_assignment(assignment)
         db.commit()
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
     except (
         course_errors.CourseNotFoundError,
-        assignment_errors.AssignmentNotFoundError
-     ) as e:
+        assignment_errors.AssignmentNotFoundError,
+    ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except teacher_errors.TeacherRoleRequired as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
@@ -131,12 +134,15 @@ async def get_assignment(
 
     Course role (Primary Instructor, Teacher, Student, Parent) required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    assignment_service = AssignmentService(db)
     try:
-        user = user_logic.get_user(user_email, db)
-        course = course_logic.get_course(course_id, db)
+        user = user_service.get_user(user_email)
+        course = course_service.get_course(course_id)
         if not user.isadmin:
-            course_logic.assert_course_access(user, course, db)
-        assignment = assignment_logic.get_assignment(course, assignment_id, db)
+            CoursePolicy.assert_course_access(user, course, db)
+        assignment = assignment_service.get_assignment(course, assignment_id)
         return Assignment.model_validate(assignment)
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
@@ -146,6 +152,7 @@ async def get_assignment(
         raise HTTPException(status_code=400, detail=str(e)) from e
     except assignment_errors.AssignmentNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
+
 
 @router.get("/")
 async def get_course_assignments(
@@ -166,12 +173,15 @@ async def get_course_assignments(
 
     Course role (Primary Instructor, Teacher, Student, Parent) required.
     """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    assignment_service = AssignmentService(db)
     try:
-        user = user_logic.get_user(user_email, db)
-        course = course_logic.get_course(course_id, db)
+        user = user_service.get_user(user_email)
+        course = course_service.get_course(course_id)
         if not user.isadmin:
-            course_logic.assert_course_access(user, course, db)
-        assignments = assignment_logic.get_course_assignments(course, db)
+            CoursePolicy.assert_course_access(user, course, db)
+        assignments = assignment_service.get_course_assignments(course)
         return [Assignment.model_validate(ass) for ass in assignments]
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e

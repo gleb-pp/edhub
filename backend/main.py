@@ -45,7 +45,7 @@ app = FastAPI(
     "a self-contained and clear design, supporting all the necessary "
     "features but not bogging the user down with complex customizations.",
     version="1.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 app.include_router(routers.assignments.router)
 app.include_router(routers.submissions.router)
