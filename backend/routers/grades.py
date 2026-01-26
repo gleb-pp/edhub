@@ -24,12 +24,12 @@ from exceptions import (
 from settings.submissions import submission_settings
 
 router = APIRouter(
-    prefix="/{course_id}/grades",
+    prefix="/courses/{course_id}/assignments/{assignment_id}/submissions/{submission_id}",
     tags=["Grades"],
 )
 
 
-@router.put("/{assignment_id}/{student_email}")
+@router.put("/grade")
 async def grade_submission(
     course_id: str,
     assignment_id: int,
@@ -88,7 +88,7 @@ async def grade_submission(
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
-@router.get("/{assignment_id}/{student_email}")
+@router.get("/grade")
 async def get_submission_grade(
     course_id: str,
     assignment_id: int,

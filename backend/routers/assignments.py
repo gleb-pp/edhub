@@ -17,12 +17,12 @@ from exceptions import (
 from settings.assignments import assignment_settings
 
 router = APIRouter(
-    prefix="/{course_id}/assignments",
+    prefix="/courses/{course_id}",
     tags=["Assignments"],
 )
 
 
-@router.post("/{section_id}")
+@router.post("/sections/{section_id}/assignments")
 async def create_assignment(
     course_id: str,
     section_id: int,
@@ -81,7 +81,7 @@ async def create_assignment(
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
-@router.delete("/{assignment_id}")
+@router.delete("/assignments/{assignment_id}")
 async def remove_assignment(
     course_id: str,
     assignment_id: int,
@@ -116,7 +116,7 @@ async def remove_assignment(
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
-@router.get("/{assignment_id}")
+@router.get("/assignments/{assignment_id}")
 async def get_assignment(
     course_id: str,
     assignment_id: int,
@@ -154,7 +154,7 @@ async def get_assignment(
         raise HTTPException(status_code=404, detail=str(e)) from e
 
 
-@router.get("/")
+@router.get("/assignments")
 async def get_course_assignments(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],

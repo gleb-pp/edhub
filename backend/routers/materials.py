@@ -17,12 +17,12 @@ from exceptions import (
 from settings.materials import material_settings
 
 router = APIRouter(
-    prefix="/{course_id}/materials",
+    prefix="/courses/{course_id}",
     tags=["Materials"],
 )
 
 
-@router.post("/{section_id}")
+@router.post("/sections/{section_id}/materials")
 async def create_material(
     course_id: str,
     section_id: int,
@@ -81,7 +81,7 @@ async def create_material(
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
-@router.delete("/{material_id}")
+@router.delete("/materials/{material_id}")
 async def remove_material(
     course_id: str,
     material_id: int,
@@ -116,7 +116,7 @@ async def remove_material(
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
-@router.get("/{material_id}")
+@router.get("/material/{material_id}")
 async def get_material(
     course_id: str,
     material_id: int,

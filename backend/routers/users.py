@@ -15,12 +15,11 @@ from sqlalchemy.orm import Session
 from db import get_db
 
 router = APIRouter(
-    prefix="/users",
     tags=["Users"],
 )
 
 
-@router.get("/{user_email}")
+@router.get("/users/{user_email}")
 async def get_user_info(
     user_email: str,
     db: Annotated[Session, Depends(get_db)],
@@ -36,7 +35,7 @@ async def get_user_info(
         raise HTTPException(status_code=404, detail=str(e)) from e
 
 
-@router.get("/{course_id}")
+@router.get("/course/{course_id}/me/role")
 async def get_my_role(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
@@ -63,7 +62,7 @@ async def get_my_role(
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.post("/")
+@router.post("/users")
 async def create_user(
     email: str, name: str, password: str, db: Annotated[Session, Depends(get_db)]
 ) -> AccessToken:
@@ -120,7 +119,7 @@ async def login(
         raise HTTPException(status_code=401, detail=str(e)) from e
 
 
-@router.patch("/change_password")
+@router.patch("/users/me/password")
 async def change_password(
     email: str,
     password: str,
@@ -144,7 +143,7 @@ async def change_password(
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.get("/instructor_courses")
+@router.get("/users/instructor_courses")
 async def get_my_instructor_courses(
     db: Annotated[Session, Depends(get_db)],
     user_email: str = Depends(get_current_user),
@@ -161,7 +160,7 @@ async def get_my_instructor_courses(
         raise HTTPException(status_code=401, detail=str(e)) from e
 
 
-@router.delete("/")
+@router.delete("/users/me")
 async def remove_user(
     db: Annotated[Session, Depends(get_db)], user_email: str = Depends(get_current_user)
 ) -> Success:

@@ -23,11 +23,11 @@ from settings.sections import section_settings
 
 router = APIRouter(
     tags=["Course Sections"],
-    prefix="/{course_id}/sections",
+    prefix="/courses/{course_id}",
 )
 
 
-@router.get("/")
+@router.get("/sections")
 async def get_course_sections(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
@@ -60,7 +60,7 @@ async def get_course_sections(
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.get("/{section_id}")
+@router.get("/sections/{section_id}")
 async def get_section_feed(
     course_id: str,
     section_id: int,
@@ -121,7 +121,7 @@ async def get_section_feed(
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.post("/")
+@router.post("/sections")
 async def create_section(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
@@ -162,7 +162,7 @@ async def create_section(
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
-@router.put("/change_section_order")
+@router.put("/sections/order")
 async def change_section_order(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
@@ -199,7 +199,7 @@ async def change_section_order(
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
-@router.delete("/remove_section")
+@router.delete("/sections/{section_id}")
 async def remove_section(
     course_id: str,
     section_id: int,

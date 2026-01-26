@@ -15,12 +15,12 @@ from exceptions import (
 )
 
 router = APIRouter(
-    prefix="/{course_id}/students",
-    tags=["Courses"],
+    prefix="/courses/{course_id}",
+    tags=["Students"],
 )
 
 
-@router.get("/")
+@router.get("/students")
 async def get_enrolled_students(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
@@ -53,7 +53,7 @@ async def get_enrolled_students(
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.post("/")
+@router.post("/students")
 async def invite_student(
     course_id: str,
     student_email: str,
@@ -97,7 +97,7 @@ async def invite_student(
         raise HTTPException(status_code=409, detail=str(e)) from e
 
 
-@router.delete("/{student_email}")
+@router.delete("/students/{student_email}")
 async def remove_student(
     course_id: str,
     student_email: str,

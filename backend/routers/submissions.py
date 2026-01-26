@@ -17,12 +17,12 @@ from exceptions import (
 )
 
 router = APIRouter(
-    prefix="/{course_id}/{assignment_id}/submissions",
+    prefix="/courses/{course_id}/assignments/{assignment_id}",
     tags=["Submissions"],
 )
 
 
-@router.put("/")
+@router.put("/submissions")
 async def submit_assignment(
     course_id: str,
     assignment_id: int,
@@ -75,7 +75,7 @@ async def submit_assignment(
         return Success(success=True)
 
 
-@router.get("/")
+@router.get("/submissions")
 async def get_assignment_submissions(
     course_id: str,
     assignment_id: int,
@@ -114,7 +114,7 @@ async def get_assignment_submissions(
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
-@router.get("/{student_email}")
+@router.get("/submissions/{student_email}")
 async def get_submission(
     course_id: str,
     assignment_id: int,

@@ -16,11 +16,12 @@ from exceptions import (
 )
 
 router = APIRouter(
+    prefix="/courses/{course_id}",
     tags=["Parents"],
 )
 
 
-@router.get("{course_id}/parents/{student_email}")
+@router.get("/students/{student_email}/parents")
 async def get_students_parents(
     course_id: str,
     student_email: str,
@@ -58,7 +59,7 @@ async def get_students_parents(
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
-@router.post("{course_id}/parents/{student_email}")
+@router.post("/students/{student_email}/parents")
 async def invite_parent(
     course_id: str,
     student_email: str,
@@ -106,7 +107,7 @@ async def invite_parent(
         raise HTTPException(status_code=409, detail=str(e)) from e
 
 
-@router.delete("{course_id}/parents/{student_email}/{parent_email}")
+@router.delete("/students/{student_email}/parents/{parent_email}")
 async def remove_parent(
     course_id: str,
     student_email: str,
@@ -153,7 +154,7 @@ async def remove_parent(
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
-@router.get("{course_id}/children/{parent_email}")
+@router.get("/parents/{parent_email}/students")
 async def get_parents_children(
     course_id: str,
     parent_email: str,

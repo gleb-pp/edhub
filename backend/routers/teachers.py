@@ -14,12 +14,12 @@ from exceptions import (
 )
 
 router = APIRouter(
-    prefix="/{course_id}/teachers",
+    prefix="/courses/{course_id}",
     tags=["Teachers"],
 )
 
 
-@router.get("/")
+@router.get("/teachers")
 async def get_course_teachers(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
@@ -50,7 +50,7 @@ async def get_course_teachers(
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.post("/")
+@router.post("/teachers")
 async def invite_teacher(
     course_id: str,
     new_teacher_email: str,
@@ -94,7 +94,7 @@ async def invite_teacher(
         raise HTTPException(status_code=409, detail=str(e)) from e
 
 
-@router.delete("/{removing_teacher_email}")
+@router.delete("/teachers/{removing_teacher_email}")
 async def remove_teacher(
     course_id: str,
     teacher_email: str,
@@ -138,7 +138,7 @@ async def remove_teacher(
         raise HTTPException(status_code=422, detail=str(e)) from e
 
 
-@router.patch("/change_course_instructor", tags=["Courses"])
+@router.patch("/teachers/instructor", tags=["Courses"])
 async def change_course_instructor(
     course_id: str,
     teacher_email: str,

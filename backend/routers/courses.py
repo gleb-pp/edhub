@@ -23,12 +23,11 @@ from exceptions import (
 from settings.course import course_settings
 
 router = APIRouter(
-    prefix="/courses",
     tags=["Courses"],
 )
 
 
-@router.get("/")
+@router.get("/courses")
 async def get_available_courses(
     db: Annotated[Session, Depends(get_db)],
     user_email: str = Depends(get_current_user),
@@ -48,7 +47,7 @@ async def get_available_courses(
         raise HTTPException(status_code=401, detail=str(e)) from e
 
 
-@router.post("/")
+@router.post("/courses")
 async def create_course(
     db: Annotated[Session, Depends(get_db)],
     title: str = Query(
@@ -91,7 +90,7 @@ async def create_course(
         raise HTTPException(status_code=401, detail=str(e)) from e
 
 
-@router.delete("/{course_id}")
+@router.delete("/courses/{course_id}")
 async def delete_course(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
@@ -122,7 +121,7 @@ async def delete_course(
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.get("/{course_id}")
+@router.get("/courses/{course_id}")
 async def get_course_info(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
@@ -151,8 +150,8 @@ async def get_course_info(
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.post("/{course_id}/exit")
-async def exit_course(
+@router.delete("/courses/{course_id}/leave")
+async def leave_course(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
     user_email: str = Depends(get_current_user),
