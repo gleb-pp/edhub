@@ -19,6 +19,7 @@ class SectionService:
         return (
             self.db.query(CourseSection)
             .filter(CourseSection.course_id == course.course_id)
+            .order_by(CourseSection.section_order)
             .all()
         )
 

@@ -1,6 +1,17 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Literal
 from datetime import datetime
+
+
+class CoursePost(BaseModel):
+    course_id: str
+    post_id: int
+    section_id: int
+    creation_time: datetime
+    type: Literal["material", "assignment"]
+    author: str | None
+    title: str
+    model_config = ConfigDict(from_attributes=True)
 
 
 class SectionID(BaseModel):
@@ -11,15 +22,5 @@ class SectionID(BaseModel):
 
 class Section(SectionID):
     title: str
-    order: int
-
-
-class CoursePost(BaseModel):
-    course_id: str
-    post_id: int
-    section_id: int
-    creation_time: datetime
-    type: Literal["material", "assignment"]
-    author: str
-    title: str
-    model_config = ConfigDict(from_attributes=True)
+    section_order: int
+    feed: list[CoursePost] = Field(default_factory=list)

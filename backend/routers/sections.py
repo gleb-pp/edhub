@@ -60,13 +60,12 @@ async def get_course_sections(
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.get("/sections/{section_id}")
-async def get_section_feed(
+@router.get("/feed")
+async def get_course_feed(
     course_id: str,
-    section_id: int,
     db: Annotated[Session, Depends(get_db)],
     user_email: str = Depends(get_current_user),
-) -> list[CoursePost]:
+) -> list[Section]:
     """
     Get the list of materials and assignments for the provided section_id in the provided course_id.
 
@@ -74,7 +73,7 @@ async def get_section_feed(
 
     Type can be 'material' or 'assignment'.
 
-    Elements are ordered by by creation_date, old posts go first.
+    Elements are ordered by creation_time, old posts go first.
 
     Course role (Primary Instructor, Teacher, Student, Parent) required.
     """
@@ -88,29 +87,44 @@ async def get_section_feed(
         course = course_service.get_course(course_id)
         if not user.isadmin:
             CoursePolicy.assert_course_access(user, course, db)
-        section = section_service.get_section(course, section_id)
-        materials = material_service.get_section_materials(section)
-        materials_posts = [
-            {
-                **mat.__dict__,
-                "type": "material",
-                "post_id": mat.material_id,
-            }
-            for mat in materials
-        ]
-        assignments = assignment_service.get_section_assignments(section)
-        assignments_posts = [
-            {
-                **ass.__dict__,
-                "type": "assignment",
-                "post_id": ass.assignment_id,
-            }
-            for ass in assignments
-        ]
-        course_feed = sorted(
-            materials_posts + assignments_posts, key=lambda p: p["creation_time"]
-        )
-        return [CoursePost.model_validate(post) for post in course_feed]
+        sections = section_service.get_course_sections(course)
+        course_feed = []
+        for sec in sections:
+            # collect materials
+            materials = material_service.get_section_materials(sec)
+            materials_posts = [
+                CoursePost(
+                    course_id=mat.course_id,
+                    section_id=mat.section_id,
+                    creation_time=mat.creation_time,
+                    author=mat.author,
+                    title=mat.title,
+                    type="material",
+                    post_id=mat.material_id,
+                )
+                for mat in materials
+            ]
+            # collect assignments
+            assignments = assignment_service.get_section_assignments(sec)
+            assignments_posts = [
+                CoursePost(
+                    course_id=ass.course_id,
+                    section_id=ass.section_id,
+                    creation_time=ass.creation_time,
+                    author=ass.author,
+                    title=ass.title,
+                    type="assignment",
+                    post_id=ass.assignment_id,
+                )
+                for ass in assignments
+            ]
+            # costruct the section model
+            section_model = Section.model_validate(sec)
+            section_model.feed = sorted(
+                materials_posts + assignments_posts, key=lambda p: p.creation_time
+            )
+            course_feed.append(section_model)
+        return course_feed
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
     except course_errors.ParticipantRoleRequired as e:
