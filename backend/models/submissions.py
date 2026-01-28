@@ -12,7 +12,6 @@ class Submission(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-# TODO: model_config?
 class SubmissionAttachmentMetadata(BaseModel):
     course_id: str
     assignment_id: int
@@ -20,3 +19,4 @@ class SubmissionAttachmentMetadata(BaseModel):
     file_id: str
     filename: str
     upload_time: datetime
+    model_config = ConfigDict(from_attributes=True)
