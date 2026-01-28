@@ -1,7 +1,7 @@
-[![Issues][issues-shield]][issues-url]
+<!-- [![Issues][issues-shield]][issues-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Forks][forks-shield]][forks-url]
-[![Unlicense License][license-shield]][license-url]
+[![Unlicense License][license-shield]][license-url] -->
 
 # 🎓 What is EdHub?
 
