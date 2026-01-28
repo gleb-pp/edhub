@@ -35,7 +35,15 @@ The backend is structured into several layers to ensure maintainability and scal
 
 ### Built With
 
+[![Python][Python]][Python-url]
 [![FastAPI][FastAPI]][FastAPI-url]
+[![Pytest][Pytest]][Pytest-url]
+[![Pydantic][Pydantic]][Pydantic-url]
+[![Black][Black]][Black-url]
+[![Ruff][Ruff]][Ruff-url]
+[![Mypy][Mypy]][Mypy-url]
+
+
 [![PostgreSQL][PostgreSQL]][PostgreSQL-url]
 [![NginX][NginX]][NginX-url]
 [![Docker][Docker]][Docker-url]
@@ -96,10 +104,21 @@ Bug reports, issue discussions, and general feedback are welcome.
 If you notice unexpected behavior or have suggestions regarding usability
 or documentation, feel free to open an issue.
 
+[Python]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
+[Python-url]: https://www.python.org/
 [FastAPI]: https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi
 [FastAPI-url]: https://fastapi.tiangolo.com/
-[React]: https://img.shields.io/badge/-ReactJs-61DAFB?logo=react&logoColor=white&style=for-the-badge
-[React-url]: https://react.dev/
+[Pytest]: https://img.shields.io/badge/pytest-008080?style=for-the-badge&logo=pytest&logoColor=white
+[Pytest-url]: https://docs.pytest.org/
+[Pydantic]: https://img.shields.io/badge/Pydantic-176DC3?style=for-the-badge&logo=pydantic&logoColor=white
+[Pydantic-url]: https://pydantic.dev/
+[Black]: https://img.shields.io/badge/Black-000000?style=for-the-badge&logo=black&logoColor=white
+[Black-url]: https://black.readthedocs.io/
+[Mypy]: https://img.shields.io/badge/mypy-4B8BBE?style=for-the-badge&logo=python&logoColor=white
+[Mypy-url]: https://mypy.readthedocs.io/
+[Ruff]: https://img.shields.io/badge/ruff-000000?style=for-the-badge&logo=ruff&logoColor=white
+[Ruff-url]: https://ruff.rs/
+
 [PostgreSQL]: https://img.shields.io/badge/postgresql-4169e1?style=for-the-badge&logo=postgresql&logoColor=white
 [PostgreSQL-url]: https://www.postgresql.org/
 [NginX]: https://img.shields.io/badge/Nginx-009639?logo=nginx&logoColor=white&style=for-the-badge
