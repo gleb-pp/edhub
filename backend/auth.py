@@ -4,6 +4,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from passlib.context import CryptContext
+from jose.exceptions import JWTError
 
 from settings.auth import auth_settings
 
@@ -13,13 +14,16 @@ pwd_hasher = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
     """Decode JWT token and return user email."""
-    payload = jwt.decode(
-        token,
-        auth_settings.jwt_secret_key,
-        algorithms=[auth_settings.algorithm],
-    )
-    expire_timestamp = payload.get("exp")
-    user_email = payload.get("email")
+    try:
+        payload = jwt.decode(
+            token,
+            auth_settings.jwt_secret_key,
+            algorithms=[auth_settings.algorithm],
+        )
+        expire_timestamp = payload.get("exp")
+        user_email = payload.get("sub")
+    except JWTError as e:
+        raise HTTPException(status_code=401, detail="Invalid token") from e
 
     # checking the fields
     if expire_timestamp is None or user_email is None:

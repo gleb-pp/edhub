@@ -46,7 +46,7 @@ class SectionService:
             f"Creating new section '{title}' for course {course.course_id}"
         )
         max_order = (
-            self.db.query(func.max(CourseSection.order))
+            self.db.query(func.max(CourseSection.section_order))
             .filter(CourseSection.course_id == course.course_id)
             .scalar()
         )

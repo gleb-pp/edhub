@@ -24,7 +24,7 @@ from exceptions import (
 from settings.submissions import submission_settings
 
 router = APIRouter(
-    prefix="/courses/{course_id}/assignments/{assignment_id}/submissions/{submission_id}",
+    prefix="/courses/{course_id}/assignments/{assignment_id}/submissions/{student_email}",
     tags=["Grades"],
 )
 

@@ -132,4 +132,4 @@ class UserService:
 
     def get_admins(self) -> list[User]:
         """Get the list of all administrators."""
-        return self.db.query(User).filter(User.is_admin).all()
+        return self.db.query(User).filter(User.isadmin).all()

@@ -48,7 +48,7 @@ class GradeService:
             return
         graded.grade = grade
         graded.comment = comment
-        graded.gradedby = teacher.email
+        graded.teacher_email = teacher.email
 
     def get_submission_grade(self, submission: AssignmentSubmission) -> Grade:
         """Get the grade for the provided submission."""
