@@ -17,12 +17,6 @@ jobs:
       - name: Create Docker network
         run: docker network create edhub-network
 
-      - name: Build system_db
-        run: docker build -t edhub-system-db ./database/system
-
-      - name: Build filestorage_db
-        run: docker build -t edhub-filestorage-db ./database/filestorage
-
       - name: Build backend
         run: docker build -t edhub-backend ./backend
 
@@ -34,7 +28,7 @@ jobs:
             -e POSTGRES_USER=postgres \
             -e POSTGRES_PASSWORD=12345678 \
             -e POSTGRES_DB=edhub \
-            edhub-system-db
+            postgres:16
 
       - name: Wait for system_db to be ready
         run: |
@@ -48,30 +42,6 @@ jobs:
             sleep 2
           done
           echo "system_db failed to start" && docker logs system_db
-          exit 1
-
-      - name: Run filestorage_db container
-        run: |
-          docker run -d \
-            --name filestorage_db \
-            --network edhub-network \
-            -e POSTGRES_USER=postgres \
-            -e POSTGRES_PASSWORD=12345678 \
-            -e POSTGRES_DB=edhub_storage \
-            edhub-filestorage-db
-
-      - name: Wait for filestorage_db to be ready  
-        run: |
-          echo "Waiting for filestorage_db to be ready..."
-          for i in {1..30}; do
-            if docker exec filestorage_db pg_isready -U postgres; then
-              echo "filestorage_db is ready!"
-              exit 0
-            fi
-            echo "Waiting for filestorage_db... ($i/30)"
-            sleep 2
-          done
-          echo "filestorage_db failed to start" && docker logs filestorage_db
           exit 1
 
       - name: Run backend container
@@ -95,14 +65,14 @@ jobs:
             echo "Waiting for backend... ($i/30)"
             sleep 2
           done
-          (echo "Backend failed to start" && docker logs backend && docker logs system_db && docker logs filestorage_db && exit 1)
+          (echo "Backend failed to start" && docker logs backend && docker logs system_db && exit 1)
           exit 1
 
       - name: Stop containers
         if: always()
         run: |
-          docker stop backend system_db filestorage_db || true
-          docker rm backend system_db filestorage_db || true
+          docker stop backend system_db || true
+          docker rm backend system_db || true
           docker network rm edhub-network || true
 
   curltests:
@@ -118,12 +88,6 @@ jobs:
       - name: Create Docker network
         run: docker network create edhub-network
 
-      - name: Build system_db
-        run: docker build -t edhub-system-db ./database/system
-
-      - name: Build filestorage_db
-        run: docker build -t edhub-filestorage-db ./database/filestorage
-
       - name: Build backend
         run: docker build -t edhub-backend ./backend
 
@@ -135,7 +99,7 @@ jobs:
             -e POSTGRES_USER=postgres \
             -e POSTGRES_PASSWORD=12345678 \
             -e POSTGRES_DB=edhub \
-            edhub-system-db
+            postgres:16
 
       - name: Wait for system_db to be ready
         run: |
@@ -149,30 +113,6 @@ jobs:
             sleep 2
           done
           echo "system_db failed to start" && docker logs system_db
-          exit 1
-
-      - name: Run filestorage_db container
-        run: |
-          docker run -d \
-            --name filestorage_db \
-            --network edhub-network \
-            -e POSTGRES_USER=postgres \
-            -e POSTGRES_PASSWORD=12345678 \
-            -e POSTGRES_DB=edhub_storage \
-            edhub-filestorage-db
-
-      - name: Wait for filestorage_db to be ready  
-        run: |
-          echo "Waiting for filestorage_db to be ready..."
-          for i in {1..30}; do
-            if docker exec filestorage_db pg_isready -U postgres; then
-              echo "filestorage_db is ready!"
-              exit 0
-            fi
-            echo "Waiting for filestorage_db... ($i/30)"
-            sleep 2
-          done
-          echo "filestorage_db failed to start" && docker logs filestorage_db
           exit 1
 
       - name: Run backend container
@@ -195,7 +135,7 @@ jobs:
             echo "Waiting for backend... ($i/30)"
             sleep 2
           done
-          (echo "Backend failed to start" && docker logs backend && docker logs system_db && docker logs filestorage_db && exit 1)
+          (echo "Backend failed to start" && docker logs backend && docker logs system_db && exit 1)
           exit 1
 
       - name: Set up tests
@@ -245,6 +185,6 @@ jobs:
       - name: Stop containers
         if: always()
         run: |
-          docker stop backend system_db filestorage_db || true
-          docker rm backend system_db filestorage_db || true
+          docker stop backend system_db || true
+          docker rm backend system_db || true
           docker network rm edhub-network || true

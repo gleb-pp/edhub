@@ -1,54 +1,32 @@
-from typing import List, Tuple, Optional
-from uuid import UUID
-from datetime import datetime
+from sqlalchemy import DateTime, Text, CheckConstraint, ForeignKey, Uuid
+from sqlalchemy.orm import Mapped, mapped_column
+from uuid import uuid4
+from datetime import datetime, timezone
+from settings.course import course_settings
 
-def sql_select_available_courses(db_cursor, user_email: str) -> List[UUID]:
-    db_cursor.execute(
-        """
-        SELECT pci.courseid, c.name, c.instructor, u.publicname, c.organization, c.timecreated, pci.emojiid
-        FROM personal_course_info pci
-        JOIN courses c ON c.courseid = pci.courseid AND pci.email = %s
-        JOIN users u ON c.instructor = u.email
-        ORDER BY pci.courseorder ASC
-        """,
-        (user_email, ),
+from repo.base import Base
+
+
+class Course(Base):
+    """Database model for the courses."""
+
+    __tablename__ = "courses"
+
+    course_id: Mapped[str] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    organization: Mapped[str | None] = mapped_column(Text)
+    instructor: Mapped[str] = mapped_column(
+        ForeignKey("users.email", ondelete="CASCADE"), nullable=False
     )
-    return db_cursor.fetchall()
-
-
-def sql_select_all_courses(db_cursor, user_email) -> List[Tuple[UUID, str, str, Optional[str], datetime, Optional[int]]]:
-    db_cursor.execute(
-        """
-        SELECT c.courseid, c.name, c.instructor, u.publicname, c.organization, c.timecreated, pci.emojiid
-        FROM courses c
-        LEFT JOIN personal_course_info pci ON c.courseid = pci.courseid AND pci.email = %s
-        JOIN users u ON c.instructor = u.email
-        """,
-        (user_email,),
+    creation_time: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.now(tz=timezone.utc)
     )
-    return db_cursor.fetchall()
 
-
-def sql_insert_course(db_cursor, title: str, instructor: str, organization: Optional[str] = None) -> UUID:
-    db_cursor.execute(
-        "INSERT INTO courses (courseid, name, organization, instructor, timecreated) VALUES (gen_random_uuid(), %s, %s, %s, now()) RETURNING courseid",
-        (title, organization, instructor),
+    __table_args__ = (
+        CheckConstraint(
+            f"length(title) BETWEEN {course_settings.name_min_lenght} AND {course_settings.name_max_lenght}"
+        ),
+        CheckConstraint(
+            f"organization IS NULL OR length(organization) BETWEEN {course_settings.organization_min_lenght} AND {course_settings.organization_max_lenght}"
+        ),
     )
-    return db_cursor.fetchone()[0]
-
-
-def sql_delete_course(db_cursor, course_id: str) -> None:
-    db_cursor.execute("DELETE FROM courses WHERE courseid = %s", (course_id,))
-
-
-def sql_select_course_info(db_cursor, course_id: str, user_email: str) -> Optional[Tuple[UUID, str, str, Optional[str], datetime, Optional[int]]]:
-    db_cursor.execute(
-        """
-        SELECT c.courseid, c.name, c.instructor, u.publicname, c.organization, c.timecreated, pci.emojiid
-        FROM courses c
-        LEFT JOIN personal_course_info pci ON c.courseid = pci.courseid AND pci.email = %s AND c.courseid = %s::uuid
-        JOIN users u ON c.instructor = u.email
-        """,
-        (user_email, course_id),
-    )
-    return db_cursor.fetchone()

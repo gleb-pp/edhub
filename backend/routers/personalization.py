@@ -1,38 +1,101 @@
 from typing import List
-from fastapi import APIRouter, Query, Depends
-from auth import get_current_user, get_db
-import json_classes
-import logic.personalization
-from constants import EMOJI_COUNT
+from fastapi import APIRouter, Query, Depends, HTTPException
+from auth import get_current_user
+from models.common import Success
+from typing import Annotated
+from sqlalchemy.orm import Session
+from db import get_db
+from models.personalization import EmojiID
+from services import UserService, CourseService, PersonalizationService
+from policies import CoursePolicy
+from exceptions import (
+    users as user_errors,
+    courses as course_errors,
+    personalization as personalization_errors,
+)
+from settings.course import course_settings
+
+router = APIRouter(tags=["Personalization"])
 
 
-router = APIRouter()
+@router.get("/courses/{course_id}/emoji")
+async def get_course_emoji(
+    db: Annotated[Session, Depends(get_db)],
+    course_id: str,
+    user_email: str = Depends(get_current_user),
+) -> EmojiID:
+    """
+    Get the personal course emoji id.
+
+    Course role (Primary Instructor, Teacher, Student, Parent) required.
+    """
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    personalization_service = PersonalizationService(db)
+    try:
+        user = user_service.get_user(user_email)
+        course = course_service.get_course(course_id)
+        CoursePolicy.assert_course_access(user, course, db)
+        return EmojiID(emoji_id=personalization_service.get_course_emoji(course, user))
+    except user_errors.UserNotFoundError as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
+    except course_errors.CourseNotFoundError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except course_errors.ParticipantRoleRequired as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e
 
 
-@router.put("/change_courses_order", response_model=json_classes.Success, tags=["Personalization"])
+@router.put("/courses/order")
 async def change_courses_order(
+    db: Annotated[Session, Depends(get_db)],
     new_order: List[str] = Query(...),
     user_email: str = Depends(get_current_user),
-):
+) -> Success:
     """
     Change the order of courses.
 
     The list of course_ids should be passed as a new_order parameter.
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.personalization.change_courses_order(db_conn, db_cursor, new_order, user_email)
+    user_service = UserService(db)
+    personalization_service = PersonalizationService(db)
+    try:
+        user = user_service.get_user(user_email)
+        personalization_service.change_courses_order(user, new_order)
+        db.commit()
+        return Success(success=True)
+    except user_errors.UserNotFoundError as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
+    except personalization_errors.IncorrectCoursesOrderError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.patch("/set_course_emoji", response_model=json_classes.Success, tags=["Personalization"])
+@router.patch("/courses/{course_id}/emoji")
 async def set_course_emoji(
     course_id: str,
-    emoji_id: int = Query(..., ge=0, le=EMOJI_COUNT),
-    user_email: str = Depends(get_current_user)
-):
+    db: Annotated[Session, Depends(get_db)],
+    emoji_id: int | None = Query(None, ge=0, le=(course_settings.emoji_count - 1)),
+    user_email: str = Depends(get_current_user),
+) -> Success:
     """
-    Set a personal emoji for a course.
+    Set a personal emoji for a course by provided emoji_id.
+
+    emoji_id can be None (if user wants to delete the course emoji).
 
     Course role (Primary Instructor, Teacher, Student, Parent) required.
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.personalization.set_course_emoji(db_conn, db_cursor, course_id, emoji_id, user_email)
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    personalization_service = PersonalizationService(db)
+    try:
+        user = user_service.get_user(user_email)
+        course = course_service.get_course(course_id)
+        CoursePolicy.assert_course_access(user, course, db)
+        personalization_service.set_course_emoji(course, user, emoji_id)
+        db.commit()
+        return Success(success=True)
+    except user_errors.UserNotFoundError as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
+    except course_errors.CourseNotFoundError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except course_errors.ParticipantRoleRequired as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e

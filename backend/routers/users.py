@@ -1,33 +1,71 @@
-from typing import List
-from fastapi import APIRouter, Depends
-from auth import get_current_user, get_db
-import json_classes
-import logic.users
+from fastapi import APIRouter, Depends, HTTPException
+from auth import get_current_user
+from services import UserService, CourseService
+from policies import TeacherPolicy, StudentPolicy, ParentPolicy
+from exceptions import (
+    users as user_errors,
+    courses as course_errors,
+    admins as admin_errors,
+)
+from models.common import Success
+from models.courses import CourseID
+from models.users import User, CourseRole, AccessToken
+from typing import Annotated
+from sqlalchemy.orm import Session
+from db import get_db
+
+router = APIRouter(
+    tags=["Users"],
+)
 
 
-router = APIRouter()
-
-
-@router.get("/get_user_info", response_model=json_classes.User, tags=["Users"])
-async def get_user_info(user_email: str = Depends(get_current_user)):
+@router.get("/users/{user_email}")
+async def get_user_info(
+    user_email: str,
+    db: Annotated[Session, Depends(get_db)],
+) -> User:
     """
     Get the info about the user.
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.users.get_user_info(db_cursor, user_email)
+    try:
+        user_service = UserService(db)
+        user = user_service.get_user(user_email)
+        return User.model_validate(user)
+    except user_errors.UserNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
-@router.get("/get_user_role", response_model=json_classes.CourseRole, tags=["Users"])
-async def get_user_role(course_id: str, user_email: str = Depends(get_current_user)):
+@router.get("/course/{course_id}/me/role")
+async def get_my_role(
+    course_id: str,
+    db: Annotated[Session, Depends(get_db)],
+    user_email: str = Depends(get_current_user),
+) -> CourseRole:
     """
     Get the user's role in the provided course.
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.users.get_user_role(db_cursor, course_id, user_email)
+    user_service = UserService(db)
+    course_service = CourseService(db)
+    try:
+        user = user_service.get_user(user_email)
+        course = course_service.get_course(course_id)
+        return CourseRole(
+            is_instructor=TeacherPolicy.check_instructor_access(user, course, db),
+            is_teacher=TeacherPolicy.check_teacher_access(user, course, db),
+            is_student=StudentPolicy.check_student_access(user, course, db),
+            is_parent=ParentPolicy.check_parent_access(user, course, db),
+            is_admin=user.isadmin,
+        )
+    except user_errors.UserNotFoundError as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
+    except course_errors.CourseNotFoundError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.post("/create_user", response_model=json_classes.Account, tags=["Users"])
-async def create_user(user: json_classes.UserCreate):
+@router.post("/users")
+async def create_user(
+    email: str, name: str, password: str, db: Annotated[Session, Depends(get_db)]
+) -> AccessToken:
     """
     Creates a user account with provided email, name, and password.
 
@@ -41,41 +79,91 @@ async def create_user(user: json_classes.UserCreate):
 
     Returns email and JWT access token for 30 minutes.
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.users.create_user(db_conn, db_cursor, user)
+    user_service = UserService(db)
+    try:
+        user_service.validate_user_email(email)
+        user_service.validate_user_name(name)
+        user_service.validate_password_lenght(password)
+        user = user_service.create_user(email, name, password)
+        token = user_service.get_access_token(user)
+        db.commit()
+        return AccessToken(access_token=token)
+    except (
+        user_errors.EmailFormatError,
+        user_errors.NameFormatError,
+        user_errors.WeakPasswordError,
+    ) as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+    except user_errors.UserExistsError as e:
+        raise HTTPException(status_code=409, detail=str(e)) from e
 
 
-@router.post("/login", response_model=json_classes.Account, tags=["Users"])
-async def login(user: json_classes.UserLogin):
+@router.post("/login")
+async def login(
+    email: str,
+    password: str,
+    db: Annotated[Session, Depends(get_db)],
+) -> AccessToken:
     """
     Log into user account with provided email and password.
 
     Returns email and JWT access token for 30 minutes.
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.users.login(db_cursor, user)
+    user_service = UserService(db)
+    try:
+        user = user_service.get_user(email)
+        user_service.verify_password(user, password)
+        token = user_service.get_access_token(user)
+        return AccessToken(access_token=token)
+    except user_errors.UserError as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
 
 
-@router.patch("/change_password", response_model=json_classes.Success, tags=["Users"])
-async def change_password(user: json_classes.UserNewPassword):
+@router.patch("/users/me/password")
+async def change_password(
+    email: str,
+    password: str,
+    new_password: str,
+    db: Annotated[Session, Depends(get_db)],
+) -> Success:
     """
     Change the user password to a new one.
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.users.change_password(db_conn, db_cursor, user)
+    user_service = UserService(db)
+    try:
+        user = user_service.get_user(email)
+        user_service.verify_password(user, password)
+        user_service.validate_password_lenght(new_password)
+        user_service.change_password(user, new_password)
+        db.commit()
+        return Success(success=True)
+    except user_errors.UserNotFoundError as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
+    except course_errors.CourseNotFoundError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.get("/get_instructor_courses", response_model=List[json_classes.CourseID], tags=["Users"])
-async def get_instructor_courses(user_email: str = Depends(get_current_user)):
+@router.get("/users/instructor_courses")
+async def get_my_instructor_courses(
+    db: Annotated[Session, Depends(get_db)],
+    user_email: str = Depends(get_current_user),
+) -> list[CourseID]:
     """
     Get the list of IDs of courses where the provided user is a Primary Instructor.
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.users.get_instructor_courses(db_cursor, user_email)
+    user_service = UserService(db)
+    try:
+        user = user_service.get_user(user_email)
+        courses = user_service.get_instructor_courses(user)
+        return [CourseID.model_validate(course) for course in courses]
+    except user_errors.UserNotFoundError as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
 
 
-@router.delete("/remove_user", response_model=json_classes.Success, tags=["Users"])
-async def remove_user(deleted_user_email: str, user_email: str = Depends(get_current_user)):
+@router.delete("/users/me")
+async def remove_user(
+    db: Annotated[Session, Depends(get_db)], user_email: str = Depends(get_current_user)
+) -> Success:
     """
     Delete user account from the system.
 
@@ -88,41 +176,14 @@ async def remove_user(deleted_user_email: str, user_email: str = Depends(get_cur
     The user's materials and assignments will be left but with NULL author.
 
     User CAN NOT be deleted if they are the only platform administrator.
-
-    Admin can remove other users
     """
-    with get_db() as (db_conn, db_cursor):
-        return logic.users.remove_user(db_conn, db_cursor, deleted_user_email, user_email)
-
-
-@router.patch("/give_admin_permissions", response_model=json_classes.Success, tags=["Users"])
-async def give_admin_permissions(object_email: str, subject_email: str = Depends(get_current_user)):
-    """
-    Give admin rights to some existing user by their email.
-
-    Admin role required.
-    """
-    with get_db() as (db_conn, db_cursor):
-        return logic.users.give_admin_permissions(db_conn, db_cursor, object_email, subject_email)
-
-
-@router.get("/get_all_users", response_model=List[json_classes.User], tags=["Users"])
-async def get_all_users(user_email: str = Depends(get_current_user)):
-    """
-    Get the list of all users in the system.
-
-    Return the email and name of each user.
-
-    Admin role required.
-    """
-    with get_db() as (db_conn, db_cursor):
-        return logic.users.get_all_users(db_cursor, user_email)
-
-
-@router.get("/get_admins", response_model=List[json_classes.User], tags=["Users"])
-async def get_admins(user_email: str = Depends(get_current_user)):
-    """
-    Get the list of platform administrators.
-    """
-    with get_db() as (db_conn, db_cursor):
-        return logic.users.get_admins(db_cursor)
+    user_service = UserService(db)
+    try:
+        user = user_service.get_user(user_email)
+        user_service.delete_user(user)
+        db.commit()
+        return Success(success=True)
+    except user_errors.UserNotFoundError as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
+    except admin_errors.DeleteLastAdminError as e:
+        raise HTTPException(status_code=403, detail=str(e)) from e

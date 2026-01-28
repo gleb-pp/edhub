@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import logic.users
-from auth import get_db
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+from db import create_tables, create_default_admin_account
 
 import routers.assignments
 import routers.submissions
@@ -14,9 +15,19 @@ import routers.students
 import routers.teachers
 import routers.users
 import routers.personalization
+import routers.admins
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    """Create database tables on application startup."""
+    create_tables()
+    create_default_admin_account()
+    yield
 
 
 app = FastAPI(
+    root_path="/api",
     title="EdHub",
     description="**Open API for platform management**\n\n"
     "EdHub is a Learning Management System for interaction between "
@@ -34,6 +45,7 @@ app = FastAPI(
     "a self-contained and clear design, supporting all the necessary "
     "features but not bogging the user down with complex customizations.",
     version="1.0",
+    lifespan=lifespan,
 )
 app.include_router(routers.assignments.router)
 app.include_router(routers.submissions.router)
@@ -46,6 +58,7 @@ app.include_router(routers.parents.router)
 app.include_router(routers.students.router)
 app.include_router(routers.teachers.router)
 app.include_router(routers.users.router)
+app.include_router(routers.admins.router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -54,10 +67,3 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-# app startup
-@app.on_event("startup")
-async def startup_event():
-    with get_db() as (conn, cur):
-        await logic.users.create_admin_account_if_not_exists(conn, cur)

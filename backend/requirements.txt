@@ -1,4 +1,4 @@
-psycopg2-binary==2.9.10
+psycopg[binary]
 fastapi==0.115.12
 fastapi-cli==0.0.7
 passlib==1.7.4
@@ -6,3 +6,8 @@ python-jose==3.5.0
 bcrypt==4.0.1
 regex==2024.11.6
 python-multipart==0.0.20
+sqlalchemy==2.0.44
+pydantic-settings==2.12.0
+types-passlib>=1.7.7.20250602
+types-regex>=2026.1.15.20260116
+types-python-jose>=3.5.0.20250531

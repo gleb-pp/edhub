@@ -1,0 +1,11 @@
+from .assignments import AssignmentService as AssignmentService
+from .courses import CourseService as CourseService
+from .grades import GradeService as GradeService
+from .materials import MaterialService as MaterialService
+from .parents import ParentService as ParentService
+from .personalization import PersonalizationService as PersonalizationService
+from .sections import SectionService as SectionService
+from .students import StudentService as StudentService
+from .submissions import SubmissionService as SubmissionService
+from .teachers import TeacherService as TeacherService
+from .users import UserService as UserService
