@@ -1,8 +1,3 @@
-<!-- [![Issues][issues-shield]][issues-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Forks][forks-shield]][forks-url]
-[![Unlicense License][license-shield]][license-url] -->
-
 # 🎓 What is EdHub?
 
 EdHub is a Learning Management System designed to facilitate interaction among teachers, students, and parents. It enhances the educational process by simplifying communication between stakeholders and increasing student engagement in learning.
@@ -100,19 +95,6 @@ Please note that:
 Bug reports, issue discussions, and general feedback are welcome.
 If you notice unexpected behavior or have suggestions regarding usability
 or documentation, feel free to open an issue.
-
-[contributors-shield]: https://img.shields.io/github/contributors/gleb-pp/edhub.svg?style=for-the-badge
-[contributors-url]: https://github.com/gleb-pp/edhub/graphs/contributors
-[stars-shield]: https://img.shields.io/github/stars/gleb-pp/edhub.svg?style=for-the-badge
-[stars-url]: https://github.com/gleb-pp/edhub/stargazers
-[forks-shield]: https://img.shields.io/github/forks/gleb-pp/edhub.svg?style=for-the-badge
-[forks-url]: https://github.com/gleb-pp/edhub/network/members
-[issues-shield]: https://img.shields.io/github/issues/gleb-pp/edhub.svg?style=for-the-badge
-[issues-url]: https://github.com/gleb-pp/edhub/issues
-[license-shield]: https://img.shields.io/github/license/gleb-pp/edhub.svg?style=for-the-badge
-[license-url]: https://github.com/gleb-pp/edhub/blob/main/LICENSE
-[prod-shield]: https://img.shields.io/github/actions/workflow/status/gleb-pp/edhub/deploy-prod.yml?style=for-the-badge
-[prod-url]: https://github.com/gleb-pp/edhub/actions
 
 [FastAPI]: https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi
 [FastAPI-url]: https://fastapi.tiangolo.com/
