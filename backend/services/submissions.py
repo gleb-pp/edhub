@@ -10,7 +10,7 @@ import logging
 class SubmissionService:
     """Service class for managing submission-related operations."""
 
-    logger = logging.getLogger("SubmissionService")
+    logger = logging.getLogger(__name__)
 
     def __init__(self, db: Session):
         self.db = db

@@ -15,7 +15,7 @@ import logging
 class UserService:
     """Service class for user-related operations."""
 
-    logger = logging.getLogger("UserService")
+    logger = logging.getLogger(__name__)
 
     def __init__(self, db: Session):
         self.db = db

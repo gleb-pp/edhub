@@ -10,7 +10,7 @@ import logging
 class MaterialService:
     """Service for managing course materials."""
 
-    logger = logging.getLogger("MaterialService")
+    logger = logging.getLogger(__name__)
 
     def __init__(self, db: Session):
         self.db = db

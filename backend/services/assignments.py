@@ -10,7 +10,7 @@ import logging
 class AssignmentService:
     """Service class for managing course assignments."""
 
-    logger = logging.getLogger("AssignmentService")
+    logger = logging.getLogger(__name__)
 
     def __init__(self, db: Session):
         self.db = db

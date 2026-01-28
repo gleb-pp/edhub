@@ -13,7 +13,7 @@ import logging
 class PersonalizationService:
     """Service for managing personalization of courses for users."""
 
-    logger = logging.getLogger("PersonalizationService")
+    logger = logging.getLogger(__name__)
 
     def __init__(self, db: Session):
         self.db = db

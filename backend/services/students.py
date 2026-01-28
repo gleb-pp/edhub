@@ -8,7 +8,7 @@ import logging
 class StudentService:
     """Service class for managing student-related operations."""
 
-    logger = logging.getLogger("StudentService")
+    logger = logging.getLogger(__name__)
 
     def __init__(self, db: Session):
         self.db = db

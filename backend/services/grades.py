@@ -9,7 +9,7 @@ import logging
 class GradeService:
     """Service class for managing grades related operations."""
 
-    logger = logging.getLogger("GradeService")
+    logger = logging.getLogger(__name__)
 
     def __init__(self, db: Session):
         self.db = db

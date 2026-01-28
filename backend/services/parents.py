@@ -8,7 +8,7 @@ import logging
 class ParentService:
     """Service for managing parent roles in courses."""
 
-    logger = logging.getLogger("ParentService")
+    logger = logging.getLogger(__name__)
 
     def __init__(self, db: Session):
         self.db = db
