@@ -35,17 +35,13 @@ The backend is structured into several layers to ensure maintainability and scal
 
 ### Built With
 
-[![Python][Python]][Python-url]
 [![FastAPI][FastAPI]][FastAPI-url]
-[![Pydantic][Pydantic]][Pydantic-url]
-
-#### Code Quality & Testing
 [![Pytest][Pytest]][Pytest-url]
+[![Pydantic][Pydantic]][Pydantic-url]
 [![Black][Black]][Black-url]
 [![Ruff][Ruff]][Ruff-url]
 [![Mypy][Mypy]][Mypy-url]
 
-#### Infrastructure
 [![PostgreSQL][PostgreSQL]][PostgreSQL-url]
 [![NginX][NginX]][NginX-url]
 [![Docker][Docker]][Docker-url]
