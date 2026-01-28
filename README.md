@@ -36,8 +36,8 @@ The backend is structured into several layers to ensure maintainability and scal
 ### Built With
 
 [![FastAPI][FastAPI]][FastAPI-url]
-[![Pytest][Pytest]][Pytest-url]
 [![Pydantic][Pydantic]][Pydantic-url]
+[![Pytest][Pytest]][Pytest-url]
 [![Black][Black]][Black-url]
 [![Ruff][Ruff]][Ruff-url]
 [![Mypy][Mypy]][Mypy-url]
