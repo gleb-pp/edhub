@@ -1,57 +1,53 @@
-[![Contributors][contributors-shield]][contributors-url]
+[![Issues][issues-shield]][issues-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Forks][forks-shield]][forks-url]
 [![Unlicense License][license-shield]][license-url]
-[![Issues][prod-shield]][prod-url]
-[![Issues][issues-shield]][issues-url]
-
-You can use the public version of EdHub available at [www.edhub.space](https://edhub.space).
 
 # What is EdHub?
 
 EdHub is a Learning Management System designed to facilitate interaction among teachers, students, and parents. It enhances the educational process by simplifying communication between stakeholders and increasing student engagement in learning.
 
-### Quick Start for Teachers
+When developing EdHub, we focused on the following priorities:
 
-Teachers can easily create a course by simply entering its title, invite students and their parents, upload learning materials, and create assignments.
+- **Quick Start for Teachers**: Teachers can easily create a course by simply entering its title, invite students and their parents, upload learning materials, and create assignments.
 
-<p align="center">
-<img src="https://raw.githubusercontent.com/gleb-pp/edhub/refs/heads/main/img/createcourse.gif" width="600"/>
-</p>
+- **Student Assignment Submissions**: Students can access course materials, submit their solutions to assignments, and receive grades from the teacher. Teachers can review submitted work, evaluate solutions, and provide grades.
 
-### Student Assignment Submissions
+- **Parental Access to Track Academic Progress**: Parents have a special role in EdHub. Once invited to a course, they can track their child's academic progress without having to ask for a student account or contact the teacher.
 
-Students can access course materials, submit their solutions to assignments, and receive grades from the teacher.
+# Implementation Details
 
-<p align="center">
-<img src="https://raw.githubusercontent.com/gleb-pp/edhub/refs/heads/main/img/studentsubmits.gif" width="600"/>
-</p>
+The project provides a fully functional REST API with a clean backend architecture,
+well-defined API design, and clear separation of business logic.
 
-Teachers can review submitted work, evaluate solutions, and provide grades.
+*Note:* This repository currently focuses on the backend part of the system. The frontend is not included and is expected to be developed separately.
 
-<p align="center">
-<img src="https://raw.githubusercontent.com/gleb-pp/edhub/refs/heads/main/img/teachergrades.gif" width="600"/>
-</p>
+### Project Goals
 
-### Parental Access to Track Academic Progress
+- Design a clean and maintainable architecture
+- Separate business logic, access control, and transport layer concerns
+- Build a backend suitable for real-world extension and scaling
+- Create a portfolio-quality backend project for future development
 
-Parents have a special role in EdHub. Once invited to a course, they can track their child's academic progress without having to ask for a student account or contact the teacher.
+### Architecture Layers
 
-<p align="center">
-<img src="https://raw.githubusercontent.com/gleb-pp/edhub/refs/heads/main/img/parents.png" width="600"/>
-</p>
+The backend is structured into several layers to ensure maintainability and scalability:
+
+- `repo`: SQLAlchemy ORM models representing database entities and relationships.
+- `services`: Stateless service classes encapsulating business logic through atomic operations.
+- `policies`: Authorization and access-control rules, separated from business logic.
+- `routers`: HTTP layer responsible for request validation, dependency injection, transaction boundaries, and exception-to-HTTP mapping.
 
 ### Built With
 
 [![FastAPI][FastAPI]][FastAPI-url]
-[![React][React]][React-url]
 [![PostgreSQL][PostgreSQL]][PostgreSQL-url]
 [![NginX][NginX]][NginX-url]
 [![Docker][Docker]][Docker-url]
 
 # Local Startup
 
-These instructions will help you to download a copy of the project and run it on your local machine. All of your organization's data will be stored on your computer and will be inaccessible to external users.
+EdHub is an open-source project, and you can run it locally to test its features, make your own improvements, and contribute to its development. By running EdHub on your local machine, you can ensure that all your organization's data remains private and secure.
 
 ### Prerequisites
 - [Docker](https://docs.docker.com/get-docker/) (v20.10+)
@@ -68,35 +64,43 @@ docker compose up --build
 
 # To run in detached mode:
 # docker compose up --build -d
-```
-Now you can go to http://localhost/ to access the application.
 
-### Services Overview
-| Service       | Port  | Description            |
-|---------------|-------|------------------------|
-| **Frontend**  | 3000  | React application      |
-| **Backend**   | 8000  | FastAPI application    |
-| **Database**  | 5432  | PostgreSQL container   |
-| **Nginx**     | 80    | Nginx reverse proxy    |
-
-### API Endpoints
-
-You can access the web version of API documentation at https://edhub.space/api/docs.
-
-### Maintenance Commands
-```bash
-# Stop all services
+# To stop containers:
 docker compose down
-
-# Stop and remove volumes
-docker compose down -v
-
-# View logs
-docker compose logs -f
-
-# Rebuild from scratch
-docker compose down -v && docker compose up --build
 ```
+
+Now you can go to http://localhost/api/docs/ to access the application.
+
+## Contributing
+
+EdHub is an open-source, non-commercial project developed primarily as a
+portfolio and educational initiative and currently maintained by a single author.
+
+### ⭐ Support the Project
+If you find this project interesting or useful:
+- Giving the repository a ⭐ star is very important and highly appreciated
+- Following the author on GitHub helps support further development
+
+Even small actions like these provide strong motivation to continue improving the project.
+
+### 🐞 Bug Reports and Feedback
+Bug reports, issue discussions, and general feedback are welcome.
+If you notice unexpected behavior or have suggestions regarding usability
+or documentation, feel free to open an issue.
+
+### 🎨 Frontend Development
+At the moment, the project does not include a production-ready frontend.
+The previous frontend implementation was removed, and a new one is not yet available.
+
+The backend API is fully functional and can be used as a foundation
+for experimenting with frontend development, educational projects,
+or personal portfolio work.
+
+Please note that:
+- The project is not commercial
+- Frontend contributions are not paid
+- Any frontend work would be driven by personal interest and portfolio goals
+
 [contributors-shield]: https://img.shields.io/github/contributors/gleb-pp/edhub.svg?style=for-the-badge
 [contributors-url]: https://github.com/gleb-pp/edhub/graphs/contributors
 [stars-shield]: https://img.shields.io/github/stars/gleb-pp/edhub.svg?style=for-the-badge
