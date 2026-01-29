@@ -120,11 +120,12 @@ jobs:
         run: |
           docker run -d \
             --name backend \
-            --network edhub-network \            
+            --network edhub-network \
+            --entrypoint sh \
             -e DATABASE_URL=postgresql://postgres:12345678@system_db:5432/edhub \
-            -e JWT_SECRET_KEY="test-secret" \
+            -e JWT_SECRET_KEY=test-secret \
             edhub-backend \
-            sleep infinity
+            -c "sleep infinity"
       
       - name: Courses service tests
         run: docker exec backend pytest backend/services/test_courses.py
