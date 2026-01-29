@@ -5,9 +5,9 @@ import exceptions.admins as admin_errors
 from sqlalchemy.orm import Session
 from repo.users import User
 from repo.courses import Course
-from auth import pwd_hasher
 from settings.auth import auth_settings
 from jose import jwt
+from auth import hash_password, verify_password
 from datetime import datetime, timedelta, timezone
 import logging
 
@@ -64,7 +64,7 @@ class UserService:
             raise user_errors.UserExistsError(email)
 
         # hashing password
-        hashed_password = pwd_hasher.hash(password)
+        hashed_password = hash_password(password)
         user = User(email=email, name=name, password_hash=hashed_password)
         self.db.add(user)
         self.db.flush()
@@ -93,7 +93,7 @@ class UserService:
 
     def verify_password(self, user: User, password: str) -> None:
         """Verify that the provided password is correct for the user with provided email."""
-        if not pwd_hasher.verify(password, user.password_hash):
+        if not verify_password(password, user.password_hash):
             self.logger.warning(
                 f"Invalid password attempt for user with email: {user.email}"
             )
@@ -102,7 +102,7 @@ class UserService:
     def change_password(self, user: User, new_password: str) -> None:
         """Change the user password to a new one."""
         self.logger.info(f"Changing password for user with email: {user.email}")
-        hashed_password = pwd_hasher.hash(new_password)
+        hashed_password = hash_password(new_password)
         user.password_hash = hashed_password
         self.db.flush()
 

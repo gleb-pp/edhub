@@ -3,14 +3,26 @@ from datetime import UTC, datetime
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
-from passlib.context import CryptContext
+import bcrypt
 from jose.exceptions import JWTError
 
 from settings.auth import auth_settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
-pwd_hasher = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+def hash_password(password: str) -> str:
+    """Hash the provided password using bcrypt."""
+    salt = bcrypt.gensalt(rounds=12)
+    hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
+    return hashed.decode("utf-8")
+
+
+def verify_password(password: str, password_hash: str) -> bool:
+    """Verify that the provided password matches the stored password hash."""
+    return bcrypt.checkpw(
+        password.encode("utf-8"),
+        password_hash.encode("utf-8"),
+    )
 
 def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
     """Decode JWT token and return user email."""

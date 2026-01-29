@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from repo.base import Base
 from repo.users import User
 from settings.admins import admin_settings
-from auth import pwd_hasher
+from auth import hash_password
 
 DATABASE_URL = "postgresql+psycopg://postgres:12345678@system_db:5432/edhub"
 engine = create_engine(DATABASE_URL, echo=True)
@@ -31,7 +31,7 @@ def create_default_admin_account() -> None:
         ):
             print("Default admin account exists, skipping...")
             return
-        hashed_password = pwd_hasher.hash(admin_settings.default_account_password)
+        hashed_password = hash_password(admin_settings.default_account_password)
         user = User(
             email=admin_settings.default_account_email,
             name=admin_settings.default_account_name,
