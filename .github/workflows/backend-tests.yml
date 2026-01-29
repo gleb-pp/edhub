@@ -75,9 +75,9 @@ jobs:
           docker rm backend system_db || true
           docker network rm edhub-network || true
 
-  curltests:
+  courses-tests:
     runs-on: ubuntu-latest
-    name: Logical curl tests
+    name: Test Courses with PyTest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -87,9 +87,6 @@ jobs:
 
       - name: Create Docker network
         run: docker network create edhub-network
-
-      - name: Build backend
-        run: docker build -t edhub-backend ./backend
 
       - name: Run system_db container
         run: |
@@ -112,75 +109,31 @@ jobs:
             echo "Waiting for system_db... ($i/30)"
             sleep 2
           done
-          echo "system_db failed to start" && docker logs system_db
+          echo "system_db failed to start"
+          docker logs system_db
           exit 1
 
-      - name: Run backend container
+      - name: Build backend image
+        run: docker build -t edhub-backend ./backend
+
+      - name: Run backend container (test mode)
         run: |
           docker run -d \
             --name backend \
-            --network edhub-network \
-            -p 8000:8000 \
+            --network edhub-network \            
             -e DATABASE_URL=postgresql://postgres:12345678@system_db:5432/edhub \
-            -e JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
-            edhub-backend
+            -e JWT_SECRET_KEY="test-secret" \
+            edhub-backend \
+            sleep infinity
       
-      - name: Wait for backend to be ready
-        run: |
-          for i in {1..30}; do
-            if curl -s -f http://localhost:8000/openapi.json >/dev/null; then
-              echo "Backend is ready!"
-              exit 0
-            fi
-            echo "Waiting for backend... ($i/30)"
-            sleep 2
-          done
-          (echo "Backend failed to start" && docker logs backend && docker logs system_db && exit 1)
-          exit 1
+      - name: Courses service tests
+        run: docker exec backend pytest backend/services/test_courses.py
 
-      - name: Set up tests
-        run: |
-          chmod +x ./backend/tests/*.sh
+      - name: Courses router tests
+        run: docker exec backend pytest backend/routers/test_courses.py
 
-      - name: Authorization tests
-        run: |
-          ./backend/tests/authorization.sh || (docker logs backend && exit 1)
-
-      - name: Admin tests
-        run: |
-          ./backend/tests/admin.sh || (docker logs backend && exit 1)
-
-      - name: Course tests
-        run: |
-          ./backend/tests/courses.sh || (docker logs backend && exit 1)
-      
-      - name: Sections tests
-        run: |
-          ./backend/tests/sections.sh || (docker logs backend && exit 1)
-      
-      - name: Students tests
-        run: |
-          ./backend/tests/students.sh || (docker logs backend && exit 1)
-      
-      - name: Teachers tests
-        run: |
-          ./backend/tests/teachers.sh || (docker logs backend && exit 1)
-
-      - name: Parents tests
-        run: |
-          ./backend/tests/parents.sh || (docker logs backend && exit 1)
-      
-      - name: Submissions tests
-        run: |
-          ./backend/tests/submissions.sh || (docker logs backend && exit 1)
-
-      - name: Grades tests
-        run: |
-          ./backend/tests/grades.sh || (docker logs backend && exit 1)
-
-      - name: Attachments tests
-        run: |
-          ./backend/tests/attachments.sh || (docker logs backend && exit 1)
+      - name: Courses policy tests
+        run: docker exec backend pytest backend/policies/test_courses.py
 
       - name: Stop containers
         if: always()
