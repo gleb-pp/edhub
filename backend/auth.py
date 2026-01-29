@@ -10,6 +10,7 @@ from settings.auth import auth_settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
+
 def hash_password(password: str) -> str:
     """Hash the provided password using bcrypt."""
     salt = bcrypt.gensalt(rounds=12)
@@ -23,6 +24,7 @@ def verify_password(password: str, password_hash: str) -> bool:
         password.encode("utf-8"),
         password_hash.encode("utf-8"),
     )
+
 
 def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
     """Decode JWT token and return user email."""
