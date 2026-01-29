@@ -128,13 +128,13 @@ jobs:
             -c "sleep infinity"
       
       - name: Courses service tests
-        run: docker exec backend pytest backend/services/test_courses.py
+        run: docker exec backend pytest ./backend/services/test_courses.py
 
       - name: Courses router tests
-        run: docker exec backend pytest backend/routers/test_courses.py
+        run: docker exec backend pytest ./backend/routers/test_courses.py
 
       - name: Courses policy tests
-        run: docker exec backend pytest backend/policies/test_courses.py
+        run: docker exec backend pytest ./backend/policies/test_courses.py
 
       - name: Stop containers
         if: always()
