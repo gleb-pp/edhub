@@ -128,10 +128,10 @@ jobs:
             -c "sleep infinity"
       
       - name: Courses service tests
-        run: docker exec backend pytest ./tests/backend/services/test_courses.py
+        run: docker exec backend pytest ./tests/services/test_courses.py
 
       - name: Courses router tests
-        run: docker exec backend pytest ./tests/backend/routers/test_courses.py
+        run: docker exec backend pytest ./tests/routers/test_courses.py
 
       - name: Courses policy tests
         run: docker exec backend pytest ./tests/policies/test_courses.py
