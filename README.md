@@ -35,12 +35,21 @@ The backend is structured into several layers to ensure maintainability and scal
 
 ### Built With
 
+#### Core Technologies
+
+[![Python][Python]][Python-url]
 [![FastAPI][FastAPI]][FastAPI-url]
 [![Pydantic][Pydantic]][Pydantic-url]
+[![SQLAlchemy][SQLAlchemy]][SQLAlchemy-url]
+
+#### Testing & Code Quality
+
 [![Pytest][Pytest]][Pytest-url]
 [![Black][Black]][Black-url]
 [![Ruff][Ruff]][Ruff-url]
 [![Mypy][Mypy]][Mypy-url]
+
+#### Infrastructure
 
 [![PostgreSQL][PostgreSQL]][PostgreSQL-url]
 [![NginX][NginX]][NginX-url]
@@ -116,6 +125,8 @@ or documentation, feel free to open an issue.
 [Mypy-url]: https://mypy.readthedocs.io/
 [Ruff]: https://img.shields.io/badge/ruff-000000?style=for-the-badge&logo=ruff&logoColor=white
 [Ruff-url]: https://ruff.rs/
+[SQLAlchemy]: https://img.shields.io/badge/SQLAlchemy-3673A5?style=for-the-badge&logo=sqlalchemy&logoColor=white
+[SQLAlchemy-url]: https://www.sqlalchemy.org/
 
 [PostgreSQL]: https://img.shields.io/badge/postgresql-4169e1?style=for-the-badge&logo=postgresql&logoColor=white
 [PostgreSQL-url]: https://www.postgresql.org/
