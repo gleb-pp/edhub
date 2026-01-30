@@ -95,6 +95,9 @@ jobs:
           - teachers
           - users
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Setup backend for tests
         uses: ./.github/actions/backend-test-setup
       
@@ -116,6 +119,9 @@ jobs:
     name: Test Admin with PyTest
     needs: backend-db-test
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Setup backend for tests
         uses: ./.github/actions/backend-test-setup
 
@@ -144,6 +150,9 @@ jobs:
           - students
           - teachers
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Setup backend for tests
         uses: ./.github/actions/backend-test-setup
 
