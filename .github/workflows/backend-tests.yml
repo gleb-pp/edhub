@@ -136,37 +136,37 @@ jobs:
           docker network rm edhub-network || true
 
   policy-tests:
-  runs-on: ubuntu-latest
-  name: Policy tests with PyTest
-  needs: backend-db-test
-  steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+    runs-on: ubuntu-latest
+    name: Policy tests with PyTest
+    needs: backend-db-test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup backend for tests
-      uses: ./.github/actions/backend-test-setup
+      - name: Setup backend for tests
+        uses: ./.github/actions/backend-test-setup
 
-    - name: Admin policy tests
-      run: docker exec backend pytest ./tests/policies/test_admin.py
+      - name: Admin policy tests
+        run: docker exec backend pytest ./tests/policies/test_admin.py
 
-    - name: Courses policy tests
-      run: docker exec backend pytest ./tests/policies/test_courses.py
+      - name: Courses policy tests
+        run: docker exec backend pytest ./tests/policies/test_courses.py
 
-    - name: Grades policy tests
-      run: docker exec backend pytest ./tests/policies/test_grades.py
+      - name: Grades policy tests
+        run: docker exec backend pytest ./tests/policies/test_grades.py
 
-    - name: Parents policy tests
-      run: docker exec backend pytest ./tests/policies/test_parents.py
+      - name: Parents policy tests
+        run: docker exec backend pytest ./tests/policies/test_parents.py
 
-    - name: Students policy tests
-      run: docker exec backend pytest ./tests/policies/test_students.py
+      - name: Students policy tests
+        run: docker exec backend pytest ./tests/policies/test_students.py
 
-    - name: Teachers policy tests
-      run: docker exec backend pytest ./tests/policies/test_teachers.py
+      - name: Teachers policy tests
+        run: docker exec backend pytest ./tests/policies/test_teachers.py
 
-    - name: Stop containers
-      if: always()
-      run: |
-        docker stop backend system_db || true
-        docker rm backend system_db || true
-        docker network rm edhub-network || true
+      - name: Stop containers
+        if: always()
+        run: |
+          docker stop backend system_db || true
+          docker rm backend system_db || true
+          docker network rm edhub-network || true
