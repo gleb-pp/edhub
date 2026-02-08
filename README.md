@@ -1,10 +1,3 @@
-<div align="center">
-
-`Python` • `FastAPI` • `Pydantic` • `SQLAlchemy` • `PostgreSQL`  
-`Docker` • `GitHub Actions` • `Poetry` • `Pytest` • `Ruff` • `Mypy`
-
-</div>
-
 # 🎓 What is EdHub?
 
 EdHub is a Learning Management System designed to facilitate interaction among teachers, students, and parents. It enhances the educational process by simplifying communication between stakeholders and increasing student engagement in learning.
@@ -46,7 +39,7 @@ The backend is structured into several layers to ensure maintainability and scal
 | :--- | :--- |
 | **Database** | <img src="https://img.shields.io/badge/PostgreSQL-4169e1?logo=postgresql&logoColor=white" alt="PostgreSQL" height="20"> <img src="https://img.shields.io/badge/SQLAlchemy-3673A5?logo=sqlalchemy&logoColor=white" alt="SQLAlchemy" height="20"> |
 | **Infrastructure** | <img src="https://img.shields.io/badge/Docker-257bd6?logo=docker&logoColor=white" alt="Docker" height="20"> <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?logo=githubactions&logoColor=white" alt="GitHub Actions" height="20"> |
-| **Code Quality** | <img src="https://img.shields.io/badge/Pytest-008080?logo=pytest&logoColor=white" alt="Pytest" height="20"> <img src="https://img.shields.io/badge/Ruff-000000?logo=ruff&logoColor=white" alt="Ruff" height="20"> <img src="https://img.shields.io/badge/Mypy-4B8BBE?logo=mypy&logoColor=white" alt="Mypy" height="20"> |
+| **Code Quality** | <img src="https://img.shields.io/badge/Pytest-008080?logo=pytest&logoColor=white" alt="Pytest" height="20"> <img src="https://img.shields.io/badge/Ruff-000000?logo=ruff&logoColor=white" alt="Ruff" height="20"> <img src="https://img.shields.io/badge/Mypy-4B8BBE?logo=python&logoColor=white" alt="Mypy" height="20"> |
 
 # 🚀 Local Startup
 
