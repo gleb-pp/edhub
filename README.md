@@ -41,18 +41,17 @@ The backend is structured into several layers to ensure maintainability and scal
 [![FastAPI][FastAPI]][FastAPI-url]
 [![Pydantic][Pydantic]][Pydantic-url]
 [![SQLAlchemy][SQLAlchemy]][SQLAlchemy-url]
+[![Poetry][Poetry]][Poetry-url]
 
 #### Testing & Code Quality
 
 [![Pytest][Pytest]][Pytest-url]
-[![Black][Black]][Black-url]
 [![Ruff][Ruff]][Ruff-url]
 [![Mypy][Mypy]][Mypy-url]
 
 #### Infrastructure
 
 [![PostgreSQL][PostgreSQL]][PostgreSQL-url]
-[![NginX][NginX]][NginX-url]
 [![Docker][Docker]][Docker-url]
 
 # 🚀 Local Startup
@@ -115,22 +114,21 @@ or documentation, feel free to open an issue.
 [Python-url]: https://www.python.org/
 [FastAPI]: https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi
 [FastAPI-url]: https://fastapi.tiangolo.com/
-[Pytest]: https://img.shields.io/badge/pytest-008080?style=for-the-badge&logo=pytest&logoColor=white
-[Pytest-url]: https://docs.pytest.org/
 [Pydantic]: https://img.shields.io/badge/Pydantic-176DC3?style=for-the-badge&logo=pydantic&logoColor=white
 [Pydantic-url]: https://pydantic.dev/
-[Black]: https://img.shields.io/badge/Black-000000?style=for-the-badge&logo=black&logoColor=white
-[Black-url]: https://black.readthedocs.io/
-[Mypy]: https://img.shields.io/badge/mypy-4B8BBE?style=for-the-badge&logo=python&logoColor=white
-[Mypy-url]: https://mypy.readthedocs.io/
-[Ruff]: https://img.shields.io/badge/ruff-000000?style=for-the-badge&logo=ruff&logoColor=white
-[Ruff-url]: https://ruff.rs/
 [SQLAlchemy]: https://img.shields.io/badge/SQLAlchemy-3673A5?style=for-the-badge&logo=sqlalchemy&logoColor=white
 [SQLAlchemy-url]: https://www.sqlalchemy.org/
+[Poetry]: https://img.shields.io/badge/Poetry-4F5D95?style=for-the-badge&logo=poetry&logoColor=white
+[Poetry-url]: https://python-poetry.org/
+
+[Pytest]: https://img.shields.io/badge/pytest-008080?style=for-the-badge&logo=pytest&logoColor=white
+[Pytest-url]: https://docs.pytest.org/
+[Ruff]: https://img.shields.io/badge/ruff-000000?style=for-the-badge&logo=ruff&logoColor=white
+[Ruff-url]: https://ruff.rs/
+[Mypy]: https://img.shields.io/badge/mypy-4B8BBE?style=for-the-badge&logo=python&logoColor=white
+[Mypy-url]: https://mypy.readthedocs.io/
 
 [PostgreSQL]: https://img.shields.io/badge/postgresql-4169e1?style=for-the-badge&logo=postgresql&logoColor=white
 [PostgreSQL-url]: https://www.postgresql.org/
-[NginX]: https://img.shields.io/badge/Nginx-009639?logo=nginx&logoColor=white&style=for-the-badge
-[NginX-url]: https://nginx.org/
 [Docker]: https://img.shields.io/badge/docker-257bd6?style=for-the-badge&logo=docker&logoColor=white
 [Docker-url]: https://www.docker.com/
