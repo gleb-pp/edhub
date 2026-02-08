@@ -18,7 +18,7 @@ jobs:
         run: docker network create edhub-network
 
       - name: Build backend
-        run: docker build -t edhub-backend ./backend
+        run: docker build -t edhub-backend .
 
       - name: Run system_db container
         run: |

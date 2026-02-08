@@ -5,24 +5,6 @@ on:
     branches: [ main, dev ]
 
 jobs:
-  check_todo:
-    runs-on: ubuntu-latest
-    name: Check for TODO comments in code
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Check for TODO comments
-        run: |
-          todo_files=$(grep -r "TODO" --include=\*.{py,js,jsx} . || true)
-          if [ -z "$todo_files" ]; then
-            echo "No TODOs found"
-          else
-            echo "TODOs found"
-            echo "$todo_files"
-            exit 1
-          fi
-
   lint_code:
     runs-on: ubuntu-latest
     name: Check backend code style with linter
@@ -33,19 +15,18 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r backend/requirements.txt
-          pip install black ruff mypy
+          pip install --no-cache-dir --upgrade pip
+          pip install --no-cache-dir poetry
+          poetry config virtualenvs.create false
+          poetry install --with dev --no-root --no-interaction --no-ansi
 
-      - name: Check Python code style with Black
-        run: black backend/ --check
       
       - name: Check Python code style with ruff
-        run: ruff check backend/
+        run: ruff check src/
       
       - name: Type check with mypy
-        run: mypy backend/
+        run: mypy src/

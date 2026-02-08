@@ -27,7 +27,7 @@ runs:
         exit 1
       shell: bash
 
-    - run: docker build -t edhub-backend ./backend
+    - run: docker build -t edhub-backend .
       shell: bash
 
     - run: |

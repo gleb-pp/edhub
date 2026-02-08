@@ -38,7 +38,7 @@ jobs:
       - name: Check backend health
         run: |
           for i in {1..30}; do
-            if curl -s -f http://localhost/api/openapi.json >/dev/null; then
+            if curl -s -f http://localhost:8000/openapi.json >/dev/null; then
               echo "Backend is ready!"
               exit 0
             fi
@@ -46,18 +46,6 @@ jobs:
             sleep 2
           done
           (echo "Backend is not responsive" && docker compose logs backend && exit 1)
-
-      # - name: Check frontend health
-      #   run: |
-      #     for i in {1..30}; do
-      #       if curl -s -f http://localhost/ >/dev/null; then
-      #         echo "Frontend is ready!"
-      #         exit 0
-      #       fi
-      #       echo "Waiting for frontend... ($i/30)"
-      #       sleep 2
-      #     done
-      #     (echo "Frontend is not responsive" && docker compose logs frontend && exit 1)
 
       - name: Docker compose down
         if: always()
