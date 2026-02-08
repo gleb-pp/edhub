@@ -35,11 +35,44 @@ The backend is structured into several layers to ensure maintainability and scal
 
 ### Built With
 
-- **Backend:** FastAPI, SQLAlchemy, Pydantic
-- **Database:** PostgreSQL
-- **Testing:** Pytest
-- **Infrastructure:** Docker, GitHub Actions
-- **Code Quality:** Ruff, MyPy
+<div align="center">
+
+| Backend & API | Database & ORM | DevOps & Tools |
+| :--- | :--- | :--- |
+| [![Python][Python-badge]][Python-url] [![FastAPI][FastAPI-badge]][FastAPI-url] [![Pydantic][Pydantic-badge]][Pydantic-url] | [![PostgreSQL][PostgreSQL-badge]][PostgreSQL-url] [![SQLAlchemy][SQLAlchemy-badge]][SQLAlchemy-url] | [![Docker][Docker-badge]][Docker-url] [![GitHub Actions][GitHub Actions-badge]][GitHub Actions-url] |
+| **Code Quality** | **Package Manager** | **Testing** |
+| [![Ruff][Ruff-badge]][Ruff-url] [![Mypy][Mypy-badge]][Mypy-url] | [![Poetry][Poetry-badge]][Poetry-url] | [![Pytest][Pytest-badge]][Pytest-url] |
+
+</div>
+
+<div align="center">
+
+| | | |
+| :--- | :--- | :--- |
+| **Core Backend** | **Infrastructure** | **Development Tools** |
+| ![Python][Python-badge] ![FastAPI][FastAPI-badge] ![Pydantic][Pydantic-badge] | ![PostgreSQL][PostgreSQL-badge] ![Docker][Docker-badge] ![Docker Compose][Docker Compose-badge] | ![Poetry][Poetry-badge] ![GitHub Actions][GitHub Actions-badge] |
+| **Data Layer** | **Quality Assurance** | |
+| ![SQLAlchemy][SQLAlchemy-badge] | ![Pytest][Pytest-badge] ![Ruff][Ruff-badge] ![Mypy][Mypy-badge] | |
+
+</div>
+
+<div align="center">
+
+`Python` • `FastAPI` • `Pydantic` • `SQLAlchemy` • `PostgreSQL`  
+`Docker` • `GitHub Actions` • `Poetry` • `Pytest` • `Ruff` • `Mypy`
+
+</div>
+
+<div align="center">
+
+| Category | Technologies |
+| :--- | :--- |
+| **Framework & API** | <img src="https://img.shields.io/badge/FastAPI-005571?logo=fastapi" alt="FastAPI" height="20"> <img src="https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white" alt="Python" height="20"> |
+| **Database** | <img src="https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL" height="20"> <img src="https://img.shields.io/badge/SQLAlchemy-3673A5?logo=sqlalchemy&logoColor=white" alt="SQLAlchemy" height="20"> |
+| **Infrastructure** | <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white" alt="Docker" height="20"> <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?logo=githubactions&logoColor=white" alt="GitHub Actions" height="20"> |
+| **Code Quality** | <img src="https://img.shields.io/badge/Pytest-0A9EDC?logo=pytest&logoColor=white" alt="Pytest" height="20"> <img src="https://img.shields.io/badge/Ruff-000000?logo=ruff&logoColor=white" alt="Ruff" height="20"> |
+
+</div>
 
 #### Core Technologies
 
