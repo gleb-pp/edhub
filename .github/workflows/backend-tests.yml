@@ -18,7 +18,7 @@ jobs:
         run: docker network create edhub-network
 
       - name: Build backend
-        run: ddocker build --target test -t edhub-backend-test .
+        run: docker build --target test -t edhub-backend-test .
 
       - name: Run system_db container
         run: |
