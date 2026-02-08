@@ -35,6 +35,12 @@ The backend is structured into several layers to ensure maintainability and scal
 
 ### Built With
 
+- **Backend:** FastAPI, SQLAlchemy, Pydantic
+- **Database:** PostgreSQL
+- **Testing:** Pytest
+- **Infrastructure:** Docker, GitHub Actions
+- **Code Quality:** Ruff, MyPy
+
 #### Core Technologies
 
 [![Python][Python]][Python-url]
@@ -53,6 +59,8 @@ The backend is structured into several layers to ensure maintainability and scal
 
 [![PostgreSQL][PostgreSQL]][PostgreSQL-url]
 [![Docker][Docker]][Docker-url]
+[![Docker Compose][Docker Compose]][Docker Compose-url]
+[![GitHub Actions][GitHub Actions]][GitHub Actions-url]
 
 # 🚀 Local Startup
 
@@ -132,3 +140,7 @@ or documentation, feel free to open an issue.
 [PostgreSQL-url]: https://www.postgresql.org/
 [Docker]: https://img.shields.io/badge/docker-257bd6?style=for-the-badge&logo=docker&logoColor=white
 [Docker-url]: https://www.docker.com/
+[Docker Compose]: https://img.shields.io/badge/docker--compose-2496ed?style=for-the-badge&logo=docker&logoColor=white
+[Docker Compose-url]: https://docs.docker.com/compose/
+[GitHub Actions]: https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white
+[GitHub Actions-url]: https://docs.github.com/en/actions
