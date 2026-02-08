@@ -42,32 +42,11 @@ The backend is structured into several layers to ensure maintainability and scal
 
 ### Built With
 
-| **Framework & API** | <img src="https://img.shields.io/badge/FastAPI-005571?logo=fastapi" alt="FastAPI" height="20"> <img src="https://img.shields.io/badge/Pydantic-176C9C?logo=pydantic&logoColor=white" alt="Pydantic" height="20"> <img src="https://img.shields.io/badge/Poetry-176C9C?logo=poetry&logoColor=white" alt="Poetry" height="20"> |
+| **Framework & API** | <img src="https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi" alt="FastAPI" height="20"> <img src="https://img.shields.io/badge/Pydantic-176DC3?style=for-the-badge&logo=pydantic&logoColor=white" alt="Pydantic" height="20"> <img src="https://img.shields.io/badge/Poetry-4F5D95?style=for-the-badge&logo=poetry&logoColor=white" alt="Poetry" height="20"> |
 | :--- | :--- |
-| **Database** | <img src="https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL" height="20"> <img src="https://img.shields.io/badge/SQLAlchemy-3673A5?logo=sqlalchemy&logoColor=white" alt="SQLAlchemy" height="20"> |
-| **Infrastructure** | <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white" alt="Docker" height="20"> <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?logo=githubactions&logoColor=white" alt="GitHub Actions" height="20"> |
-| **Code Quality** | <img src="https://img.shields.io/badge/Pytest-0A9EDC?logo=pytest&logoColor=white" alt="Pytest" height="20"> <img src="https://img.shields.io/badge/Ruff-000000?logo=ruff&logoColor=white" alt="Ruff" height="20"> <img src="https://img.shields.io/badge/Mypy-000000?logo=mypy&logoColor=white" alt="Mypy" height="20"> |
-
-#### Core Technologies
-
-[![Python][Python]][Python-url]
-[![FastAPI][FastAPI]][FastAPI-url]
-[![Pydantic][Pydantic]][Pydantic-url]
-[![SQLAlchemy][SQLAlchemy]][SQLAlchemy-url]
-[![Poetry][Poetry]][Poetry-url]
-
-#### Testing & Code Quality
-
-[![Pytest][Pytest]][Pytest-url]
-[![Ruff][Ruff]][Ruff-url]
-[![Mypy][Mypy]][Mypy-url]
-
-#### Infrastructure
-
-[![PostgreSQL][PostgreSQL]][PostgreSQL-url]
-[![Docker][Docker]][Docker-url]
-[![Docker Compose][Docker Compose]][Docker Compose-url]
-[![GitHub Actions][GitHub Actions]][GitHub Actions-url]
+| **Database** | <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" height="20"> <img src="https://img.shields.io/badge/SQLAlchemy-3673A5?style=for-the-badge&logo=sqlalchemy&logoColor=white" alt="SQLAlchemy" height="20"> |
+| **Infrastructure** | <img src="https://img.shields.io/badge/Docker-257BD6?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" height="20"> <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white" alt="GitHub Actions" height="20"> |
+| **Code Quality** | <img src="https://img.shields.io/badge/Pytest-008080?style=for-the-badge&logo=pytest&logoColor=white" alt="Pytest" height="20"> <img src="https://img.shields.io/badge/Ruff-000000?style=for-the-badge&logo=ruff&logoColor=white" alt="Ruff" height="20"> <img src="https://img.shields.io/badge/Mypy-4B8BBE?style=for-the-badge&logo=python&logoColor=white" alt="Mypy" height="20"> |
 
 # 🚀 Local Startup
 
