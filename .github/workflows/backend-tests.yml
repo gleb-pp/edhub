@@ -18,7 +18,7 @@ jobs:
         run: docker network create edhub-network
 
       - name: Build backend
-        run: docker build --target test -t edhub-backend-test .
+        run: docker build --target prod -t edhub-backend .
 
       - name: Run system_db container
         run: |
@@ -52,7 +52,7 @@ jobs:
             -p 8000:8000 \
             -e DATABASE_URL=postgresql://postgres:12345678@system_db:5432/edhub \
             -e JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
-            edhub-backend-test
+            edhub-backend
 
       - name: Wait for backend to be ready
         run: |
