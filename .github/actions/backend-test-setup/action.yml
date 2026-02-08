@@ -27,7 +27,7 @@ runs:
         exit 1
       shell: bash
 
-    - run: docker build -t edhub-backend .
+    - run: docker build --target test -t edhub-backend-test .
       shell: bash
 
     - run: |
@@ -37,6 +37,6 @@ runs:
           --entrypoint sh \
           -e DATABASE_URL=postgresql://postgres:12345678@system_db:5432/edhub \
           -e JWT_SECRET_KEY=test-secret \
-          edhub-backend \
+          edhub-backend-test \
           -c "sleep infinity"
       shell: bash
