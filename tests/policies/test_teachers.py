@@ -20,7 +20,7 @@ class TestTeacherPolicy:
         mock_course = MagicMock(spec=Course)
         mock_course.instructor = "instructor@test.com"
         mock_db = MagicMock()
-        
+
         TeacherPolicy.assert_instructor_access(mock_user, mock_course, mock_db)
 
     def test_assert_instructor_access_fail(self):
@@ -40,7 +40,7 @@ class TestTeacherPolicy:
         mock_course = MagicMock(spec=Course)
         mock_course.instructor = "instructor@test.com"
         mock_db = MagicMock()
-        
+
         TeacherPolicy.assert_teacher_access(mock_user, mock_course, mock_db)
 
     def test_assert_teacher_access_success_as_teacher(self):
@@ -50,7 +50,7 @@ class TestTeacherPolicy:
         mock_course.instructor = "instructor@test.com"
         mock_db = MagicMock()
         mock_db.query().scalar.return_value = True
-        
+
         TeacherPolicy.assert_teacher_access(mock_user, mock_course, mock_db)
 
     def test_assert_teacher_access_fail(self):
@@ -72,7 +72,7 @@ class TestTeacherPolicy:
         mock_course.instructor = "instructor@test.com"
         mock_db = MagicMock()
         mock_db.query().scalar.return_value = False
-        
+
         TeacherPolicy.assert_not_teacher(mock_user, mock_course, mock_db)
 
     def test_assert_not_teacher_conflict_as_instructor(self):
@@ -104,7 +104,7 @@ class TestTeacherPolicy:
         mock_course = MagicMock(spec=Course)
         mock_course.instructor = "instructor@test.com"
         mock_db = MagicMock()
-        
+
         result = TeacherPolicy.check_teacher_access(mock_user, mock_course, mock_db)
         assert result is True
 
@@ -115,7 +115,7 @@ class TestTeacherPolicy:
         mock_course.instructor = "instructor@test.com"
         mock_db = MagicMock()
         mock_db.query().scalar.return_value = True
-        
+
         result = TeacherPolicy.check_teacher_access(mock_user, mock_course, mock_db)
         assert result is True
 
@@ -126,6 +126,6 @@ class TestTeacherPolicy:
         mock_course.instructor = "instructor@test.com"
         mock_db = MagicMock()
         mock_db.query().scalar.return_value = False
-        
+
         result = TeacherPolicy.check_teacher_access(mock_user, mock_course, mock_db)
         assert result is False

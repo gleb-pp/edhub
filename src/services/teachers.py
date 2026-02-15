@@ -36,7 +36,7 @@ class TeacherService:
         teaches = (
             self.db.query(Teaches)
             .filter(
-                Teaches.email == teacher.email, 
+                Teaches.email == teacher.email,
                 Teaches.course_id == course.course_id,
             )
             .first()

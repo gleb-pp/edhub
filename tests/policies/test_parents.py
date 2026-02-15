@@ -21,7 +21,7 @@ class TestParentPolicy:
         mock_course = MagicMock(spec=Course)
         mock_db = MagicMock()
         mock_db.query().scalar.return_value = True
-        
+
         ParentPolicy.assert_parent_access(mock_user, mock_course, mock_db)
 
     def test_assert_parent_access_fail(self):
@@ -70,7 +70,7 @@ class TestParentPolicy:
     @patch("src.policies.parents.TeacherPolicy.check_teacher_access")
     def test_assert_access_to_parent_denied(self, mock_teacher_check, mock_course_assert):
         mock_teacher_check.return_value = False
-        
+
         mock_parent = MagicMock(spec=User)
         mock_parent.email = "parent@test.com"
         mock_user = MagicMock(spec=User)
@@ -88,7 +88,7 @@ class TestParentPolicy:
     @patch("src.policies.parents.TeacherPolicy.check_teacher_access")
     def test_assert_access_to_parent_as_same_user(self, mock_teacher_check, mock_course_assert):
         mock_teacher_check.return_value = False
-        
+
         mock_parent = MagicMock(spec=User)
         mock_parent.email = "same@test.com"
         mock_user = MagicMock(spec=User)
@@ -105,7 +105,7 @@ class TestParentPolicy:
     @patch("src.policies.parents.TeacherPolicy.check_teacher_access")
     def test_assert_access_to_parent_as_admin(self, mock_teacher_check, mock_course_assert):
         mock_teacher_check.return_value = False
-        
+
         mock_parent = MagicMock(spec=User)
         mock_parent.email = "parent@test.com"
         mock_user = MagicMock(spec=User)

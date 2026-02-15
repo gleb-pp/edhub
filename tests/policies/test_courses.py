@@ -15,7 +15,7 @@ class TestCoursePolicy:
         mock_course = MagicMock(spec=Course)
         mock_db = MagicMock()
         mock_db.query().scalar.return_value = True
-        
+
         CoursePolicy.assert_course_access(mock_user, mock_course, mock_db)
 
     def test_assert_course_access_fail(self):
@@ -23,6 +23,6 @@ class TestCoursePolicy:
         mock_course = MagicMock(spec=Course)
         mock_db = MagicMock()
         mock_db.query().scalar.return_value = False
-        
+
         with pytest.raises(ParticipantRoleRequiredError):
             CoursePolicy.assert_course_access(mock_user, mock_course, mock_db)

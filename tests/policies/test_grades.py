@@ -14,7 +14,7 @@ class TestGradePolicy:
         mock_submission.course_id = 1
         mock_submission.assignment_id = 2
         mock_submission.email = "student@test.com"
-        
+
         mock_db = MagicMock()
         mock_db.query().filter().first.return_value = None
 
@@ -25,7 +25,7 @@ class TestGradePolicy:
         mock_submission.course_id = 1
         mock_submission.assignment_id = 2
         mock_submission.email = "student@test.com"
-        
+
         mock_db = MagicMock()
         mock_db.query().filter().first.return_value = object()
 
