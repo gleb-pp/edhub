@@ -1,19 +1,19 @@
 from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from src.db import get_db
-from fastapi import APIRouter, Depends, Query, HTTPException
+
 from src.auth import get_current_user
+from src.db import get_db
+from src.exceptions import assignments as assignment_errors
+from src.exceptions import courses as course_errors
+from src.exceptions import sections as section_errors
+from src.exceptions import teachers as teacher_errors
+from src.exceptions import users as user_errors
+from src.models.assignments import Assignment, AssignmentID
 from src.models.common import Success
-from src.models.assignments import AssignmentID, Assignment
-from src.services import UserService, CourseService, SectionService, AssignmentService
 from src.policies import CoursePolicy, TeacherPolicy
-from src.exceptions import (
-    users as user_errors,
-    courses as course_errors,
-    sections as section_errors,
-    teachers as teacher_errors,
-    assignments as assignment_errors,
-)
+from src.services import AssignmentService, CourseService, SectionService, UserService
 from src.settings.assignments import assignment_settings
 
 router = APIRouter(
@@ -77,7 +77,7 @@ async def create_assignment(
         section_errors.SectionNotFoundError,
     ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
-    except teacher_errors.TeacherRoleRequired as e:
+    except teacher_errors.TeacherRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
@@ -112,7 +112,7 @@ async def remove_assignment(
         assignment_errors.AssignmentNotFoundError,
     ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
-    except teacher_errors.TeacherRoleRequired as e:
+    except teacher_errors.TeacherRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
@@ -146,7 +146,7 @@ async def get_assignment(
         return Assignment.model_validate(assignment)
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
-    except course_errors.ParticipantRoleRequired as e:
+    except course_errors.ParticipantRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -185,7 +185,7 @@ async def get_course_assignments(
         return [Assignment.model_validate(ass) for ass in assignments]
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
-    except course_errors.ParticipantRoleRequired as e:
+    except course_errors.ParticipantRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e

@@ -1,15 +1,17 @@
+from datetime import UTC, datetime
+
 from sqlalchemy import (
-    Integer,
-    DateTime,
-    Text,
     CheckConstraint,
-    Uuid,
+    DateTime,
     ForeignKeyConstraint,
+    Integer,
+    Text,
+    Uuid,
 )
 from sqlalchemy.orm import Mapped, mapped_column
-from datetime import datetime, timezone
-from src.settings.course import course_settings
+
 from src.repo.base import Base
+from src.settings.course import course_settings
 
 
 class MaterialFile(Base):
@@ -20,7 +22,7 @@ class MaterialFile(Base):
     fileid: Mapped[str] = mapped_column(Uuid, primary_key=True)
     filename: Mapped[str] = mapped_column(Text, nullable=False)
     uploadtime: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.now(tz=timezone.utc)
+        DateTime, nullable=False, default=datetime.now(tz=UTC)
     )
 
     __table_args__ = (
@@ -41,7 +43,7 @@ class AssignmentFile(Base):
     fileid: Mapped[str] = mapped_column(Uuid, primary_key=True)
     filename: Mapped[str] = mapped_column(Text, nullable=False)
     uploadtime: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.now(tz=timezone.utc)
+        DateTime, nullable=False, default=datetime.now(tz=UTC)
     )
 
     __table_args__ = (
@@ -63,7 +65,7 @@ class SubmissionFile(Base):
     fileid: Mapped[str] = mapped_column(Uuid, primary_key=True)
     filename: Mapped[str] = mapped_column(Text, nullable=False)
     uploadtime: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.now(tz=timezone.utc)
+        DateTime, nullable=False, default=datetime.now(tz=UTC)
     )
 
     __table_args__ = (

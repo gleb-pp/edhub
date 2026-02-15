@@ -1,8 +1,10 @@
-from src.repo.users import User
+import logging
+
+from sqlalchemy.orm import Session
+
 from src.repo.courses import Course
 from src.repo.parents import ParentAt
-from sqlalchemy.orm import Session
-import logging
+from src.repo.users import User
 
 
 class ParentService:

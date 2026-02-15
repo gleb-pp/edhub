@@ -1,15 +1,17 @@
+from datetime import UTC, datetime
+
 from sqlalchemy import (
-    Integer,
-    DateTime,
-    Text,
     CheckConstraint,
+    DateTime,
     ForeignKey,
     ForeignKeyConstraint,
+    Integer,
+    Text,
 )
 from sqlalchemy.orm import Mapped, mapped_column
-from datetime import datetime, timezone
-from src.settings.submissions import submission_settings
+
 from src.repo.base import Base
+from src.settings.submissions import submission_settings
 
 
 class Grade(Base):
@@ -28,7 +30,7 @@ class Grade(Base):
         ForeignKey("users.email", ondelete="SET NULL"), nullable=True
     )
     time_graded: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.now(tz=timezone.utc)
+        DateTime, nullable=False, default=datetime.now(tz=UTC)
     )
 
     __table_args__ = (

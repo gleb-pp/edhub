@@ -1,15 +1,17 @@
-from regex import match, search
-from src.settings.user import user_settings
-from src.exceptions import users as user_errors
-import src.exceptions.admins as admin_errors
-from sqlalchemy.orm import Session
-from src.repo.users import User
-from src.repo.courses import Course
-from src.settings.auth import auth_settings
-from jose import jwt
-from src.auth import hash_password, verify_password
-from datetime import datetime, timedelta, timezone
 import logging
+from datetime import UTC, datetime, timedelta
+
+from jose import jwt
+from regex import match, search
+from sqlalchemy.orm import Session
+
+import src.exceptions.admins as admin_errors
+from src.auth import hash_password, verify_password
+from src.exceptions import users as user_errors
+from src.repo.courses import Course
+from src.repo.users import User
+from src.settings.auth import auth_settings
+from src.settings.user import user_settings
 
 
 class UserService:
@@ -76,7 +78,7 @@ class UserService:
         # giving access token
         data = {
             "email": user.email,
-            "exp": datetime.now(tz=timezone.utc)
+            "exp": datetime.now(tz=UTC)
             + timedelta(minutes=auth_settings.access_token_expire_minutes),
         }
         return jwt.encode(

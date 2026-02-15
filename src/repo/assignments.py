@@ -1,15 +1,17 @@
+from datetime import UTC, datetime
+
 from sqlalchemy import (
-    Integer,
-    DateTime,
-    Text,
     CheckConstraint,
+    DateTime,
     ForeignKey,
     ForeignKeyConstraint,
+    Integer,
+    Text,
 )
 from sqlalchemy.orm import Mapped, mapped_column
-from datetime import datetime, timezone
-from src.settings.assignments import assignment_settings
+
 from src.repo.base import Base
+from src.settings.assignments import assignment_settings
 
 
 class CourseAssignment(Base):
@@ -22,7 +24,7 @@ class CourseAssignment(Base):
         Integer, primary_key=True, autoincrement=True
     )
     creation_time: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.now(tz=timezone.utc)
+        DateTime, nullable=False, default=datetime.now(tz=UTC)
     )
     author: Mapped[str | None] = mapped_column(
         ForeignKey("users.email", ondelete="SET NULL"), nullable=True

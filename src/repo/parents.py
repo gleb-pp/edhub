@@ -1,5 +1,6 @@
 from sqlalchemy import ForeignKey, ForeignKeyConstraint
 from sqlalchemy.orm import Mapped, mapped_column
+
 from src.repo.base import Base
 
 

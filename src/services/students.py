@@ -1,8 +1,10 @@
-from src.repo.users import User
+import logging
+
+from sqlalchemy.orm import Session
+
 from src.repo.courses import Course
 from src.repo.students import StudentAt
-from sqlalchemy.orm import Session
-import logging
+from src.repo.users import User
 
 
 class StudentService:

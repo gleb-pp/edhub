@@ -1,21 +1,22 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from src.db import create_tables, create_default_admin_account
 
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+import src.routers.admins
 import src.routers.assignments
-import src.routers.submissions
-import src.routers.grades
 import src.routers.courses
-import src.routers.sections
+import src.routers.grades
 import src.routers.materials
 import src.routers.parents
+import src.routers.personalization
+import src.routers.sections
 import src.routers.students
+import src.routers.submissions
 import src.routers.teachers
 import src.routers.users
-import src.routers.personalization
-import src.routers.admins
+from src.db import create_default_admin_account, create_tables
 
 
 @asynccontextmanager

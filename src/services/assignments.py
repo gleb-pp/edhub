@@ -1,10 +1,12 @@
-from src.repo.assignments import CourseAssignment
-from src.repo.sections import CourseSection
-from src.repo.courses import Course
-from src.repo.users import User
-import src.exceptions.assignments as assignment_errors
-from sqlalchemy.orm import Session
 import logging
+
+from sqlalchemy.orm import Session
+
+import src.exceptions.assignments as assignment_errors
+from src.repo.assignments import CourseAssignment
+from src.repo.courses import Course
+from src.repo.sections import CourseSection
+from src.repo.users import User
 
 
 class AssignmentService:

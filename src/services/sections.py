@@ -1,9 +1,11 @@
+import logging
+
+from sqlalchemy import func
 from sqlalchemy.orm import Session
+
+import src.exceptions.sections as section_errors
 from src.repo.courses import Course
 from src.repo.sections import CourseSection
-import src.exceptions.sections as section_errors
-from sqlalchemy import func
-import logging
 
 
 class SectionService:

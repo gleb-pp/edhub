@@ -1,9 +1,11 @@
-from src.exceptions import courses as course_errors
-from sqlalchemy.orm import Session
-from src.repo.courses import Course
-from src.repo.users import User
-from src.repo.personalization import PersonalCourseInfo
 import logging
+
+from sqlalchemy.orm import Session
+
+from src.exceptions import courses as course_errors
+from src.repo.courses import Course
+from src.repo.personalization import PersonalCourseInfo
+from src.repo.users import User
 
 
 class CourseService:

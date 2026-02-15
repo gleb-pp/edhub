@@ -1,19 +1,19 @@
-from fastapi import APIRouter, Depends, Query, HTTPException
-from src.auth import get_current_user
-from src.models.common import Success
-from src.models.materials import MaterialID, Material
 from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+
+from src.auth import get_current_user
 from src.db import get_db
-from src.services import UserService, CourseService, SectionService, MaterialService
+from src.exceptions import courses as course_errors
+from src.exceptions import materials as material_errors
+from src.exceptions import sections as section_errors
+from src.exceptions import teachers as teacher_errors
+from src.exceptions import users as user_errors
+from src.models.common import Success
+from src.models.materials import Material, MaterialID
 from src.policies import CoursePolicy, TeacherPolicy
-from src.exceptions import (
-    users as user_errors,
-    courses as course_errors,
-    sections as section_errors,
-    teachers as teacher_errors,
-    materials as material_errors,
-)
+from src.services import CourseService, MaterialService, SectionService, UserService
 from src.settings.materials import material_settings
 
 router = APIRouter(
@@ -77,7 +77,7 @@ async def create_material(
         section_errors.SectionNotFoundError,
     ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
-    except teacher_errors.TeacherRoleRequired as e:
+    except teacher_errors.TeacherRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
@@ -112,7 +112,7 @@ async def remove_material(
         material_errors.MaterialNotFoundError,
     ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
-    except teacher_errors.TeacherRoleRequired as e:
+    except teacher_errors.TeacherRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
@@ -146,7 +146,7 @@ async def get_material(
         return Material.model_validate(material)
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
-    except course_errors.ParticipantRoleRequired as e:
+    except course_errors.ParticipantRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e

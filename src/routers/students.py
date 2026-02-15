@@ -1,17 +1,22 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
 from src.auth import get_current_user
+from src.db import get_db
+from src.exceptions import courses as course_errors
+from src.exceptions import students as student_errors
+from src.exceptions import teachers as teacher_errors
+from src.exceptions import users as user_errors
 from src.models.common import Success
 from src.models.users import User
-from typing import Annotated
-from sqlalchemy.orm import Session
-from src.db import get_db
-from src.services import UserService, CourseService, StudentService, PersonalizationService
-from src.policies import CoursePolicy, StudentPolicy, ParentPolicy, TeacherPolicy
-from src.exceptions import (
-    users as user_errors,
-    courses as course_errors,
-    students as student_errors,
-    teachers as teacher_errors,
+from src.policies import CoursePolicy, ParentPolicy, StudentPolicy, TeacherPolicy
+from src.services import (
+    CourseService,
+    PersonalizationService,
+    StudentService,
+    UserService,
 )
 
 router = APIRouter(
@@ -47,7 +52,7 @@ async def get_enrolled_students(
         return [User.model_validate(st) for st in students]
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
-    except course_errors.ParticipantRoleRequired as e:
+    except course_errors.ParticipantRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -91,9 +96,9 @@ async def invite_student(
             raise HTTPException(status_code=400, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
-    except teacher_errors.TeacherRoleRequired as e:
+    except teacher_errors.TeacherRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
-    except course_errors.RoleConflict as e:
+    except course_errors.RoleConflictError as e:
         raise HTTPException(status_code=409, detail=str(e)) from e
 
 
@@ -135,7 +140,7 @@ async def remove_student(
             raise HTTPException(status_code=400, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
-    except teacher_errors.TeacherRoleRequired as e:
+    except teacher_errors.TeacherRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
-    except student_errors.StudentRoleRequired as e:
+    except student_errors.StudentRoleRequiredError as e:
         raise HTTPException(status_code=422, detail=str(e)) from e

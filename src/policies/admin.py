@@ -1,5 +1,5 @@
-from src.repo.users import User
 import src.exceptions.admins as admin_errors
+from src.repo.users import User
 
 
 class AdminPolicy:

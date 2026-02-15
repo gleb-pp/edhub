@@ -1,14 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException
-from src.auth import get_current_user
-from src.services import UserService, CourseService
-from src.policies import AdminPolicy
-from src.exceptions import users as user_errors, admins as admin_errors
-from src.models.common import Success
-from src.models.users import User
-from src.models.courses import Course
 from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
+from src.auth import get_current_user
 from src.db import get_db
+from src.exceptions import admins as admin_errors
+from src.exceptions import users as user_errors
+from src.models.common import Success
+from src.models.courses import Course
+from src.models.users import User
+from src.policies import AdminPolicy
+from src.services import CourseService, UserService
 
 router = APIRouter(
     prefix="/admin",

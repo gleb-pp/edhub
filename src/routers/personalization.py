@@ -1,18 +1,17 @@
-from typing import List
-from fastapi import APIRouter, Query, Depends, HTTPException
-from src.auth import get_current_user
-from src.models.common import Success
 from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+
+from src.auth import get_current_user
 from src.db import get_db
+from src.exceptions import courses as course_errors
+from src.exceptions import personalization as personalization_errors
+from src.exceptions import users as user_errors
+from src.models.common import Success
 from src.models.personalization import EmojiID
-from src.services import UserService, CourseService, PersonalizationService
 from src.policies import CoursePolicy
-from src.exceptions import (
-    users as user_errors,
-    courses as course_errors,
-    personalization as personalization_errors,
-)
+from src.services import CourseService, PersonalizationService, UserService
 from src.settings.course import course_settings
 
 router = APIRouter(tags=["Personalization"])
@@ -41,14 +40,14 @@ async def get_course_emoji(
         raise HTTPException(status_code=401, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
-    except course_errors.ParticipantRoleRequired as e:
+    except course_errors.ParticipantRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
 @router.put("/courses/order")
 async def change_courses_order(
     db: Annotated[Session, Depends(get_db)],
-    new_order: List[str] = Query(...),
+    new_order: list[str] = Query(...),
     user_email: str = Depends(get_current_user),
 ) -> Success:
     """
@@ -97,5 +96,5 @@ async def set_course_emoji(
         raise HTTPException(status_code=401, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
-    except course_errors.ParticipantRoleRequired as e:
+    except course_errors.ParticipantRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e

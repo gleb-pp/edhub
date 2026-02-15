@@ -21,7 +21,7 @@ dependencies = [
 
 [tool.poetry]
 packages = [
-    { include = "backend" },
+    { include = "src" },
 ]
 
 [build-system]
@@ -29,27 +29,26 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
-line-length = 88
 indent-width = 4
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "B", "UP", "N", "ASYNC", "A", "C4", "DTZ", "T20"]
 ignore = [
-    "D100",
-    "D104",
-    "D105",
-    "D107",
+    "D100",    # Docstrings in public modules
+    "D107",    # Docstrings in __init__
+    "D213",    # multi-line-summary-second-line
+    "D203",    # blank line required before class docstring
+    "D211",    # no-blank-line-before-class
+    "E501",    # Line too long
+    "T201",    # Print found
+    "B008",    # Do not perform function call `Query` in argument defaults
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 
-[tool.ruff.lint.isort]
-split-on-trailing-comma = false
-
 [tool.mypy]
-mypy_path = "backend"
+mypy_path = "src"
 explicit_package_bases = true
 namespace_packages = true
 ignore_missing_imports = true

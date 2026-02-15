@@ -1,23 +1,23 @@
-from fastapi import APIRouter, Query, Depends, HTTPException
-from src.auth import get_current_user
-from src.models.common import Success
-from src.models.sections import CoursePost, SectionID, Section
 from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+
+from src.auth import get_current_user
 from src.db import get_db
-from src.services import (
-    UserService,
-    CourseService,
-    SectionService,
-    MaterialService,
-    AssignmentService,
-)
+from src.exceptions import courses as course_errors
+from src.exceptions import sections as section_errors
+from src.exceptions import teachers as teacher_errors
+from src.exceptions import users as user_errors
+from src.models.common import Success
+from src.models.sections import CoursePost, Section, SectionID
 from src.policies import CoursePolicy, TeacherPolicy
-from src.exceptions import (
-    users as user_errors,
-    courses as course_errors,
-    sections as section_errors,
-    teachers as teacher_errors,
+from src.services import (
+    AssignmentService,
+    CourseService,
+    MaterialService,
+    SectionService,
+    UserService,
 )
 from src.settings.sections import section_settings
 
@@ -54,7 +54,7 @@ async def get_course_sections(
         return [Section.model_validate(sec) for sec in sections]
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
-    except course_errors.ParticipantRoleRequired as e:
+    except course_errors.ParticipantRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -127,7 +127,7 @@ async def get_course_feed(
         return course_feed
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
-    except course_errors.ParticipantRoleRequired as e:
+    except course_errors.ParticipantRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -172,7 +172,7 @@ async def create_section(
         raise HTTPException(status_code=401, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
-    except teacher_errors.TeacherRoleRequired as e:
+    except teacher_errors.TeacherRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
@@ -209,7 +209,7 @@ async def change_section_order(
         section_errors.IncorrectSectionOrderError,
     ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
-    except teacher_errors.TeacherRoleRequired as e:
+    except teacher_errors.TeacherRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
@@ -248,7 +248,7 @@ async def remove_section(
         section_errors.SectionNotFoundError,
     ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
-    except teacher_errors.TeacherRoleRequired as e:
+    except teacher_errors.TeacherRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
     except section_errors.LastSectionDeleteError as e:
         raise HTTPException(status_code=409, detail=str(e)) from e

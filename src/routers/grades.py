@@ -1,25 +1,25 @@
-from fastapi import APIRouter, Depends, Query, HTTPException
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+
 from src.auth import get_current_user
+from src.db import get_db
+from src.exceptions import assignments as assignment_errors
+from src.exceptions import courses as course_errors
+from src.exceptions import students as student_errors
+from src.exceptions import submissions as submission_errors
+from src.exceptions import teachers as teacher_errors
+from src.exceptions import users as user_errors
 from src.models.common import Success
 from src.models.grades import AssignmentGrade
-from typing import Annotated
-from sqlalchemy.orm import Session
-from src.db import get_db
+from src.policies import StudentPolicy, TeacherPolicy
 from src.services import (
-    CourseService,
-    UserService,
-    GradeService,
     AssignmentService,
+    CourseService,
+    GradeService,
     SubmissionService,
-)
-from src.policies import TeacherPolicy, StudentPolicy
-from src.exceptions import (
-    users as user_errors,
-    courses as course_errors,
-    students as student_errors,
-    teachers as teacher_errors,
-    assignments as assignment_errors,
-    submissions as submission_errors,
+    UserService,
 )
 from src.settings.submissions import submission_settings
 
@@ -79,12 +79,12 @@ async def grade_submission(
             raise HTTPException(status_code=400, detail=str(e)) from e
     except (
         course_errors.CourseNotFoundError,
-        student_errors.StudentRoleRequired,
+        student_errors.StudentRoleRequiredError,
         assignment_errors.AssignmentNotFoundError,
         submission_errors.SubmissionNotFoundError,
     ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
-    except teacher_errors.TeacherRoleRequired as e:
+    except teacher_errors.TeacherRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
@@ -133,8 +133,8 @@ async def get_submission_grade(
     except submission_errors.GradeNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
     except (
-        course_errors.ParticipantRoleRequired,
-        student_errors.StudentRoleRequired,
-        student_errors.NoAccessToStudentInfo,
+        course_errors.ParticipantRoleRequiredError,
+        student_errors.StudentRoleRequiredError,
+        student_errors.NoAccessToStudentInfoError,
     ) as e:
         raise HTTPException(status_code=403, detail=str(e)) from e

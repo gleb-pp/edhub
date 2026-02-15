@@ -1,10 +1,12 @@
+import logging
+from datetime import UTC, datetime
+
+from sqlalchemy.orm import Session
+
+import src.exceptions.submissions as submission_errors
 from src.repo.assignments import CourseAssignment
 from src.repo.submissions import AssignmentSubmission
 from src.repo.users import User
-import src.exceptions.submissions as submission_errors
-from sqlalchemy.orm import Session
-from datetime import datetime, timezone
-import logging
 
 
 class SubmissionService:
@@ -73,5 +75,5 @@ class SubmissionService:
             f"Updating submission for assignment {submission.assignment_id} in course {submission.course_id} by student {submission.email}"
         )
         submission.submission_text = submission_text
-        submission.timemodified = datetime.now(tz=timezone.utc)
+        submission.timemodified = datetime.now(tz=UTC)
         self.db.flush()

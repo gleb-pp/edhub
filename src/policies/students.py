@@ -1,12 +1,14 @@
-from src.repo.users import User
+from sqlalchemy import exists
+from sqlalchemy.orm import Session
+
+import src.exceptions.students as student_errors
 from src.repo.courses import Course
 from src.repo.students import StudentAt
-from sqlalchemy.orm import Session
-from sqlalchemy import exists
-import src.exceptions.students as student_errors
+from src.repo.users import User
+
 from .courses import CoursePolicy
-from .teachers import TeacherPolicy
 from .parents import ParentPolicy
+from .teachers import TeacherPolicy
 
 
 class StudentPolicy:
@@ -26,13 +28,13 @@ class StudentPolicy:
     def assert_student_access(user: User, course: Course, db: Session) -> None:
         """Asserts that the provided user has a student role in the provided course."""
         if not StudentPolicy.check_student_access(user, course, db):
-            raise student_errors.StudentRoleRequired(user.email, course.title)
+            raise student_errors.StudentRoleRequiredError(user.email, course.title)
 
     @staticmethod
     def assert_not_student(user: User, course: Course, db: Session) -> None:
         """Asserts that the provided user is already student in the provided course."""
         if StudentPolicy.check_student_access(user, course, db):
-            raise student_errors.StudentRoleConflict(user.email, course.course_id)
+            raise student_errors.StudentRoleConflictError(user.email, course.course_id)
 
     @staticmethod
     def assert_access_to_student(
@@ -47,6 +49,6 @@ class StudentPolicy:
             or ParentPolicy.check_parent_of_student(user, student, course, db)
             or user.isadmin
         ):
-            raise student_errors.NoAccessToStudentInfo(
+            raise student_errors.NoAccessToStudentInfoError(
                 student.email, user.email, course.id
             )

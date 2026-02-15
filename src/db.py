@@ -3,10 +3,10 @@ from collections.abc import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
+from src.auth import hash_password
 from src.repo.base import Base
 from src.repo.users import User
 from src.settings.admins import admin_settings
-from src.auth import hash_password
 
 DATABASE_URL = "postgresql+psycopg://postgres:12345678@system_db:5432/edhub"
 engine = create_engine(DATABASE_URL, echo=True)

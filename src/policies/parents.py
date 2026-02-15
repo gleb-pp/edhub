@@ -1,9 +1,11 @@
-from src.repo.users import User
+from sqlalchemy import exists
+from sqlalchemy.orm import Session
+
+import src.exceptions.parents as parent_errors
 from src.repo.courses import Course
 from src.repo.parents import ParentAt
-from sqlalchemy.orm import Session
-from sqlalchemy import exists
-import src.exceptions.parents as parent_errors
+from src.repo.users import User
+
 from .courses import CoursePolicy
 from .teachers import TeacherPolicy
 
@@ -25,13 +27,13 @@ class ParentPolicy:
     def assert_parent_access(parent: User, course: Course, db: Session) -> None:
         """Asserts that the provided user has a parent role in the provided course."""
         if not ParentPolicy.check_parent_access(parent, course, db):
-            raise parent_errors.ParentRoleRequired(parent.email, course.course_id)
+            raise parent_errors.ParentRoleRequiredError(parent.email, course.course_id)
 
     @staticmethod
     def assert_not_parent(user: User, course: Course, db: Session) -> None:
         """Asserts that the provided user is already a parent in the provided course."""
         if ParentPolicy.check_parent_access(user, course, db):
-            raise parent_errors.ParentRoleConflict(user.email, course.course_id)
+            raise parent_errors.ParentRoleConflictError(user.email, course.course_id)
 
     @staticmethod
     def check_parent_of_student(
@@ -52,7 +54,7 @@ class ParentPolicy:
     ) -> None:
         """Asserts that the provided user is not a parent of the student in the provided course."""
         if ParentPolicy.check_parent_of_student(parent, student, course, db):
-            raise parent_errors.ParentOfStudentRoleConflict(
+            raise parent_errors.ParentOfStudentRoleConflictError(
                 parent.email, student.email, course.course_id
             )
 
@@ -62,7 +64,7 @@ class ParentPolicy:
     ) -> None:
         """Asserts that the provided user is already parent of the student in the provided course."""
         if not ParentPolicy.check_parent_of_student(parent, student, course, db):
-            raise parent_errors.ParentOfStudentRoleRequired(
+            raise parent_errors.ParentOfStudentRoleRequiredError(
                 parent.email, student.email, course.course_id
             )
 
@@ -78,6 +80,6 @@ class ParentPolicy:
             or user.email == parent.email
             or user.isadmin
         ):
-            raise parent_errors.NoAccessToParentInfo(
+            raise parent_errors.NoAccessToParentInfoError(
                 parent.email, user.email, course.course_id
             )

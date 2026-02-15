@@ -1,7 +1,8 @@
-from sqlalchemy import Integer, Text, CheckConstraint, ForeignKey, UniqueConstraint
+from sqlalchemy import CheckConstraint, ForeignKey, Integer, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
-from src.settings.sections import section_settings
+
 from src.repo.base import Base
+from src.settings.sections import section_settings
 
 
 class CourseSection(Base):

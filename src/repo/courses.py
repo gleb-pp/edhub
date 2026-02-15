@@ -1,9 +1,11 @@
-from sqlalchemy import DateTime, Text, CheckConstraint, ForeignKey, Uuid
-from sqlalchemy.orm import Mapped, mapped_column
+from datetime import UTC, datetime
 from uuid import uuid4
-from datetime import datetime, timezone
-from src.settings.course import course_settings
+
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Text, Uuid
+from sqlalchemy.orm import Mapped, mapped_column
+
 from src.repo.base import Base
+from src.settings.course import course_settings
 
 
 class Course(Base):
@@ -18,7 +20,7 @@ class Course(Base):
         ForeignKey("users.email", ondelete="CASCADE"), nullable=False
     )
     creation_time: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.now(tz=timezone.utc)
+        DateTime, nullable=False, default=datetime.now(tz=UTC)
     )
 
     __table_args__ = (

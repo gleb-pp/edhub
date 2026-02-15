@@ -1,9 +1,9 @@
 from datetime import UTC, datetime
 
+import bcrypt
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
-import bcrypt
 from jose.exceptions import JWTError
 
 from src.settings.auth import auth_settings

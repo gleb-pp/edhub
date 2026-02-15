@@ -1,13 +1,15 @@
-from src.repo.courses import Course
-from src.repo.users import User
-from sqlalchemy.orm import Session
-from src.repo.personalization import PersonalCourseInfo
-from src.settings.course import course_settings
+import logging
 from random import randint
+
 from sqlalchemy import func
+from sqlalchemy.orm import Session
+
 import src.exceptions.courses as course_errors
 import src.exceptions.personalization as personalization_errors
-import logging
+from src.repo.courses import Course
+from src.repo.personalization import PersonalCourseInfo
+from src.repo.users import User
+from src.settings.course import course_settings
 
 
 class PersonalizationService:
@@ -54,7 +56,7 @@ class PersonalizationService:
             self.logger.warning(
                 f"User {user.email} is not a participant in course {course.course_id}"
             )
-            raise course_errors.ParticipantRoleRequired(user.email, course.course_id)
+            raise course_errors.ParticipantRoleRequiredError(user.email, course.course_id)
         self.db.delete(personal_info)
 
     def get_course_emoji(self, course: Course, user: User) -> int | None:
@@ -71,7 +73,7 @@ class PersonalizationService:
             self.logger.warning(
                 f"User {user.email} is not a participant in course {course.course_id}"
             )
-            raise course_errors.ParticipantRoleRequired(user.email, course.course_id)
+            raise course_errors.ParticipantRoleRequiredError(user.email, course.course_id)
         return personal_info.emoji_id
 
     def change_courses_order(self, user: User, new_order: list[str]) -> None:
@@ -117,5 +119,5 @@ class PersonalizationService:
             self.logger.warning(
                 f"User {user.email} is not a participant in course {course.course_id}"
             )
-            raise course_errors.ParticipantRoleRequired(user.email, course.course_id)
+            raise course_errors.ParticipantRoleRequiredError(user.email, course.course_id)
         personal_info.emoji_id = emoji_id

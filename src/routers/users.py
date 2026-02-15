@@ -1,18 +1,18 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
 from src.auth import get_current_user
-from src.services import UserService, CourseService
-from src.policies import TeacherPolicy, StudentPolicy, ParentPolicy
-from src.exceptions import (
-    users as user_errors,
-    courses as course_errors,
-    admins as admin_errors,
-)
+from src.db import get_db
+from src.exceptions import admins as admin_errors
+from src.exceptions import courses as course_errors
+from src.exceptions import users as user_errors
 from src.models.common import Success
 from src.models.courses import CourseID
-from src.models.users import User, CourseRole, AccessToken
-from typing import Annotated
-from sqlalchemy.orm import Session
-from src.db import get_db
+from src.models.users import AccessToken, CourseRole, User
+from src.policies import ParentPolicy, StudentPolicy, TeacherPolicy
+from src.services import CourseService, UserService
 
 router = APIRouter(
     tags=["Users"],

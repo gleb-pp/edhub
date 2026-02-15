@@ -1,24 +1,24 @@
-from fastapi import APIRouter, Query, Depends, HTTPException
-from src.auth import get_current_user
-from src.models.courses import CourseID, Course
-from src.models.common import Success
 from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+
+from src.auth import get_current_user
 from src.db import get_db
+from src.exceptions import courses as course_errors
+from src.exceptions import teachers as teacher_errors
+from src.exceptions import users as user_errors
+from src.models.common import Success
+from src.models.courses import Course, CourseID
+from src.policies import CoursePolicy, ParentPolicy, StudentPolicy, TeacherPolicy
 from src.services import (
-    UserService,
     CourseService,
+    ParentService,
     PersonalizationService,
     SectionService,
     StudentService,
     TeacherService,
-    ParentService,
-)
-from src.policies import TeacherPolicy, CoursePolicy, StudentPolicy, ParentPolicy
-from src.exceptions import (
-    teachers as teacher_errors,
-    courses as course_errors,
-    users as user_errors,
+    UserService,
 )
 from src.settings.course import course_settings
 
@@ -115,7 +115,7 @@ async def delete_course(
         return Success(success=True)
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
-    except teacher_errors.InstructorRoleRequired as e:
+    except teacher_errors.InstructorRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -144,7 +144,7 @@ async def get_course_info(
         return Course.model_validate(course)
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
-    except course_errors.ParticipantRoleRequired as e:
+    except course_errors.ParticipantRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -185,13 +185,13 @@ async def leave_course(
             return Success(success=True)
         if TeacherPolicy.check_instructor_access(user, course, db):
             raise teacher_errors.DeleteInstructorError(user.email, course.course_id)
-        raise course_errors.ParticipantRoleRequired(user.email, course_id)
+        raise course_errors.ParticipantRoleRequiredError(user.email, course_id)
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except (
         teacher_errors.DeleteInstructorError,
-        course_errors.ParticipantRoleRequired,
+        course_errors.ParticipantRoleRequiredError,
     ) as e:
         raise HTTPException(status_code=403, detail=str(e)) from e

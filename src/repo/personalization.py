@@ -1,5 +1,6 @@
-from sqlalchemy import Integer, CheckConstraint, ForeignKey, UniqueConstraint
+from sqlalchemy import CheckConstraint, ForeignKey, Integer, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
+
 from src.repo.base import Base
 from src.settings.course import course_settings
 

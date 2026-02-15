@@ -1,10 +1,12 @@
+import logging
+
+from sqlalchemy.orm import Session
+
+import src.exceptions.materials as material_errors
+from src.repo.courses import Course
 from src.repo.materials import CourseMaterial
 from src.repo.sections import CourseSection
-from src.repo.courses import Course
 from src.repo.users import User
-import src.exceptions.materials as material_errors
-from sqlalchemy.orm import Session
-import logging
 
 
 class MaterialService:
