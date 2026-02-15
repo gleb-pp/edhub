@@ -4,10 +4,8 @@ import pytest
 from sqlalchemy.orm import Session
 
 from src.exceptions import courses as course_errors
-from src.services.courses import CourseService
-from src.repo.courses import Course
-from src.repo.personalization import PersonalCourseInfo
-from src.repo.users import User
+from src.services import CourseService
+from src.repo import Course, User
 
 
 class TestCourseService:

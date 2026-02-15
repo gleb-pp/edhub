@@ -1,16 +1,12 @@
 from unittest.mock import MagicMock, patch
-from datetime import UTC, datetime, timedelta
 
 import pytest
-from jose import jwt
 from sqlalchemy.orm import Session
 
 import src.exceptions.admins as admin_errors
 from src.exceptions import users as user_errors
-from src.services.users import UserService
-from src.repo.courses import Course
-from src.repo.users import User
-from src.settings.auth import auth_settings
+from src.services import UserService
+from src.repo import Course, User
 from src.settings.user import user_settings
 
 

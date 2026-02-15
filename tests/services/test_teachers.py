@@ -1,12 +1,9 @@
 from unittest.mock import MagicMock, patch
 
-import pytest
 from sqlalchemy.orm import Session
 
-from src.services.teachers import TeacherService
-from src.repo.courses import Course
-from src.repo.teachers import Teaches
-from src.repo.users import User
+from src.services import TeacherService
+from src.repo import Course, Teaches, User
 
 
 class TestTeacherService:

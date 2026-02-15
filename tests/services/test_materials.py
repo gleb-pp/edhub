@@ -4,11 +4,8 @@ import pytest
 from sqlalchemy.orm import Session
 
 import src.exceptions.materials as material_errors
-from src.services.materials import MaterialService
-from src.repo.courses import Course
-from src.repo.materials import CourseMaterial
-from src.repo.sections import CourseSection
-from src.repo.users import User
+from src.services import MaterialService
+from src.repo import Course, CourseMaterial, CourseSection, User
 
 
 class TestMaterialService:

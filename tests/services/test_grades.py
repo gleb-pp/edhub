@@ -4,10 +4,8 @@ import pytest
 from sqlalchemy.orm import Session
 
 import src.exceptions.submissions as submission_errors
-from src.services.grades import GradeService
-from src.repo.grades import Grade
-from src.repo.submissions import AssignmentSubmission
-from src.repo.users import User
+from src.services import GradeService
+from src.repo import Grade, AssignmentSubmission, User
 
 
 class TestGradeService:

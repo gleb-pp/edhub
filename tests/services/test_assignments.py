@@ -4,11 +4,8 @@ import pytest
 from sqlalchemy.orm import Session
 
 import src.exceptions.assignments as assignment_errors
-from src.services.assignments import AssignmentService
-from src.repo.assignments import CourseAssignment
-from src.repo.courses import Course
-from src.repo.sections import CourseSection
-from src.repo.users import User
+from src.services import AssignmentService
+from src.repo import CourseAssignment, Course, CourseSection, User
 
 
 class TestAssignmentService:

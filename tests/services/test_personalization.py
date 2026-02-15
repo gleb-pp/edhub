@@ -1,15 +1,12 @@
 from unittest.mock import MagicMock, patch
-from secrets import randbelow
 
 import pytest
 from sqlalchemy.orm import Session
 
 import src.exceptions.courses as course_errors
 import src.exceptions.personalization as personalization_errors
-from src.services.personalization import PersonalizationService
-from src.repo.courses import Course
-from src.repo.personalization import PersonalCourseInfo
-from src.repo.users import User
+from src.services import PersonalizationService
+from src.repo import Course, PersonalCourseInfo, User
 from src.settings.course import course_settings
 
 

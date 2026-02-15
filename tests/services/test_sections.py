@@ -4,9 +4,8 @@ import pytest
 from sqlalchemy.orm import Session
 
 import src.exceptions.sections as section_errors
-from src.services.sections import SectionService
-from src.repo.courses import Course
-from src.repo.sections import CourseSection
+from src.services import SectionService
+from src.repo import Course, CourseSection
 
 
 class TestSectionService:
