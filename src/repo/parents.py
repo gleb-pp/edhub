@@ -8,13 +8,13 @@ class ParentAt(Base):
     __tablename__ = "parent_at"
 
     parent_email: Mapped[str] = mapped_column(
-        ForeignKey("users.email", ondelete="CASCADE"), primary_key=True
+        ForeignKey("users.email", ondelete="CASCADE"), primary_key=True,
     )
     student_email: Mapped[str] = mapped_column(
-        ForeignKey("users.email", ondelete="CASCADE"), primary_key=True
+        ForeignKey("users.email", ondelete="CASCADE"), primary_key=True,
     )
     course_id: Mapped[str] = mapped_column(
-        ForeignKey("courses.course_id", ondelete="CASCADE"), primary_key=True
+        ForeignKey("courses.course_id", ondelete="CASCADE"), primary_key=True,
     )
     __table_args__ = (
         ForeignKeyConstraint(

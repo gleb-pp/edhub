@@ -27,20 +27,20 @@ async def create_material(
     course_id: str,
     section_id: int,
     db: Annotated[Session, Depends(get_db)],
-    title: str = Query(
+    title: Annotated[str, Query(
         ...,
         min_length=material_settings.name_min_lenght,
         max_length=material_settings.name_max_lenght,
         pattern=r"^[\p{L}0-9_ ]+$",
         description=f"Title can contain only letters, digits, spaces, and underscores, {material_settings.name_min_lenght}-{material_settings.name_max_lenght} symbols",
-    ),
-    description: str = Query(
+    )],
+    description: Annotated[str, Query(
         ...,
         min_length=material_settings.description_min_lenght,
         max_length=material_settings.description_max_lenght,
         description=f"Description must contain {material_settings.description_min_lenght}-{material_settings.description_max_lenght} symbols",
-    ),
-    teacher_email: str = Depends(get_current_user),
+    )],
+    teacher_email: Annotated[str, Depends(get_current_user)],
 ) -> MaterialID:
     """
     Create the material with provided title and description within the section by provided section_id within the course with provided course_id.
@@ -66,7 +66,7 @@ async def create_material(
             TeacherPolicy.assert_teacher_access(teacher, course, db)
         section = section_service.get_section(course, section_id)
         material = material_service.create_material(
-            section, title, description, teacher
+            section, title, description, teacher,
         )
         db.commit()
         return MaterialID.model_validate(material)
@@ -86,7 +86,7 @@ async def remove_material(
     course_id: str,
     material_id: int,
     db: Annotated[Session, Depends(get_db)],
-    teacher_email: str = Depends(get_current_user),
+    teacher_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
     """
     Remove the material by the provided course_id and material_id.
@@ -121,7 +121,7 @@ async def get_material(
     course_id: str,
     material_id: int,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user),
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> Material:
     """
     Get the material details by the provided (course_id, material_id).
@@ -159,7 +159,7 @@ async def get_material(
 #     course_id: str,
 #     material_id: str,
 #     file: UploadFile = File(...),
-#     user_email: str = Depends(get_current_user),
+#     user_email: Annotated[str, Depends(get_current_user)],
 # ) -> MaterialAttachmentMetadata:
 #     """
 #     Attach the provided file to provided course material.
@@ -180,7 +180,7 @@ async def get_material(
 # async def get_material_attachments(
 #     course_id: str,
 #     material_id: str,
-#     user_email: str = Depends(get_current_user)
+#     user_email: Annotated[str, Depends(get_current_user)]
 # ) -> list[MaterialAttachmentMetadata]:
 #     """
 #     Get the list of course material attachments by provided course_id, material_id.
@@ -200,7 +200,7 @@ async def get_material(
 #     course_id: str,
 #     material_id: str,
 #     file_id: str,
-#     user_email: str = Depends(get_current_user)
+#     user_email: Annotated[str, Depends(get_current_user)]
 # ):
 #     """
 #     Download the course material attachment by provided course_id, material_id, file_id.

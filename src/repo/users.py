@@ -15,6 +15,6 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(80), nullable=False)
     isadmin: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     timeregistered: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.now(tz=UTC)
+        DateTime, nullable=False, default=datetime.now(tz=UTC),
     )
     password_hash: Mapped[str] = mapped_column(Text, nullable=False)

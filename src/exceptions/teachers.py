@@ -10,7 +10,7 @@ class InstructorRoleRequiredError(TeacherError):
 
     def __init__(self, email: str, course_name: str) -> None:
         super().__init__(
-            f"User {email} is not an instructor in the course {course_name}."
+            f"User {email} is not an instructor in the course {course_name}.",
         )
 
 
@@ -19,7 +19,7 @@ class TeacherRoleRequiredError(TeacherError):
 
     def __init__(self, email: str, course_name: str) -> None:
         super().__init__(
-            f"User {email} is not a teacher nor instructor in the course {course_name}."
+            f"User {email} is not a teacher nor instructor in the course {course_name}.",
         )
 
 
@@ -28,7 +28,7 @@ class TeacherRoleConflictError(TeacherError, RoleConflictError):
 
     def __init__(self, email: str, course_id: str) -> None:
         super().__init__(
-            f"User {email} is already teacher at the course {course_id}."
+            f"User {email} is already teacher at the course {course_id}.",
         )
 
 
@@ -37,5 +37,5 @@ class DeleteInstructorError(TeacherError):
 
     def __init__(self, email: str, course_id: str) -> None:
         super().__init__(
-            f"User {email} can't exit the course {course_id} since they are the primary instructor."
+            f"User {email} can't exit the course {course_id} since they are the primary instructor.",
         )

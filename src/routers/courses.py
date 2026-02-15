@@ -30,7 +30,7 @@ router = APIRouter(
 @router.get("/courses")
 async def get_available_courses(
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user),
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> list[Course]:
     """
     Get the list of of courses available for user (as a Primary Instructor, Teacher, Student, or Parent).
@@ -50,21 +50,21 @@ async def get_available_courses(
 @router.post("/courses")
 async def create_course(
     db: Annotated[Session, Depends(get_db)],
-    title: str = Query(
+    title: Annotated[str, Query(
         ...,
         min_length=course_settings.name_min_lenght,
         max_length=course_settings.name_max_lenght,
         pattern=r"^[\p{L}0-9_ ]+$",
         description=f"Title can contain only letters, digits, spaces, and underscores, {course_settings.name_min_lenght}-{course_settings.name_max_lenght} symbols",
-    ),
-    organization: str | None = Query(
+    )],
+    organization: Annotated[str | None, Query(
         None,
         min_length=course_settings.organization_min_lenght,
         max_length=course_settings.organization_max_lenght,
         pattern=r"^[\p{L}0-9_ ]+$",
         description=f"Organization can contain only letters, digits, spaces, and underscores, {course_settings.organization_min_lenght}-{course_settings.organization_max_lenght} symbols",
-    ),
-    user_email: str = Depends(get_current_user),
+    )],
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> CourseID:
     """
     Create the course with provided title and become a Primary Instructor in it.
@@ -94,7 +94,7 @@ async def create_course(
 async def delete_course(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user),
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
     """
     Remove the course with provided course_id.
@@ -125,7 +125,7 @@ async def delete_course(
 async def get_course_info(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user),
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> Course:
     """
     Get information about the course: course_id, title, organization, instructor_email, and creation_time.
@@ -154,7 +154,7 @@ async def get_course_info(
 async def leave_course(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user),
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
     """
     Remove user from the course with provided course_id.

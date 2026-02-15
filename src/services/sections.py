@@ -13,7 +13,7 @@ class SectionService:
 
     logger = logging.getLogger(__name__)
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
 
     def get_course_sections(self, course: Course) -> list[CourseSection]:
@@ -37,7 +37,7 @@ class SectionService:
         )
         if not section:
             self.logger.warning(
-                f"Attempt to access non-existing section {section_id} in course {course.course_id}"
+                f"Attempt to access non-existing section {section_id} in course {course.course_id}",
             )
             raise section_errors.SectionNotFoundError(section_id, course.course_id)
         return section
@@ -45,7 +45,7 @@ class SectionService:
     def create_section(self, title: str, course: Course) -> CourseSection:
         """Create a new section within the course with provided id."""
         self.logger.info(
-            f"Creating new section '{title}' for course {course.course_id}"
+            f"Creating new section '{title}' for course {course.course_id}",
         )
         max_order = (
             self.db.query(func.max(CourseSection.section_order))
@@ -54,7 +54,7 @@ class SectionService:
         )
         new_order = (max_order or 0) + 1
         section = CourseSection(
-            course_id=course.course_id, title=title, section_order=new_order
+            course_id=course.course_id, title=title, section_order=new_order,
         )
         self.db.add(section)
         self.db.flush()
@@ -63,7 +63,7 @@ class SectionService:
     def remove_section(self, section: CourseSection) -> None:
         """Delete the provided section from the course."""
         self.logger.info(
-            f"Removing section {section.section_id} from course {section.course_id}"
+            f"Removing section {section.section_id} from course {section.course_id}",
         )
         section_count = (
             self.db.query(func.count(CourseSection.section_id))
@@ -72,19 +72,19 @@ class SectionService:
         )
         if section_count <= 1:
             raise section_errors.LastSectionDeleteError(
-                section.section_id, section.course_id
+                section.section_id, section.course_id,
             )
         self.db.delete(section)
 
     def change_section_order(self, course: Course, new_order: list[int]) -> None:
         """Set the new section order within the provided course by the list of ordered section_ids."""
         self.logger.info(
-            f"Changing section order for course {course.course_id} to {new_order}"
+            f"Changing section order for course {course.course_id} to {new_order}",
         )
         sections = [sec.section_id for sec in self.get_course_sections(course)]
         if len(sections) != len(new_order) or set(sections) != set(new_order):
             self.logger.warning(
-                f"Incorrect section order {new_order} for course {course.course_id}"
+                f"Incorrect section order {new_order} for course {course.course_id}",
             )
             raise section_errors.IncorrectSectionOrderError
 

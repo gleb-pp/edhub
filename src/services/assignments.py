@@ -14,7 +14,7 @@ class AssignmentService:
 
     logger = logging.getLogger(__name__)
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
 
     def get_section_assignments(self, section: CourseSection) -> list[CourseAssignment]:
@@ -29,11 +29,11 @@ class AssignmentService:
         )
 
     def create_assignment(
-        self, section: CourseSection, title: str, description: str, author: User
+        self, section: CourseSection, title: str, description: str, author: User,
     ) -> CourseAssignment:
         """Create a new assignment within the provided course section."""
         self.logger.info(
-            f"Creating assignment '{title}' in section {section.section_id} of course {section.course_id} by author {author.email}."
+            f"Creating assignment '{title}' in section {section.section_id} of course {section.course_id} by author {author.email}.",
         )
         assignment = CourseAssignment(
             course_id=section.course_id,
@@ -58,12 +58,13 @@ class AssignmentService:
         )
         if not assignment:
             raise assignment_errors.AssignmentNotFoundError(
-                course_id=course.course_id, assignment_id=assignment_id
+                course_id=course.course_id, assignment_id=assignment_id,
             )
         return assignment
 
     def get_course_assignments(self, course: Course) -> list[CourseAssignment]:
-        """Get the list of assignments within the provided course.
+        """
+        Get the list of assignments within the provided course.
 
         Assignments are ordered by section_order, then by creation_date, old posts go first.
         """
@@ -76,7 +77,7 @@ class AssignmentService:
             )
             .filter(CourseAssignment.course_id == course.course_id)
             .order_by(
-                CourseSection.section_order.asc(), CourseAssignment.creation_time.asc()
+                CourseSection.section_order.asc(), CourseAssignment.creation_time.asc(),
             )
             .all()
         )
@@ -84,7 +85,7 @@ class AssignmentService:
     def delete_assignment(self, assignment: CourseAssignment) -> None:
         """Delete the provided course assignment."""
         self.logger.info(
-            f"Deleting assignment {assignment.assignment_id} from course {assignment.course_id}."
+            f"Deleting assignment {assignment.assignment_id} from course {assignment.course_id}.",
         )
         self.db.delete(assignment)
         self.db.flush()

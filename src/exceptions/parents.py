@@ -31,7 +31,7 @@ class ParentRoleRequiredError(ParentError):
 
     def __init__(self, parent: str, course_id: str) -> None:
         super().__init__(
-            f"User {parent} is not a parent at the course {course_id}."
+            f"User {parent} is not a parent at the course {course_id}.",
         )
 
 
@@ -40,5 +40,5 @@ class NoAccessToParentInfoError(ParentError):
 
     def __init__(self, parent_email: str, user_email: str, course_id: str) -> None:
         super().__init__(
-            f"User {user_email} has no access to the parent {parent_email} within the course {course_id}."
+            f"User {user_email} has no access to the parent {parent_email} within the course {course_id}.",
         )

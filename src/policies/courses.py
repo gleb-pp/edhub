@@ -12,12 +12,12 @@ class CoursePolicy:
 
     @staticmethod
     def assert_course_access(user: User, course: Course, db: Session) -> None:
-        """Asserts that the provided user has an access to the provided course."""
+        """Assert that the provided user has an access to the provided course."""
         access = db.query(
             exists().where(
                 (PersonalCourseInfo.email == user.email)
-                & (PersonalCourseInfo.course_id == course.course_id)
-            )
+                & (PersonalCourseInfo.course_id == course.course_id),
+            ),
         ).scalar()
         if not access:
             raise course_errors.ParticipantRoleRequiredError(user.email, course.course_id)

@@ -1,5 +1,5 @@
 import logging
-from random import randint
+from secrets import randbelow
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -17,13 +17,13 @@ class PersonalizationService:
 
     logger = logging.getLogger(__name__)
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
 
     def add_course_participant(self, course: Course, user: User) -> None:
         """Add the course personal info about the user when they enter the course."""
         self.logger.info(
-            f"Adding course participant {user.email} to course {course.course_id}"
+            f"Adding course participant {user.email} to course {course.course_id}",
         )
         max_order = (
             self.db.query(func.max(PersonalCourseInfo.course_order))
@@ -34,7 +34,7 @@ class PersonalizationService:
         personal_info = PersonalCourseInfo(
             course_id=course.course_id,
             email=user.email,
-            emoji_id=randint(0, course_settings.emoji_count - 1),
+            emoji_id=randbelow(course_settings.emoji_count),
             course_order=new_order,
         )
         self.db.add(personal_info)
@@ -42,7 +42,7 @@ class PersonalizationService:
     def remove_course_participant(self, course: Course, user: User) -> None:
         """Remove the course personal info about the user when they leaves the course."""
         self.logger.info(
-            f"Removing course participant {user.email} from course {course.course_id}"
+            f"Removing course participant {user.email} from course {course.course_id}",
         )
         personal_info = (
             self.db.query(PersonalCourseInfo)
@@ -54,7 +54,7 @@ class PersonalizationService:
         )
         if not personal_info:
             self.logger.warning(
-                f"User {user.email} is not a participant in course {course.course_id}"
+                f"User {user.email} is not a participant in course {course.course_id}",
             )
             raise course_errors.ParticipantRoleRequiredError(user.email, course.course_id)
         self.db.delete(personal_info)
@@ -71,7 +71,7 @@ class PersonalizationService:
         )
         if not personal_info:
             self.logger.warning(
-                f"User {user.email} is not a participant in course {course.course_id}"
+                f"User {user.email} is not a participant in course {course.course_id}",
             )
             raise course_errors.ParticipantRoleRequiredError(user.email, course.course_id)
         return personal_info.emoji_id
@@ -90,7 +90,7 @@ class PersonalizationService:
         ]
         if len(courses) != len(new_order) or set(courses) != set(new_order):
             self.logger.warning(
-                f"Incorrect courses order provided by user {user.email}"
+                f"Incorrect courses order provided by user {user.email}",
             )
             raise personalization_errors.IncorrectCoursesOrderError
 
@@ -101,11 +101,11 @@ class PersonalizationService:
             ).update({"course_order": index})
 
     def set_course_emoji(
-        self, course: Course, user: User, emoji_id: int | None
+        self, course: Course, user: User, emoji_id: int | None,
     ) -> None:
         """Set the personal course emoji for the provided user."""
         self.logger.info(
-            f"Setting course emoji for user {user.email} in course {course.course_id} to {emoji_id}"
+            f"Setting course emoji for user {user.email} in course {course.course_id} to {emoji_id}",
         )
         personal_info = (
             self.db.query(PersonalCourseInfo)
@@ -117,7 +117,7 @@ class PersonalizationService:
         )
         if not personal_info:
             self.logger.warning(
-                f"User {user.email} is not a participant in course {course.course_id}"
+                f"User {user.email} is not a participant in course {course.course_id}",
             )
             raise course_errors.ParticipantRoleRequiredError(user.email, course.course_id)
         personal_info.emoji_id = emoji_id

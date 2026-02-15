@@ -18,19 +18,19 @@ class Grade(Base):
     __tablename__ = "grades"
 
     course_id: Mapped[str] = mapped_column(
-        ForeignKey("courses.course_id", ondelete="CASCADE"), primary_key=True
+        ForeignKey("courses.course_id", ondelete="CASCADE"), primary_key=True,
     )
     assignment_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     student_email: Mapped[str] = mapped_column(
-        ForeignKey("users.email", ondelete="CASCADE"), primary_key=True
+        ForeignKey("users.email", ondelete="CASCADE"), primary_key=True,
     )
     grade: Mapped[int] = mapped_column(Integer)
     comment: Mapped[str | None] = mapped_column(Text)
     teacher_email: Mapped[str | None] = mapped_column(
-        ForeignKey("users.email", ondelete="SET NULL"), nullable=True
+        ForeignKey("users.email", ondelete="SET NULL"), nullable=True,
     )
     time_graded: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.now(tz=UTC)
+        DateTime, nullable=False, default=datetime.now(tz=UTC),
     )
 
     __table_args__ = (
@@ -44,6 +44,6 @@ class Grade(Base):
             ondelete="CASCADE",
         ),
         CheckConstraint(
-            f"comment IS NULL OR length(comment) BETWEEN {submission_settings.grade_comment_min_lenght} AND {submission_settings.grade_comment_max_lenght}"
+            f"comment IS NULL OR length(comment) BETWEEN {submission_settings.grade_comment_min_lenght} AND {submission_settings.grade_comment_max_lenght}",
         ),
     )

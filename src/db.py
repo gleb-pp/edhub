@@ -1,3 +1,4 @@
+import contextlib
 from collections.abc import Generator
 
 from sqlalchemy import create_engine
@@ -46,10 +47,8 @@ def create_default_admin_account() -> None:
         print(f"Error while creating the default admin account: {e}")
         raise
     finally:
-        try:
+        with contextlib.suppress(StopIteration):
             next(db_gen)
-        except StopIteration:
-            pass
 
 
 def get_db() -> Generator[Session, None, None]:

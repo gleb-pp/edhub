@@ -27,20 +27,20 @@ async def create_assignment(
     course_id: str,
     section_id: int,
     db: Annotated[Session, Depends(get_db)],
-    title: str = Query(
+    title: Annotated[str, Query(
         ...,
         min_length=assignment_settings.name_min_lenght,
         max_length=assignment_settings.name_max_lenght,
         pattern=r"^[\p{L}0-9_ ]+$",
         description=f"Title can contain only letters, digits, spaces, and underscores, {assignment_settings.name_min_lenght}-{assignment_settings.name_max_lenght} symbols",
-    ),
-    description: str = Query(
+    )],
+    description: Annotated[str, Query(
         ...,
         min_length=assignment_settings.description_min_lenght,
         max_length=assignment_settings.description_max_lenght,
         description=f"Description must contain {assignment_settings.description_min_lenght}-{assignment_settings.description_max_lenght} symbols",
-    ),
-    teacher_email: str = Depends(get_current_user),
+    )],
+    teacher_email: Annotated[str, Depends(get_current_user)],
 ) -> AssignmentID:
     """
     Create the assignment with provided title and description within the section by provided section_id within the course with provided course_id.
@@ -66,7 +66,7 @@ async def create_assignment(
             TeacherPolicy.assert_teacher_access(teacher, course, db)
         section = section_service.get_section(course, section_id)
         assignment = assignment_service.create_assignment(
-            section, title, description, teacher
+            section, title, description, teacher,
         )
         db.commit()
         return AssignmentID.model_validate(assignment)
@@ -86,7 +86,7 @@ async def remove_assignment(
     course_id: str,
     assignment_id: int,
     db: Annotated[Session, Depends(get_db)],
-    teacher_email: str = Depends(get_current_user),
+    teacher_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
     """
     Remove the assignment by the provided course_id and assignment_id.
@@ -121,7 +121,7 @@ async def get_assignment(
     course_id: str,
     assignment_id: int,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user),
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> Assignment:
     """
     Get the assignment details by the provided (course_id, assignment_id).
@@ -158,7 +158,7 @@ async def get_assignment(
 async def get_course_assignments(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user),
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> list[Assignment]:
     """
     Get the list of course assignments by the provided course_id.
@@ -196,7 +196,7 @@ async def get_course_assignments(
 #     course_id: str,
 #     assignment_id: str,
 #     file: UploadFile = File(...),
-#     user_email: str = Depends(get_current_user),
+#     user_email: Annotated[str, Depends(get_current_user)],
 # ) -> AssignmentAttachmentMetadata:
 #     """
 #     Attach the provided file to provided course assignment.
@@ -217,7 +217,7 @@ async def get_course_assignments(
 # async def get_assignment_attachments(
 #     course_id: str,
 #     assignment_id: str,
-#     user_email: str = Depends(get_current_user)
+#     user_email: Annotated[str, Depends(get_current_user)]
 # ) -> list[AssignmentAttachmentMetadata]:
 #     """
 #     Get the list of course assignment attachments by provided course_id, assignment_id.
@@ -237,7 +237,7 @@ async def get_course_assignments(
 #     course_id: str,
 #     assignment_id: str,
 #     file_id: str,
-#     user_email: str = Depends(get_current_user)
+#     user_email: Annotated[str, Depends(get_current_user)]
 # ):
 #     """
 #     Download the course assignment attachment by provided course_id, assignment_id, file_id.

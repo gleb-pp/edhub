@@ -22,5 +22,5 @@ class GradePolicy:
         )
         if grade:
             raise submission_errors.SubmissionGradedError(
-                submission.course_id, submission.assignment_id, submission.email
+                submission.course_id, submission.assignment_id, submission.email,
             )

@@ -13,7 +13,7 @@ class GradeService:
 
     logger = logging.getLogger(__name__)
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
 
     def update_submission_grade(
@@ -25,7 +25,7 @@ class GradeService:
     ) -> None:
         """Set the new grade for the submission."""
         self.logger.info(
-            f"Updating grade for submission: course_id={submission.course_id}, assignment_id={submission.assignment_id}, student_email={submission.email}, grade={grade}, teacher_email={teacher.email}"
+            f"Updating grade for submission: course_id={submission.course_id}, assignment_id={submission.assignment_id}, student_email={submission.email}, grade={grade}, teacher_email={teacher.email}",
         )
         graded = (
             self.db.query(Grade)
@@ -66,6 +66,6 @@ class GradeService:
         if not grade:
             self.logger.warning("Attempt to access non-existing grade for submission.")
             raise submission_errors.GradeNotFoundError(
-                submission.course_id, submission.assignment_id, submission.email
+                submission.course_id, submission.assignment_id, submission.email,
             )
         return grade

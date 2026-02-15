@@ -23,7 +23,7 @@ router = APIRouter(
 async def remove_user(
     deleted_user_email: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user),
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
     """
     Delete user account from the system.
@@ -51,10 +51,9 @@ async def remove_user(
     except user_errors.UserNotFoundError as e:
         if e.email == user_email:
             raise HTTPException(status_code=401, detail=str(e)) from e
-        elif e.email == deleted_user_email:
+        if e.email == deleted_user_email:
             raise HTTPException(status_code=404, detail=str(e)) from e
-        else:
-            raise HTTPException(status_code=400, detail=str(e)) from e
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except (
         admin_errors.AdminRoleRequiredError,
         admin_errors.DeleteLastAdminError,
@@ -66,7 +65,7 @@ async def remove_user(
 async def give_admin_permissions(
     new_admin_email: str,
     db: Annotated[Session, Depends(get_db)],
-    admin_email: str = Depends(get_current_user),
+    admin_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
     """
     Give admin rights to some existing user by their email.
@@ -84,10 +83,9 @@ async def give_admin_permissions(
     except user_errors.UserNotFoundError as e:
         if e.email == admin_email:
             raise HTTPException(status_code=401, detail=str(e)) from e
-        elif e.email == new_admin_email:
+        if e.email == new_admin_email:
             raise HTTPException(status_code=404, detail=str(e)) from e
-        else:
-            raise HTTPException(status_code=400, detail=str(e)) from e
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except admin_errors.AdminRoleRequiredError as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
 
@@ -95,7 +93,7 @@ async def give_admin_permissions(
 @router.get("/users")
 async def get_all_users(
     db: Annotated[Session, Depends(get_db)],
-    admin_email: str = Depends(get_current_user),
+    admin_email: Annotated[str, Depends(get_current_user)],
 ) -> list[User]:
     """
     Get the list of all users in the system.
@@ -120,9 +118,7 @@ async def get_all_users(
 async def get_admins(
     db: Annotated[Session, Depends(get_db)],
 ) -> list[User]:
-    """
-    Get the list of platform administrators.
-    """
+    """Get the list of platform administrators."""
     user_service = UserService(db)
     admins = user_service.get_admins()
     return [User.model_validate(a) for a in admins]
@@ -131,7 +127,7 @@ async def get_admins(
 @router.get("/get_all_courses")
 async def get_all_courses(
     db: Annotated[Session, Depends(get_db)],
-    admin_email: str = Depends(get_current_user),
+    admin_email: Annotated[str, Depends(get_current_user)],
 ) -> list[Course]:
     """
     Get the list of all courses in the system.

@@ -9,10 +9,10 @@ class PersonalCourseInfo(Base):
     __tablename__ = "personal_course_info"
 
     course_id: Mapped[str] = mapped_column(
-        ForeignKey("courses.course_id", ondelete="CASCADE"), primary_key=True
+        ForeignKey("courses.course_id", ondelete="CASCADE"), primary_key=True,
     )
     email: Mapped[str] = mapped_column(
-        ForeignKey("users.email", ondelete="CASCADE"), primary_key=True
+        ForeignKey("users.email", ondelete="CASCADE"), primary_key=True,
     )
     emoji_id: Mapped[int | None] = mapped_column(Integer)
     course_order: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -26,7 +26,7 @@ class PersonalCourseInfo(Base):
             initially="DEFERRED",
         ),
         CheckConstraint(
-            f"emoji_id IS NULL OR (emoji_id BETWEEN 0 AND {course_settings.emoji_count - 1})"
+            f"emoji_id IS NULL OR (emoji_id BETWEEN 0 AND {course_settings.emoji_count - 1})",
         ),
         CheckConstraint("course_order >= 0"),
     )

@@ -31,7 +31,7 @@ async def get_students_parents(
     course_id: str,
     student_email: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user),
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> list[User]:
     """
     Get the list of parents observing the student with provided email on course with provided course_id.
@@ -53,8 +53,7 @@ async def get_students_parents(
     except user_errors.UserNotFoundError as e:
         if e.email == user_email:
             raise HTTPException(status_code=401, detail=str(e)) from e
-        else:
-            raise HTTPException(status_code=400, detail=str(e)) from e
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except (course_errors.CourseNotFoundError, student_errors.StudentRoleRequiredError) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except (
@@ -70,7 +69,7 @@ async def invite_parent(
     student_email: str,
     parent_email: str,
     db: Annotated[Session, Depends(get_db)],
-    teacher_email: str = Depends(get_current_user),
+    teacher_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
     """
     Invite the user with provided parent_email to become a parent of the student with provided student_email on course with provided course_id.
@@ -100,8 +99,7 @@ async def invite_parent(
     except user_errors.UserNotFoundError as e:
         if e.email == teacher_email:
             raise HTTPException(status_code=401, detail=str(e)) from e
-        else:
-            raise HTTPException(status_code=400, detail=str(e)) from e
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except teacher_errors.TeacherRoleRequiredError as e:
@@ -118,7 +116,7 @@ async def remove_parent(
     student_email: str,
     parent_email: str,
     db: Annotated[Session, Depends(get_db)],
-    teacher_email: str = Depends(get_current_user),
+    teacher_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
     """
     Remove the parent identified by parent_email from the tracking of student with provided student_email on course with provided course_id.
@@ -148,8 +146,7 @@ async def remove_parent(
     except user_errors.UserNotFoundError as e:
         if e.email == teacher_email:
             raise HTTPException(status_code=401, detail=str(e)) from e
-        else:
-            raise HTTPException(status_code=400, detail=str(e)) from e
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except (
         course_errors.CourseNotFoundError,
         parent_errors.ParentOfStudentRoleRequiredError,
@@ -164,7 +161,7 @@ async def get_parents_children(
     course_id: str,
     parent_email: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user),
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> list[User]:
     """
     Get the list of students for the parent with provided email on course with provided course_id.
@@ -187,8 +184,7 @@ async def get_parents_children(
     except user_errors.UserNotFoundError as e:
         if e.email == user_email:
             raise HTTPException(status_code=401, detail=str(e)) from e
-        else:
-            raise HTTPException(status_code=400, detail=str(e)) from e
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except (course_errors.CourseNotFoundError, parent_errors.ParentRoleRequiredError) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except (

@@ -19,7 +19,7 @@ class UserService:
 
     logger = logging.getLogger(__name__)
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
 
     def validate_user_email(self, email: str) -> None:
@@ -29,7 +29,7 @@ class UserService:
             match(pattern, email)
             and len(email) <= user_settings.max_email_length
             and ".." not in email
-            and len(email.split("@")[0]) <= user_settings.max_email_local_part
+            and len(email.split("@", maxsplit=1)[0]) <= user_settings.max_email_local_part
         ):
             raise user_errors.EmailFormatError
 
@@ -61,7 +61,7 @@ class UserService:
         # checking whether such user exists
         if self.db.query(User).filter(User.email == email).first() is not None:
             self.logger.warning(
-                f"Attempt to create a user with existing email: {email}"
+                f"Attempt to create a user with existing email: {email}",
             )
             raise user_errors.UserExistsError(email)
 
@@ -82,7 +82,7 @@ class UserService:
             + timedelta(minutes=auth_settings.access_token_expire_minutes),
         }
         return jwt.encode(
-            data, auth_settings.jwt_secret_key, algorithm=auth_settings.algorithm
+            data, auth_settings.jwt_secret_key, algorithm=auth_settings.algorithm,
         )
 
     def get_user(self, email: str) -> User:
@@ -97,7 +97,7 @@ class UserService:
         """Verify that the provided password is correct for the user with provided email."""
         if not verify_password(password, user.password_hash):
             self.logger.warning(
-                f"Invalid password attempt for user with email: {user.email}"
+                f"Invalid password attempt for user with email: {user.email}",
             )
             raise user_errors.InvalidPasswordError
 

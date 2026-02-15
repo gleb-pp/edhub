@@ -21,7 +21,7 @@ router = APIRouter(tags=["Personalization"])
 async def get_course_emoji(
     db: Annotated[Session, Depends(get_db)],
     course_id: str,
-    user_email: str = Depends(get_current_user),
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> EmojiID:
     """
     Get the personal course emoji id.
@@ -47,8 +47,8 @@ async def get_course_emoji(
 @router.put("/courses/order")
 async def change_courses_order(
     db: Annotated[Session, Depends(get_db)],
-    new_order: list[str] = Query(...),
-    user_email: str = Depends(get_current_user),
+    new_order: Annotated[list[str], Query(...)],
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
     """
     Change the order of courses.
@@ -72,8 +72,8 @@ async def change_courses_order(
 async def set_course_emoji(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
-    emoji_id: int | None = Query(None, ge=0, le=(course_settings.emoji_count - 1)),
-    user_email: str = Depends(get_current_user),
+    emoji_id: Annotated[int | None, Query(None, ge=0, le=(course_settings.emoji_count - 1))],
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
     """
     Set a personal emoji for a course by provided emoji_id.

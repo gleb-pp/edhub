@@ -24,9 +24,7 @@ async def get_user_info(
     user_email: str,
     db: Annotated[Session, Depends(get_db)],
 ) -> User:
-    """
-    Get the info about the user.
-    """
+    """Get the info about the user."""
     try:
         user_service = UserService(db)
         user = user_service.get_user(user_email)
@@ -39,11 +37,9 @@ async def get_user_info(
 async def get_my_role(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user),
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> CourseRole:
-    """
-    Get the user's role in the provided course.
-    """
+    """Get the user's role in the provided course."""
     user_service = UserService(db)
     course_service = CourseService(db)
     try:
@@ -64,10 +60,10 @@ async def get_my_role(
 
 @router.post("/users")
 async def create_user(
-    email: str, name: str, password: str, db: Annotated[Session, Depends(get_db)]
+    email: str, name: str, password: str, db: Annotated[Session, Depends(get_db)],
 ) -> AccessToken:
     """
-    Creates a user account with provided email, name, and password.
+    Create a user account with provided email, name, and password.
 
     User email should be in the correct format.
 
@@ -126,9 +122,7 @@ async def change_password(
     new_password: str,
     db: Annotated[Session, Depends(get_db)],
 ) -> Success:
-    """
-    Change the user password to a new one.
-    """
+    """Change the user password to a new one."""
     user_service = UserService(db)
     try:
         user = user_service.get_user(email)
@@ -146,11 +140,9 @@ async def change_password(
 @router.get("/users/instructor_courses")
 async def get_my_instructor_courses(
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user),
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> list[CourseID]:
-    """
-    Get the list of IDs of courses where the provided user is a Primary Instructor.
-    """
+    """Get the list of IDs of courses where the provided user is a Primary Instructor."""
     user_service = UserService(db)
     try:
         user = user_service.get_user(user_email)
@@ -162,7 +154,7 @@ async def get_my_instructor_courses(
 
 @router.delete("/users/me")
 async def remove_user(
-    db: Annotated[Session, Depends(get_db)], user_email: str = Depends(get_current_user)
+    db: Annotated[Session, Depends(get_db)], user_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
     """
     Delete user account from the system.

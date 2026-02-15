@@ -31,7 +31,7 @@ router = APIRouter(
 async def get_course_sections(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user),
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> list[Section]:
     """
     Get the list of course sections.
@@ -64,7 +64,7 @@ async def get_course_sections(
 async def get_course_feed(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user),
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> list[Section]:
     """
     Get the list of materials and assignments for the provided section_id in the provided course_id.
@@ -121,7 +121,7 @@ async def get_course_feed(
             # costruct the section model
             section_model = Section.model_validate(sec)
             section_model.feed = sorted(
-                materials_posts + assignments_posts, key=lambda p: p.creation_time
+                materials_posts + assignments_posts, key=lambda p: p.creation_time,
             )
             course_feed.append(section_model)
         return course_feed
@@ -139,14 +139,14 @@ async def get_course_feed(
 async def create_section(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
-    title: str = Query(
+    teacher_email: Annotated[str, Depends(get_current_user)],
+    title: Annotated[str, Query(
         ...,
         min_length=section_settings.name_min_length,
         max_length=section_settings.name_max_length,
         pattern=r"^[\p{L}0-9_ ]+$",
         description=f"Section title can contain only letters, digits, spaces, and underscores, {section_settings.name_min_length}-{section_settings.name_max_length} symbols",
-    ),
-    teacher_email: str = Depends(get_current_user),
+    )],
 ) -> SectionID:
     """
     Create the course section with provided title within the course with provided course_id.
@@ -180,8 +180,8 @@ async def create_section(
 async def change_section_order(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
-    new_order: list[int] = Query(...),
-    teacher_email: str = Depends(get_current_user),
+    new_order: Annotated[list[int], Query(...)],
+    teacher_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
     """
     Change the order of sections within the course with provided course_id.
@@ -218,7 +218,7 @@ async def remove_section(
     course_id: str,
     section_id: int,
     db: Annotated[Session, Depends(get_db)],
-    teacher_email: str = Depends(get_current_user),
+    teacher_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
     """
     Remove the section with provided section_id from the course with provided course_id.

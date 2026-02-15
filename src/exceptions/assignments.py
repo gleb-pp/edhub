@@ -7,5 +7,5 @@ class AssignmentNotFoundError(AssignmentError):
 
     def __init__(self, course_id: str, assignment_id: int) -> None:
         super().__init__(
-            f"Assignments {assignment_id} does not exist in the course {course_id}."
+            f"Assignments {assignment_id} does not exist in the course {course_id}.",
         )

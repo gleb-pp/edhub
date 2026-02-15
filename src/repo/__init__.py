@@ -12,18 +12,18 @@ from .teachers import Teaches
 from .users import User
 
 __all__ = [
-    "CourseAssignment",
-    "MaterialFile",
     "AssignmentFile",
-    "SubmissionFile",
+    "AssignmentSubmission",
     "Course",
+    "CourseAssignment",
     "CourseMaterial",
+    "CourseSection",
+    "Grade",
+    "MaterialFile",
     "ParentAt",
     "PersonalCourseInfo",
-    "CourseSection",
     "StudentAt",
-    "AssignmentSubmission",
+    "SubmissionFile",
     "Teaches",
     "User",
-    "Grade",
 ]

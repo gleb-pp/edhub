@@ -6,7 +6,7 @@ class AdminSettings(BaseSettings):
 
     default_account_email: str = "admin"
     default_account_name: str = "admin"
-    default_account_password: str = "admin"
+    default_account_password: str = "admin" # noqa: S105
 
     model_config = SettingsConfigDict(env_prefix="admin_")
 

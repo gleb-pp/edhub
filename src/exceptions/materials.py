@@ -7,5 +7,5 @@ class MaterialNotFoundError(MaterialError):
 
     def __init__(self, course_id: str, material_id: int) -> None:
         super().__init__(
-            f"Material {material_id} does not exist in the course {course_id}."
+            f"Material {material_id} does not exist in the course {course_id}.",
         )

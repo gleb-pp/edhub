@@ -32,16 +32,16 @@ async def submit_assignment(
     course_id: str,
     assignment_id: int,
     db: Annotated[Session, Depends(get_db)],
-    submission_text: str = Query(
+    submission_text: Annotated[str, Query(
         ...,
         min_length=3,
         max_length=10000,
         description="Submission text must contain 3-10000 symbols",
-    ),
-    student_email: str = Depends(get_current_user),
+    )],
+    student_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
     """
-    Allows student to submit their assignment OR edit their submission.
+    Allow student to submit their assignment OR edit their submission.
 
     Submission text must contains from 3 to 10000 symbols.
 
@@ -85,7 +85,7 @@ async def get_assignment_submissions(
     course_id: str,
     assignment_id: int,
     db: Annotated[Session, Depends(get_db)],
-    teacher_email: str = Depends(get_current_user),
+    teacher_email: Annotated[str, Depends(get_current_user)],
 ) -> list[Submission]:
     """
     Get the list of students submissions for the provided assignment.
@@ -125,7 +125,7 @@ async def get_submission(
     assignment_id: int,
     student_email: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user),
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> Submission:
     """
     Get the student submission of assignment by course_id, assignment_id and student_email.
@@ -151,8 +151,7 @@ async def get_submission(
     except user_errors.UserNotFoundError as e:
         if e.email == user_email:
             raise HTTPException(status_code=401, detail=str(e)) from e
-        else:
-            raise HTTPException(status_code=400, detail=str(e)) from e
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except (
         course_errors.CourseNotFoundError,
         student_errors.StudentRoleRequiredError,
@@ -174,7 +173,7 @@ async def get_submission(
 #     assignment_id: str,
 #     student_email: str,
 #     file: UploadFile = File(...),
-#     user_email: str = Depends(get_current_user),
+#     user_email: Annotated[str, Depends(get_current_user)],
 # ) -> SubmissionAttachmentMetadata:
 #     """
 #     Attach the provided file to provided course assignment submission.
@@ -196,7 +195,7 @@ async def get_submission(
 #     course_id: str,
 #     assignment_id: str,
 #     student_email: str,
-#     user_email: str = Depends(get_current_user)
+#     user_email: Annotated[str, Depends(get_current_user)]
 # ) -> list[SubmissionAttachmentMetadata]:
 #     """
 #     Get the list of attachments to the course assignment submission by provided course_id, assignment_id, student_email.
@@ -219,7 +218,7 @@ async def get_submission(
 #     assignment_id: str,
 #     student_email: str,
 #     file_id: str,
-#     user_email: str = Depends(get_current_user)
+#     user_email: Annotated[str, Depends(get_current_user)]
 # ):
 #     """
 #     Download the attachment to the course assignment submission by provided course_id, assignment_id, student_email, file_id.

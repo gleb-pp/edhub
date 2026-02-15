@@ -20,27 +20,27 @@ class StudentPolicy:
         return db.query(
             exists().where(
                 (StudentAt.email == user.email)
-                & (StudentAt.course_id == course.course_id)
-            )
+                & (StudentAt.course_id == course.course_id),
+            ),
         ).scalar()
 
     @staticmethod
     def assert_student_access(user: User, course: Course, db: Session) -> None:
-        """Asserts that the provided user has a student role in the provided course."""
+        """Assert that the provided user has a student role in the provided course."""
         if not StudentPolicy.check_student_access(user, course, db):
             raise student_errors.StudentRoleRequiredError(user.email, course.title)
 
     @staticmethod
     def assert_not_student(user: User, course: Course, db: Session) -> None:
-        """Asserts that the provided user is already student in the provided course."""
+        """Assert that the provided user is already student in the provided course."""
         if StudentPolicy.check_student_access(user, course, db):
             raise student_errors.StudentRoleConflictError(user.email, course.course_id)
 
     @staticmethod
     def assert_access_to_student(
-        student: User, user: User, course: Course, db: Session
+        student: User, user: User, course: Course, db: Session,
     ) -> None:
-        """Asserts that the provided user has access to the provided student."""
+        """Assert that the provided user has access to the provided student."""
         CoursePolicy.assert_course_access(user, course, db)
         StudentPolicy.assert_student_access(student, course, db)
         if not (
@@ -50,5 +50,5 @@ class StudentPolicy:
             or user.isadmin
         ):
             raise student_errors.NoAccessToStudentInfoError(
-                student.email, user.email, course.id
+                student.email, user.email, course.id,
             )

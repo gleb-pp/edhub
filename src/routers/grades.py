@@ -36,16 +36,16 @@ async def grade_submission(
     student_email: str,
     grade: int,
     db: Annotated[Session, Depends(get_db)],
-    comment: str | None = Query(
+    comment: Annotated[str | None, Query(
         None,
         min_length=submission_settings.grade_comment_min_lenght,
         max_length=submission_settings.grade_comment_max_lenght,
         description=f"Comment must contain {submission_settings.grade_comment_min_lenght}-{submission_settings.grade_comment_max_lenght} symbols",
-    ),
-    teacher_email: str = Depends(get_current_user),
+    )],
+    teacher_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
     """
-    Allows teacher to grade student's submission.
+    Allow teacher to grade student's submission.
 
     If the assignment is already graded, the grade will be updated.
 
@@ -73,10 +73,9 @@ async def grade_submission(
     except user_errors.UserNotFoundError as e:
         if e.email == teacher_email:
             raise HTTPException(status_code=401, detail=str(e)) from e
-        elif e.email == student_email:
+        if e.email == student_email:
             raise HTTPException(status_code=404, detail=str(e)) from e
-        else:
-            raise HTTPException(status_code=400, detail=str(e)) from e
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except (
         course_errors.CourseNotFoundError,
         student_errors.StudentRoleRequiredError,
@@ -94,7 +93,7 @@ async def get_submission_grade(
     assignment_id: int,
     student_email: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user),
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> AssignmentGrade:
     """
     Get the grade for the student's submission.
@@ -122,8 +121,7 @@ async def get_submission_grade(
     except user_errors.UserNotFoundError as e:
         if e.email == user_email:
             raise HTTPException(status_code=401, detail=str(e)) from e
-        else:
-            raise HTTPException(status_code=400, detail=str(e)) from e
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except (
         course_errors.CourseNotFoundError,
         assignment_errors.AssignmentNotFoundError,

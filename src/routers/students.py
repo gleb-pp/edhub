@@ -29,7 +29,7 @@ router = APIRouter(
 async def get_enrolled_students(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user),
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> list[User]:
     """
     Get the list of enrolled students by course_id.
@@ -63,7 +63,7 @@ async def invite_student(
     course_id: str,
     student_email: str,
     db: Annotated[Session, Depends(get_db)],
-    teacher_email: str = Depends(get_current_user),
+    teacher_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
     """
     Add the student with provided email to the course with provided course_id.
@@ -90,10 +90,9 @@ async def invite_student(
     except user_errors.UserNotFoundError as e:
         if e.email == teacher_email:
             raise HTTPException(status_code=401, detail=str(e)) from e
-        elif e.email == student_email:
+        if e.email == student_email:
             raise HTTPException(status_code=404, detail=str(e)) from e
-        else:
-            raise HTTPException(status_code=400, detail=str(e)) from e
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except teacher_errors.TeacherRoleRequiredError as e:
@@ -107,7 +106,7 @@ async def remove_student(
     course_id: str,
     student_email: str,
     db: Annotated[Session, Depends(get_db)],
-    teacher_email: str = Depends(get_current_user),
+    teacher_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
     """
     Remove the student with provided email from the course with provided course_id.
@@ -134,10 +133,9 @@ async def remove_student(
     except user_errors.UserNotFoundError as e:
         if e.email == teacher_email:
             raise HTTPException(status_code=401, detail=str(e)) from e
-        elif e.email == student_email:
+        if e.email == student_email:
             raise HTTPException(status_code=404, detail=str(e)) from e
-        else:
-            raise HTTPException(status_code=400, detail=str(e)) from e
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except teacher_errors.TeacherRoleRequiredError as e:

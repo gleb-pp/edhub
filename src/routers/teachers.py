@@ -28,7 +28,7 @@ router = APIRouter(
 async def get_course_teachers(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
-    user_email: str = Depends(get_current_user),
+    user_email: Annotated[str, Depends(get_current_user)],
 ) -> list[User]:
     """
     Get the list of teachers teaching the course with the provided course_id.
@@ -60,7 +60,7 @@ async def invite_teacher(
     course_id: str,
     new_teacher_email: str,
     db: Annotated[Session, Depends(get_db)],
-    teacher_email: str = Depends(get_current_user),
+    teacher_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
     """
     Add the user with provided new_teacher_email as a teacher to the course with provided course_id.
@@ -87,10 +87,9 @@ async def invite_teacher(
     except user_errors.UserNotFoundError as e:
         if e.email == teacher_email:
             raise HTTPException(status_code=401, detail=str(e)) from e
-        elif e.email == new_teacher_email:
+        if e.email == new_teacher_email:
             raise HTTPException(status_code=404, detail=str(e)) from e
-        else:
-            raise HTTPException(status_code=400, detail=str(e)) from e
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except teacher_errors.InstructorRoleRequiredError as e:
@@ -104,7 +103,7 @@ async def remove_teacher(
     course_id: str,
     teacher_email: str,
     db: Annotated[Session, Depends(get_db)],
-    instructor_email: str = Depends(get_current_user),
+    instructor_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
     """
     Remove the teacher with removing_teacher_email from the course with provided course_id.
@@ -133,8 +132,7 @@ async def remove_teacher(
     except user_errors.UserNotFoundError as e:
         if e.email == instructor_email:
             raise HTTPException(status_code=401, detail=str(e)) from e
-        else:
-            raise HTTPException(status_code=400, detail=str(e)) from e
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except teacher_errors.InstructorRoleRequiredError as e:
@@ -148,7 +146,7 @@ async def change_course_instructor(
     course_id: str,
     teacher_email: str,
     db: Annotated[Session, Depends(get_db)],
-    instructor_email: str = Depends(get_current_user),
+    instructor_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
     """
     Transfer the course ownership (Primary Instructor role) to other Teacher within the course.
@@ -170,10 +168,9 @@ async def change_course_instructor(
     except user_errors.UserNotFoundError as e:
         if e.email == instructor_email:
             raise HTTPException(status_code=401, detail=str(e)) from e
-        elif e.email == teacher_email:
+        if e.email == teacher_email:
             raise HTTPException(status_code=404, detail=str(e)) from e
-        else:
-            raise HTTPException(status_code=400, detail=str(e)) from e
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except teacher_errors.InstructorRoleRequiredError as e:

@@ -14,11 +14,11 @@ class SubmissionService:
 
     logger = logging.getLogger(__name__)
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
 
     def get_submission(
-        self, assignment: CourseAssignment, student: User
+        self, assignment: CourseAssignment, student: User,
     ) -> AssignmentSubmission:
         """Get the submission by provided assignment and student."""
         submission = (
@@ -32,15 +32,15 @@ class SubmissionService:
         )
         if not submission:
             self.logger.warning(
-                f"Attempt to get non-existent submission for assignment {assignment.assignment_id} in course {assignment.course_id} by student {student.email}"
+                f"Attempt to get non-existent submission for assignment {assignment.assignment_id} in course {assignment.course_id} by student {student.email}",
             )
             raise submission_errors.SubmissionNotFoundError(
-                assignment.course_id, assignment.assignment_id, student.email
+                assignment.course_id, assignment.assignment_id, student.email,
             )
         return submission
 
     def get_assignment_submissions(
-        self, assignment: CourseAssignment
+        self, assignment: CourseAssignment,
     ) -> list[AssignmentSubmission]:
         """Get the list of all submissions to the provided assignment."""
         return (
@@ -53,11 +53,11 @@ class SubmissionService:
         )
 
     def create_submission(
-        self, assignment: CourseAssignment, student: User, submission_text: str
+        self, assignment: CourseAssignment, student: User, submission_text: str,
     ) -> None:
         """Create an assignment submission."""
         self.logger.info(
-            f"Creating submission for assignment {assignment.assignment_id} in course {assignment.course_id} by student {student.email}"
+            f"Creating submission for assignment {assignment.assignment_id} in course {assignment.course_id} by student {student.email}",
         )
         submission = AssignmentSubmission(
             course_id=assignment.course_id,
@@ -68,11 +68,11 @@ class SubmissionService:
         self.db.add(submission)
 
     def update_submission(
-        self, submission: AssignmentSubmission, submission_text: str
+        self, submission: AssignmentSubmission, submission_text: str,
     ) -> None:
         """Update the assignment submission."""
         self.logger.info(
-            f"Updating submission for assignment {submission.assignment_id} in course {submission.course_id} by student {submission.email}"
+            f"Updating submission for assignment {submission.assignment_id} in course {submission.course_id} by student {submission.email}",
         )
         submission.submission_text = submission_text
         submission.timemodified = datetime.now(tz=UTC)

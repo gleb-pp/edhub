@@ -11,10 +11,10 @@ class CourseSection(Base):
     __tablename__ = "course_sections"
 
     course_id: Mapped[str] = mapped_column(
-        ForeignKey("courses.course_id", ondelete="CASCADE"), primary_key=True
+        ForeignKey("courses.course_id", ondelete="CASCADE"), primary_key=True,
     )
     section_id: Mapped[int] = mapped_column(
-        Integer, primary_key=True, autoincrement=True
+        Integer, primary_key=True, autoincrement=True,
     )
     title: Mapped[str] = mapped_column(Text, nullable=False)
     section_order: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -28,7 +28,7 @@ class CourseSection(Base):
             initially="DEFERRED",
         ),
         CheckConstraint(
-            f"length(title) BETWEEN {section_settings.name_min_length} AND {section_settings.name_max_length}"
+            f"length(title) BETWEEN {section_settings.name_min_length} AND {section_settings.name_max_length}",
         ),
         CheckConstraint("section_order >= 0"),
     )

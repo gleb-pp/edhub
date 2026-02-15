@@ -12,13 +12,13 @@ class ParentService:
 
     logger = logging.getLogger(__name__)
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
 
     def invite_parent(self, parent: User, student: User, course: Course) -> None:
         """Invite the provided parent to the provided course."""
         self.logger.info(
-            f"Inviting parent {parent.email} to course {course.course_id} for student {student.email}"
+            f"Inviting parent {parent.email} to course {course.course_id} for student {student.email}",
         )
         parent_of = ParentAt(
             parent_email=parent.email,
@@ -28,11 +28,11 @@ class ParentService:
         self.db.add(parent_of)
 
     def remove_parent_student(
-        self, parent: User, student: User, course: Course
+        self, parent: User, student: User, course: Course,
     ) -> None:
         """Remove the provided parent from observing the provided student within the provided course."""
         self.logger.info(
-            f"Removing parent {parent.email} from student {student.email} in course {course.course_id}"
+            f"Removing parent {parent.email} from student {student.email} in course {course.course_id}",
         )
         self.db.delete(
             self.db.query(ParentAt)
@@ -41,14 +41,14 @@ class ParentService:
                 ParentAt.student_email == student.email,
                 ParentAt.course_id == course.course_id,
             )
-            .first()
+            .first(),
         )
         self.db.flush()
 
     def remove_parent(self, parent: User, course: Course) -> None:
         """Remove the provided parent from the provided course."""
         self.logger.info(
-            f"Removing parent {parent.email} from course {course.course_id}"
+            f"Removing parent {parent.email} from course {course.course_id}",
         )
         self.db.delete(
             self.db.query(ParentAt)
@@ -56,7 +56,7 @@ class ParentService:
                 ParentAt.parent_email == parent.email,
                 ParentAt.course_id == course.course_id,
             )
-            .first()
+            .first(),
         )
 
     def get_students_parents(self, student: User, course: Course) -> list[User]:

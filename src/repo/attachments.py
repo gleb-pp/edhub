@@ -22,7 +22,7 @@ class MaterialFile(Base):
     fileid: Mapped[str] = mapped_column(Uuid, primary_key=True)
     filename: Mapped[str] = mapped_column(Text, nullable=False)
     uploadtime: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.now(tz=UTC)
+        DateTime, nullable=False, default=datetime.now(tz=UTC),
     )
 
     __table_args__ = (
@@ -43,7 +43,7 @@ class AssignmentFile(Base):
     fileid: Mapped[str] = mapped_column(Uuid, primary_key=True)
     filename: Mapped[str] = mapped_column(Text, nullable=False)
     uploadtime: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.now(tz=UTC)
+        DateTime, nullable=False, default=datetime.now(tz=UTC),
     )
 
     __table_args__ = (
@@ -65,7 +65,7 @@ class SubmissionFile(Base):
     fileid: Mapped[str] = mapped_column(Uuid, primary_key=True)
     filename: Mapped[str] = mapped_column(Text, nullable=False)
     uploadtime: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.now(tz=UTC)
+        DateTime, nullable=False, default=datetime.now(tz=UTC),
     )
 
     __table_args__ = (

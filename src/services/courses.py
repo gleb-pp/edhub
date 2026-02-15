@@ -13,7 +13,7 @@ class CourseService:
 
     logger = logging.getLogger(__name__)
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
 
     def get_course(self, course_id: str) -> Course:
@@ -41,7 +41,7 @@ class CourseService:
     def create_course(self, title: str, organization: str | None, user: User) -> Course:
         """Create the course with the provided parameters."""
         self.logger.info(
-            f"Creating course '{title}' for organization '{organization}' by user {user.email}."
+            f"Creating course '{title}' for organization '{organization}' by user {user.email}.",
         )
         course = Course(title=title, organization=organization, instructor=user.email)
         self.db.add(course)

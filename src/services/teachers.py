@@ -12,7 +12,7 @@ class TeacherService:
 
     logger = logging.getLogger(__name__)
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
 
     def get_course_teachers(self, course: Course) -> list[User]:
@@ -36,15 +36,15 @@ class TeacherService:
         self.db.delete(
             self.db.query(Teaches)
             .filter(
-                Teaches.email == teacher.email, Teaches.course_id == course.course_id
+                Teaches.email == teacher.email, Teaches.course_id == course.course_id,
             )
-            .first()
+            .first(),
         )
         self.db.flush()
         self.logger.info(f"Removed teacher {teacher.email} from course {course.name}")
 
     def change_course_instructor(
-        self, instructor: User, teacher: User, course: Course
+        self, instructor: User, teacher: User, course: Course,
     ) -> None:
         """Change the instructor to some teacher within the provided course."""
         course.instructor = teacher.email
@@ -52,5 +52,5 @@ class TeacherService:
         self.invite_teacher(instructor, course)
         self.db.flush()
         self.logger.info(
-            f"Changed instructor of course {course.name} to {teacher.email}"
+            f"Changed instructor of course {course.name} to {teacher.email}",
         )

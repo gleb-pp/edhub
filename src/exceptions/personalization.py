@@ -7,5 +7,5 @@ class IncorrectCoursesOrderError(PersonalizationError):
 
     def __init__(self) -> None:
         super().__init__(
-            "New list of courses passed does not match with the original one."
+            "New list of courses passed does not match with the original one.",
         )

@@ -14,7 +14,7 @@ class MaterialService:
 
     logger = logging.getLogger(__name__)
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
 
     def get_section_materials(self, section: CourseSection) -> list[CourseMaterial]:
@@ -29,11 +29,11 @@ class MaterialService:
         )
 
     def create_material(
-        self, section: CourseSection, title: str, description: str, author: User
+        self, section: CourseSection, title: str, description: str, author: User,
     ) -> CourseMaterial:
         """Create a new material within the provided course section."""
         self.logger.info(
-            f"Creating material '{title}' in section {section.section_id} of course {section.course_id} by author {author.email}"
+            f"Creating material '{title}' in section {section.section_id} of course {section.course_id} by author {author.email}",
         )
         material = CourseMaterial(
             course_id=section.course_id,
@@ -58,16 +58,16 @@ class MaterialService:
         )
         if not material:
             self.logger.warning(
-                f"Attempt to access non-existing material {material_id} in course {course.course_id}"
+                f"Attempt to access non-existing material {material_id} in course {course.course_id}",
             )
             raise material_errors.MaterialNotFoundError(
-                course_id=course.course_id, material_id=material_id
+                course_id=course.course_id, material_id=material_id,
             )
         return material
 
     def delete_material(self, material: CourseMaterial) -> None:
         """Delete the provided course material."""
         self.logger.info(
-            f"Deleting material {material.material_id} from course {material.course_id}"
+            f"Deleting material {material.material_id} from course {material.course_id}",
         )
         self.db.delete(material)
