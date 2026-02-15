@@ -72,8 +72,8 @@ async def change_courses_order(
 async def set_course_emoji(
     course_id: str,
     db: Annotated[Session, Depends(get_db)],
-    emoji_id: Annotated[int | None, Query(None, ge=0, le=(course_settings.emoji_count - 1))],
     user_email: Annotated[str, Depends(get_current_user)],
+    emoji_id: Annotated[int | None, Query(ge=0, le=(course_settings.emoji_count - 1))] = None,
 ) -> Success:
     """
     Set a personal emoji for a course by provided emoji_id.

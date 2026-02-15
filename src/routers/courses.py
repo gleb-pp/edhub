@@ -50,6 +50,7 @@ async def get_available_courses(
 @router.post("/courses")
 async def create_course(
     db: Annotated[Session, Depends(get_db)],
+    user_email: Annotated[str, Depends(get_current_user)],
     title: Annotated[str, Query(
         ...,
         min_length=course_settings.name_min_lenght,
@@ -58,13 +59,11 @@ async def create_course(
         description=f"Title can contain only letters, digits, spaces, and underscores, {course_settings.name_min_lenght}-{course_settings.name_max_lenght} symbols",
     )],
     organization: Annotated[str | None, Query(
-        None,
         min_length=course_settings.organization_min_lenght,
         max_length=course_settings.organization_max_lenght,
         pattern=r"^[\p{L}0-9_ ]+$",
         description=f"Organization can contain only letters, digits, spaces, and underscores, {course_settings.organization_min_lenght}-{course_settings.organization_max_lenght} symbols",
-    )],
-    user_email: Annotated[str, Depends(get_current_user)],
+    )] = None,
 ) -> CourseID:
     """
     Create the course with provided title and become a Primary Instructor in it.
