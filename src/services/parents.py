@@ -34,30 +34,34 @@ class ParentService:
         self.logger.info(
             f"Removing parent {parent.email} from student {student.email} in course {course.course_id}",
         )
-        self.db.delete(
+        parent_at = (
             self.db.query(ParentAt)
             .filter(
                 ParentAt.parent_email == parent.email,
                 ParentAt.student_email == student.email,
                 ParentAt.course_id == course.course_id,
             )
-            .first(),
+            .first()
         )
-        self.db.flush()
+        if parent_at:
+            self.db.delete(parent_at)
+            self.db.flush()
 
     def remove_parent(self, parent: User, course: Course) -> None:
         """Remove the provided parent from the provided course."""
         self.logger.info(
             f"Removing parent {parent.email} from course {course.course_id}",
         )
-        self.db.delete(
+        parent_at = (
             self.db.query(ParentAt)
             .filter(
                 ParentAt.parent_email == parent.email,
                 ParentAt.course_id == course.course_id,
             )
-            .first(),
+            .first()
         )
+        if parent_at:
+            self.db.delete(parent_at)
 
     def get_students_parents(self, student: User, course: Course) -> list[User]:
         """Get the list of parents observing the provided student within the provided course."""

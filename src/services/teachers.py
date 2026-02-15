@@ -16,7 +16,7 @@ class TeacherService:
         self.db = db
 
     def get_course_teachers(self, course: Course) -> list[User]:
-        """Get the list of students enrolled to the provided course."""
+        """Get the list of teachers enrolled to the provided course."""
         return (
             self.db.query(User)
             .join(Teaches, Teaches.email == User.email)
@@ -29,28 +29,32 @@ class TeacherService:
         """Invite the provided teacher to the provided course."""
         teaches = Teaches(email=teacher.email, course_id=course.course_id)
         self.db.add(teaches)
-        self.logger.info(f"Invited teacher {teacher.email} to course {course.name}")
+        self.logger.info(f"Invited teacher {teacher.email} to course {course.course_id}")
 
     def remove_teacher(self, teacher: User, course: Course) -> None:
         """Remove the provided teacher from the provided course."""
-        self.db.delete(
+        teaches = (
             self.db.query(Teaches)
             .filter(
-                Teaches.email == teacher.email, Teaches.course_id == course.course_id,
+                Teaches.email == teacher.email, 
+                Teaches.course_id == course.course_id,
             )
-            .first(),
+            .first()
         )
-        self.db.flush()
-        self.logger.info(f"Removed teacher {teacher.email} from course {course.name}")
+        if teaches:
+            self.db.delete(teaches)
+            self.logger.info(f"Removed teacher {teacher.email} from course {course.course_id}")
 
     def change_course_instructor(
         self, instructor: User, teacher: User, course: Course,
     ) -> None:
         """Change the instructor to some teacher within the provided course."""
+        old_instructor_email = course.instructor
         course.instructor = teacher.email
         self.remove_teacher(teacher, course)
-        self.invite_teacher(instructor, course)
+        if old_instructor_email != teacher.email:
+            self.invite_teacher(instructor, course)
         self.db.flush()
         self.logger.info(
-            f"Changed instructor of course {course.name} to {teacher.email}",
+            f"Changed instructor of course {course.course_id} from {old_instructor_email} to {teacher.email}",
         )

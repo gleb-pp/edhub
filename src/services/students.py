@@ -43,12 +43,14 @@ class StudentService:
         self.logger.info(
             f"Removing student {student.email} from course {course.course_id}",
         )
-        self.db.delete(
+        student_at = (
             self.db.query(StudentAt)
             .filter(
                 StudentAt.email == student.email,
                 StudentAt.course_id == course.course_id,
             )
-            .first(),
+            .first()
         )
-        self.db.flush()
+        if student_at:
+            self.db.delete(student_at)
+            self.db.flush()
