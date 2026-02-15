@@ -1,9 +1,10 @@
-import pytest
 from typing import cast
 from unittest.mock import MagicMock
 
-from src.policies.grades import GradePolicy
+import pytest
+
 from src.exceptions.submissions import SubmissionGradedError
+from src.policies.grades import GradePolicy
 from src.repo.submissions import AssignmentSubmission
 
 
@@ -19,11 +20,11 @@ class TestGradePolicy:
         db = MagicMock()
         db.query().filter().first.return_value = None
 
-        GradePolicy.assert_not_graded(cast(AssignmentSubmission, DummySubmission()), db)
+        GradePolicy.assert_not_graded(cast("AssignmentSubmission", DummySubmission()), db)
 
     def test_assert_not_graded_fail(self):
         db = MagicMock()
         db.query().filter().first.return_value = object()
 
         with pytest.raises(SubmissionGradedError):
-            GradePolicy.assert_not_graded(cast(AssignmentSubmission, DummySubmission()), db)
+            GradePolicy.assert_not_graded(cast("AssignmentSubmission", DummySubmission()), db)

@@ -1,15 +1,16 @@
-import pytest
 from typing import cast
 from unittest.mock import MagicMock, patch
 
-from src.policies.parents import ParentPolicy
+import pytest
+
 from src.exceptions.parents import (
-    ParentRoleRequiredError,
-    ParentRoleConflictError,
-    ParentOfStudentRoleRequiredError,
-    ParentOfStudentRoleConflictError,
     NoAccessToParentInfoError,
+    ParentOfStudentRoleConflictError,
+    ParentOfStudentRoleRequiredError,
+    ParentRoleConflictError,
+    ParentRoleRequiredError,
 )
+from src.policies.parents import ParentPolicy
 from src.repo.courses import Course
 from src.repo.users import User
 
@@ -29,21 +30,21 @@ class TestParentPolicy:
     def test_assert_parent_access_success(self):
         db = MagicMock()
         db.query().scalar.return_value = True
-        ParentPolicy.assert_parent_access(cast(User, DummyUser()), cast(Course, DummyCourse()), db)
+        ParentPolicy.assert_parent_access(cast("User", DummyUser()), cast("Course", DummyCourse()), db)
 
     def test_assert_parent_access_fail(self):
         db = MagicMock()
         db.query().scalar.return_value = False
 
         with pytest.raises(ParentRoleRequiredError):
-            ParentPolicy.assert_parent_access(cast(User, DummyUser()), cast(Course, DummyCourse()), db)
+            ParentPolicy.assert_parent_access(cast("User", DummyUser()), cast("Course", DummyCourse()), db)
 
     def test_assert_not_parent_fail(self):
         db = MagicMock()
         db.query().scalar.return_value = True
 
         with pytest.raises(ParentRoleConflictError):
-            ParentPolicy.assert_not_parent(cast(User, DummyUser()), cast(Course, DummyCourse()), db)
+            ParentPolicy.assert_not_parent(cast("User", DummyUser()), cast("Course", DummyCourse()), db)
 
     def test_assert_parent_of_student_required(self):
         db = MagicMock()
@@ -51,7 +52,7 @@ class TestParentPolicy:
 
         with pytest.raises(ParentOfStudentRoleRequiredError):
             ParentPolicy.assert_parent_of_student(
-                cast(User, DummyUser()), cast(User, DummyUser("s@test.com")), cast(Course, DummyCourse()), db
+                cast("User", DummyUser()), cast("User", DummyUser("s@test.com")), cast("Course", DummyCourse()), db,
             )
 
     def test_assert_not_parent_of_student(self):
@@ -60,7 +61,7 @@ class TestParentPolicy:
 
         with pytest.raises(ParentOfStudentRoleConflictError):
             ParentPolicy.assert_not_parent_of_student(
-                cast(User, DummyUser()), cast(User, DummyUser("s@test.com")), cast(Course, DummyCourse()), db
+                cast("User", DummyUser()), cast("User", DummyUser("s@test.com")), cast("Course", DummyCourse()), db,
             )
 
     @patch("src.policies.parents.CoursePolicy.assert_course_access")
@@ -73,8 +74,8 @@ class TestParentPolicy:
 
         with pytest.raises(NoAccessToParentInfoError):
             ParentPolicy.assert_access_to_parent(
-                cast(User, DummyUser("parent@test.com")),
-                cast(User, DummyUser("other@test.com")),
-                cast(Course, DummyCourse()),
+                cast("User", DummyUser("parent@test.com")),
+                cast("User", DummyUser("other@test.com")),
+                cast("Course", DummyCourse()),
                 db,
             )
