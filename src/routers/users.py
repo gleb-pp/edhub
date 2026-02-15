@@ -135,6 +135,8 @@ async def change_password(
         raise HTTPException(status_code=401, detail=str(e)) from e
     except course_errors.CourseNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+    except user_errors.WeakPasswordError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
 
 
 @router.get("/users/instructor_courses")
