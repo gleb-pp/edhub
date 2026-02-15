@@ -1,25 +1,23 @@
-from typing import cast
+from unittest.mock import MagicMock
 
 import pytest
 
 from src.exceptions.admins import AdminRoleRequiredError
-from src.policies.admin import AdminPolicy
+from src.policies import AdminPolicy
 from src.repo.users import User
-
-
-class DummyUser:
-    def __init__(self, email="a@test.com", is_admin=False):
-        self.email = email
-        self.is_admin = is_admin
 
 
 class TestAdminPolicy:
 
     def test_assert_user_is_admin_success(self):
-        user = cast("User", DummyUser(is_admin=True))
-        AdminPolicy.assert_user_is_admin(user)
+        mock_user = MagicMock(spec=User)
+        mock_user.is_admin = True
+        
+        AdminPolicy.assert_user_is_admin(mock_user)
 
     def test_assert_user_is_admin_fail(self):
-        user = cast("User", DummyUser(is_admin=False))
+        mock_user = MagicMock(spec=User)
+        mock_user.is_admin = False
+        
         with pytest.raises(AdminRoleRequiredError):
-            AdminPolicy.assert_user_is_admin(user)
+            AdminPolicy.assert_user_is_admin(mock_user)

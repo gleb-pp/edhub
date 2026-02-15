@@ -13,12 +13,7 @@ class TeacherPolicy:
     @staticmethod
     def check_instructor_access(user: User, course: Course, db: Session) -> bool:
         """Check whether the provided user has an instructor role in the provided course."""
-        return db.query(
-            exists().where(
-                (Course.instructor == user.email)
-                & (Course.course_id == course.course_id),
-            ),
-        ).scalar()
+        return course.instructor == user.email
 
     @staticmethod
     def check_teacher_access(user: User, course: Course, db: Session) -> bool:
@@ -36,13 +31,13 @@ class TeacherPolicy:
     def assert_instructor_access(user: User, course: Course, db: Session) -> None:
         """Assert that the provided user has an instructor role in the provided course."""
         if not TeacherPolicy.check_instructor_access(user, course, db):
-            raise teacher_errors.InstructorRoleRequiredError(user.email, course.name)
+            raise teacher_errors.InstructorRoleRequiredError(user.email, course.title)
 
     @staticmethod
     def assert_teacher_access(user: User, course: Course, db: Session) -> None:
         """Assert that the provided user has a teacher or an instructor role in the provided course."""
         if not TeacherPolicy.check_teacher_access(user, course, db):
-            raise teacher_errors.TeacherRoleRequiredError(user.email, course.name)
+            raise teacher_errors.TeacherRoleRequiredError(user.email, course.title)
 
     @staticmethod
     def assert_not_teacher(user: User, course: Course, db: Session) -> None:
