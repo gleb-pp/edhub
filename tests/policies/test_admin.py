@@ -9,13 +9,13 @@ from src.repo.users import User
 
 class TestAdminPolicy:
 
-    def test_assert_user_is_admin_success(self):
+    def test_assert_user_is_admin_success(self) -> None:
         mock_user = MagicMock(spec=User)
         mock_user.is_admin = True
 
         AdminPolicy.assert_user_is_admin(mock_user)
 
-    def test_assert_user_is_admin_fail(self):
+    def test_assert_user_is_admin_fail(self) -> None:
         mock_user = MagicMock(spec=User)
         mock_user.is_admin = False
 

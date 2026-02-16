@@ -10,7 +10,7 @@ from src.repo.users import User
 
 class TestCoursePolicy:
 
-    def test_assert_course_access_success(self):
+    def test_assert_course_access_success(self) -> None:
         mock_user = MagicMock(spec=User)
         mock_course = MagicMock(spec=Course)
         mock_db = MagicMock()
@@ -18,7 +18,7 @@ class TestCoursePolicy:
 
         CoursePolicy.assert_course_access(mock_user, mock_course, mock_db)
 
-    def test_assert_course_access_fail(self):
+    def test_assert_course_access_fail(self) -> None:
         mock_user = MagicMock(spec=User)
         mock_course = MagicMock(spec=Course)
         mock_db = MagicMock()

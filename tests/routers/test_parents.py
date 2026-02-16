@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from fastapi import HTTPException
 
 from src.exceptions import courses as course_errors
@@ -7,12 +8,11 @@ from src.exceptions import parents as parent_errors
 from src.exceptions import students as student_errors
 from src.exceptions import teachers as teacher_errors
 from src.exceptions import users as user_errors
-from src.models.common import Success
 from src.routers.parents import (
+    get_parents_children,
     get_students_parents,
     invite_parent,
     remove_parent,
-    get_parents_children
 )
 
 pytestmark = pytest.mark.asyncio
@@ -110,7 +110,7 @@ class TestParentsRouter:
         mock_user,
         mock_student,
         mock_course,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
         mock_user_service.get_user.side_effect = [mock_user, mock_student]
         mock_course_service.get_course.return_value = mock_course
@@ -120,11 +120,11 @@ class TestParentsRouter:
 
         with (
             patch("src.routers.parents.StudentPolicy.assert_access_to_student") as mock_assert_access,
-            patch("src.routers.parents.User.model_validate") as mock_validate
+            patch("src.routers.parents.User.model_validate") as mock_validate,
         ):
             mock_validate.side_effect = lambda x: f"validated_{x}"
             result = await get_students_parents(
-                mock_course.course_id, mock_student.email, mock_db, "user@test.com"
+                mock_course.course_id, mock_student.email, mock_db, "user@test.com",
             )
 
         assert len(result) == 2
@@ -144,7 +144,7 @@ class TestParentsRouter:
             ("student_role_required", student_errors.StudentRoleRequiredError("student@test.com", "course-123"), 400, True),
             ("access_denied", student_errors.NoAccessToStudentInfoError("student@test.com", "user@test.com", "course-123"), 403, True),
         ],
-        ids=["user_not_found", "student_not_found", "course_not_found", "student_role_required", "access_denied"]
+        ids=["user_not_found", "student_not_found", "course_not_found", "student_role_required", "access_denied"],
     )
     async def test_get_students_parents_errors(
         self,
@@ -160,12 +160,10 @@ class TestParentsRouter:
         side_effect,
         expected_status,
         should_check_access,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
 
-        if error_scenario == "user_not_found":
-            mock_user_service.get_user.side_effect = side_effect
-        elif error_scenario == "student_not_found":
+        if error_scenario == "user_not_found" or error_scenario == "student_not_found":
             mock_user_service.get_user.side_effect = side_effect
         else:
             mock_user_service.get_user.side_effect = [mock_user, mock_student]
@@ -181,7 +179,7 @@ class TestParentsRouter:
                     mock_assert_access.side_effect = side_effect
 
                 await get_students_parents(
-                    mock_course.course_id, mock_student.email, mock_db, "user@test.com"
+                    mock_course.course_id, mock_student.email, mock_db, "user@test.com",
                 )
 
             assert exc_info.value.status_code == expected_status
@@ -197,7 +195,7 @@ class TestParentsRouter:
     @pytest.mark.parametrize(
         "parent_already_in_course",
         [False, True],
-        ids=["parent_not_in_course", "parent_already_in_course"]
+        ids=["parent_not_in_course", "parent_already_in_course"],
     )
     async def test_invite_parent_success(
         self,
@@ -212,7 +210,7 @@ class TestParentsRouter:
         mock_parent,
         mock_course,
         parent_already_in_course,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 
@@ -225,7 +223,7 @@ class TestParentsRouter:
             patch("src.routers.parents.TeacherPolicy.assert_not_teacher") as mock_assert_not_teacher,
             patch("src.routers.parents.StudentPolicy.assert_not_student") as mock_assert_not_student,
             patch("src.routers.parents.ParentPolicy.assert_not_parent_of_student") as mock_assert_not_parent,
-            patch("src.routers.parents.ParentPolicy.check_parent_access", return_value=parent_already_in_course)
+            patch("src.routers.parents.ParentPolicy.check_parent_access", return_value=parent_already_in_course),
         ):
             result = await invite_parent(
                 mock_course.course_id,
@@ -276,8 +274,8 @@ class TestParentsRouter:
             "student_role_required",
             "teacher_conflict",
             "student_conflict",
-            "parent_already_exists"
-        ]
+            "parent_already_exists",
+        ],
     )
     async def test_invite_parent_errors(
         self,
@@ -295,7 +293,7 @@ class TestParentsRouter:
         side_effect,
         expected_status,
         should_call_policies,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 
@@ -315,7 +313,7 @@ class TestParentsRouter:
             patch("src.routers.parents.TeacherPolicy.assert_not_teacher") as mock_assert_not_teacher,
             patch("src.routers.parents.StudentPolicy.assert_not_student") as mock_assert_not_student,
             patch("src.routers.parents.ParentPolicy.assert_not_parent_of_student") as mock_assert_not_parent,
-            patch("src.routers.parents.ParentPolicy.check_parent_access", return_value=False)
+            patch("src.routers.parents.ParentPolicy.check_parent_access", return_value=False),
         ):
             with pytest.raises(HTTPException) as exc_info:
                 if error_scenario == "teacher_role_required":
@@ -346,7 +344,7 @@ class TestParentsRouter:
     @pytest.mark.parametrize(
         "parent_still_in_course",
         [False, True],
-        ids=["parent_removed", "parent_still_in_course"]
+        ids=["parent_removed", "parent_still_in_course"],
     )
     async def test_remove_parent_success(
         self,
@@ -361,7 +359,7 @@ class TestParentsRouter:
         mock_parent,
         mock_course,
         parent_still_in_course,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 
@@ -372,7 +370,7 @@ class TestParentsRouter:
             patch("src.routers.parents.TeacherPolicy.assert_teacher_access") as mock_assert_teacher,
             patch("src.routers.parents.StudentPolicy.assert_student_access") as mock_assert_student,
             patch("src.routers.parents.ParentPolicy.assert_parent_of_student") as mock_assert_parent,
-            patch("src.routers.parents.ParentPolicy.check_parent_access", return_value=parent_still_in_course)
+            patch("src.routers.parents.ParentPolicy.check_parent_access", return_value=parent_still_in_course),
         ):
             result = await remove_parent(
                 mock_course.course_id,
@@ -411,8 +409,8 @@ class TestParentsRouter:
             "parent_not_found",
             "course_not_found",
             "parent_role_required",
-            "teacher_role_required"
-        ]
+            "teacher_role_required",
+        ],
     )
     async def test_remove_parent_errors(
         self,
@@ -430,15 +428,11 @@ class TestParentsRouter:
         side_effect,
         expected_status,
         should_check_policies,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 
-        if error_scenario == "teacher_not_found":
-            mock_user_service.get_user.side_effect = side_effect
-        elif error_scenario == "student_not_found":
-            mock_user_service.get_user.side_effect = side_effect
-        elif error_scenario == "parent_not_found":
+        if error_scenario == "teacher_not_found" or error_scenario == "student_not_found" or error_scenario == "parent_not_found":
             mock_user_service.get_user.side_effect = side_effect
         else:
             mock_user_service.get_user.side_effect = [mock_teacher, mock_student, mock_parent]
@@ -452,7 +446,7 @@ class TestParentsRouter:
             patch("src.routers.parents.TeacherPolicy.assert_teacher_access") as mock_assert_teacher,
             patch("src.routers.parents.StudentPolicy.assert_student_access") as mock_assert_student,
             patch("src.routers.parents.ParentPolicy.assert_parent_of_student") as mock_assert_parent,
-            patch("src.routers.parents.ParentPolicy.check_parent_access", return_value=False)
+            patch("src.routers.parents.ParentPolicy.check_parent_access", return_value=False),
         ):
             with pytest.raises(HTTPException) as exc_info:
                 if error_scenario == "teacher_role_required":
@@ -484,7 +478,7 @@ class TestParentsRouter:
         mock_user,
         mock_parent,
         mock_course,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
         mock_user_service.get_user.side_effect = [mock_user, mock_parent]
         mock_course_service.get_course.return_value = mock_course
@@ -494,11 +488,11 @@ class TestParentsRouter:
 
         with (
             patch("src.routers.parents.ParentPolicy.assert_access_to_parent") as mock_assert_access,
-            patch("src.routers.parents.User.model_validate") as mock_validate
+            patch("src.routers.parents.User.model_validate") as mock_validate,
         ):
             mock_validate.side_effect = lambda x: f"validated_{x}"
             result = await get_parents_children(
-                mock_course.course_id, mock_parent.email, mock_db, "user@test.com"
+                mock_course.course_id, mock_parent.email, mock_db, "user@test.com",
             )
 
         assert len(result) == 2
@@ -518,7 +512,7 @@ class TestParentsRouter:
             ("parent_role_required", parent_errors.ParentRoleRequiredError("parent@test.com", "course-123"), 400, True),
             ("access_denied", parent_errors.NoAccessToParentInfoError("parent@test.com", "stranger@test.com", "course-123"), 403, True),
         ],
-        ids=["user_not_found", "parent_not_found", "course_not_found", "parent_role_required", "access_denied"]
+        ids=["user_not_found", "parent_not_found", "course_not_found", "parent_role_required", "access_denied"],
     )
     async def test_get_parents_children_errors(
         self,
@@ -534,12 +528,10 @@ class TestParentsRouter:
         side_effect,
         expected_status,
         should_check_access,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
 
-        if error_scenario == "user_not_found":
-            mock_user_service.get_user.side_effect = side_effect
-        elif error_scenario == "parent_not_found":
+        if error_scenario == "user_not_found" or error_scenario == "parent_not_found":
             mock_user_service.get_user.side_effect = side_effect
         else:
             mock_user_service.get_user.side_effect = [mock_user, mock_parent]
@@ -555,7 +547,7 @@ class TestParentsRouter:
                     mock_assert_access.side_effect = side_effect
 
                 await get_parents_children(
-                    mock_course.course_id, mock_parent.email, mock_db, "user@test.com"
+                    mock_course.course_id, mock_parent.email, mock_db, "user@test.com",
                 )
 
             assert exc_info.value.status_code == expected_status

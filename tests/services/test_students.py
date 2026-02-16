@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from sqlalchemy.orm import Session
 
 from src.repo import Course, StudentAt, User
@@ -9,24 +10,24 @@ from src.services import StudentService
 class TestStudentService:
 
     @pytest.fixture
-    def mock_db(self):
+    def mock_db(self) -> MagicMock:
         return MagicMock(spec=Session)
 
     @pytest.fixture
-    def service(self, mock_db):
+    def service(self, mock_db) -> StudentService:
         return StudentService(mock_db)
 
     @pytest.fixture
-    def mock_course(self):
+    def mock_course(self) -> MagicMock:
         course = MagicMock(spec=Course)
         course.course_id = 1
         return course
 
     @pytest.mark.parametrize("students_list", [
         ([MagicMock(spec=User), MagicMock(spec=User)]),
-        ([])
+        ([]),
     ])
-    def test_get_enrolled_students(self, service, mock_db, mock_course, students_list):
+    def test_get_enrolled_students(self, service, mock_db, mock_course, students_list) -> None:
         mock_query = mock_db.query.return_value
         mock_join = mock_query.join.return_value
         mock_filter = mock_join.filter.return_value
@@ -41,7 +42,7 @@ class TestStudentService:
         mock_filter.order_by.assert_called_once()
 
     @patch.object(StudentService.logger, "info")
-    def test_invite_student_success(self, mock_logger, service, mock_db, mock_course):
+    def test_invite_student_success(self, mock_logger, service, mock_db, mock_course) -> None:
         mock_student = MagicMock(spec=User)
         mock_student.email = "student@test.com"
 
@@ -58,9 +59,9 @@ class TestStudentService:
     @patch.object(StudentService.logger, "info")
     @pytest.mark.parametrize("existing_student, should_delete", [
         (MagicMock(spec=StudentAt), True),
-        (None, False)
+        (None, False),
     ])
-    def test_remove_student(self, mock_logger, service, mock_db, mock_course, existing_student, should_delete):
+    def test_remove_student(self, mock_logger, service, mock_db, mock_course, existing_student, should_delete) -> None:
         mock_student = MagicMock(spec=User)
         mock_student.email = "student@test.com"
 

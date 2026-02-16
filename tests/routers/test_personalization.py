@@ -1,16 +1,16 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from fastapi import HTTPException
 
 from src.exceptions import courses as course_errors
 from src.exceptions import personalization as personalization_errors
 from src.exceptions import users as user_errors
 from src.routers.personalization import (
-    get_course_emoji,
     change_courses_order,
-    set_course_emoji
+    get_course_emoji,
+    set_course_emoji,
 )
-from src.settings.course import course_settings
 
 pytestmark = pytest.mark.asyncio
 
@@ -75,7 +75,7 @@ class TestPersonalizationRouter:
         mock_get_current_user,
         mock_user,
         mock_course,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
         mock_user_service.get_user.return_value = mock_user
         mock_course_service.get_course.return_value = mock_course
@@ -97,7 +97,7 @@ class TestPersonalizationRouter:
             ("course_not_found", course_errors.CourseNotFoundError("course-123"), 400, False),
             ("participant_role_required", course_errors.ParticipantRoleRequiredError("user@test.com", "course-123"), 403, True),
         ],
-        ids=["user_not_found", "course_not_found", "participant_role_required"]
+        ids=["user_not_found", "course_not_found", "participant_role_required"],
     )
     async def test_get_course_emoji_errors(
         self,
@@ -112,7 +112,7 @@ class TestPersonalizationRouter:
         side_effect,
         expected_status,
         should_check_policy,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
 
         if error_scenario == "user_not_found":
@@ -148,7 +148,7 @@ class TestPersonalizationRouter:
         mock_personalization_service,
         mock_get_current_user,
         mock_user,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
         mock_user_service.get_user.return_value = mock_user
 
@@ -166,7 +166,7 @@ class TestPersonalizationRouter:
             ("user_not_found", user_errors.UserNotFoundError("user@test.com"), 401),
             ("incorrect_order", personalization_errors.IncorrectCoursesOrderError(), 400),
         ],
-        ids=["user_not_found", "incorrect_order"]
+        ids=["user_not_found", "incorrect_order"],
     )
     async def test_change_courses_order_errors(
         self,
@@ -178,7 +178,7 @@ class TestPersonalizationRouter:
         error_scenario,
         side_effect,
         expected_status,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
 
         if error_scenario == "user_not_found":
@@ -199,7 +199,7 @@ class TestPersonalizationRouter:
             (5, 5),
             (None, None),
         ],
-        ids=["set_emoji", "remove_emoji"]
+        ids=["set_emoji", "remove_emoji"],
     )
     async def test_set_course_emoji_success(
         self,
@@ -212,14 +212,14 @@ class TestPersonalizationRouter:
         mock_course,
         emoji_id,
         expected_emoji,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
         mock_user_service.get_user.return_value = mock_user
         mock_course_service.get_course.return_value = mock_course
 
         with patch("src.routers.personalization.CoursePolicy.assert_course_access") as mock_assert_access:
             result = await set_course_emoji(
-                mock_course.course_id, mock_db, "user@test.com", emoji_id
+                mock_course.course_id, mock_db, "user@test.com", emoji_id,
             )
 
         assert result.success is True
@@ -227,7 +227,7 @@ class TestPersonalizationRouter:
         mock_course_service.get_course.assert_called_once_with(mock_course.course_id)
         mock_assert_access.assert_called_once_with(mock_user, mock_course, mock_db)
         mock_personalization_service.set_course_emoji.assert_called_once_with(
-            mock_course, mock_user, expected_emoji
+            mock_course, mock_user, expected_emoji,
         )
         mock_db.commit.assert_called_once()
 
@@ -238,7 +238,7 @@ class TestPersonalizationRouter:
             ("course_not_found", course_errors.CourseNotFoundError("course-123"), 400, False),
             ("participant_role_required", course_errors.ParticipantRoleRequiredError("user@test.com", "course-123"), 403, True),
         ],
-        ids=["user_not_found", "course_not_found", "participant_role_required"]
+        ids=["user_not_found", "course_not_found", "participant_role_required"],
     )
     async def test_set_course_emoji_errors(
         self,
@@ -253,7 +253,7 @@ class TestPersonalizationRouter:
         side_effect,
         expected_status,
         should_check_policy,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
 
         if error_scenario == "user_not_found":

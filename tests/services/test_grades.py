@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from sqlalchemy.orm import Session
 
 import src.exceptions.submissions as submission_errors
@@ -10,15 +11,15 @@ from src.services import GradeService
 class TestGradeService:
 
     @pytest.fixture
-    def mock_db(self):
+    def mock_db(self) -> MagicMock:
         return MagicMock(spec=Session)
 
     @pytest.fixture
-    def service(self, mock_db):
+    def service(self, mock_db) -> GradeService:
         return GradeService(mock_db)
 
     @pytest.fixture
-    def mock_submission(self):
+    def mock_submission(self) -> MagicMock:
         submission = MagicMock(spec=AssignmentSubmission)
         submission.course_id = 1
         submission.assignment_id = 2
@@ -26,7 +27,7 @@ class TestGradeService:
         return submission
 
     @pytest.fixture
-    def mock_teacher(self):
+    def mock_teacher(self) -> MagicMock:
         teacher = MagicMock(spec=User)
         teacher.email = "teacher@test.com"
         return teacher
@@ -51,7 +52,7 @@ class TestGradeService:
         existing_grade,
         new_grade,
         comment,
-    ):
+    ) -> None:
         if existing_grade:
             existing_grade.grade = 70
             existing_grade.comment = "Old comment"
@@ -100,7 +101,7 @@ class TestGradeService:
         mock_submission,
         db_result,
         should_raise,
-    ):
+    ) -> None:
         mock_db.query.return_value.filter.return_value.first.return_value = db_result
 
         if should_raise:

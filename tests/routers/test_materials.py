@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from fastapi import HTTPException
 
 from src.exceptions import courses as course_errors
@@ -8,7 +9,7 @@ from src.exceptions import sections as section_errors
 from src.exceptions import teachers as teacher_errors
 from src.exceptions import users as user_errors
 from src.models.common import Success
-from src.routers.materials import create_material, remove_material, get_material
+from src.routers.materials import create_material, get_material, remove_material
 
 pytestmark = pytest.mark.asyncio
 
@@ -104,7 +105,7 @@ class TestMaterialsRouter:
             ("teacher@test.com", False, True),
             ("admin@test.com", True, False),
         ],
-        ids=["as_teacher", "as_admin"]
+        ids=["as_teacher", "as_admin"],
     )
     async def test_create_material_success(
         self,
@@ -121,7 +122,7 @@ class TestMaterialsRouter:
         user_email,
         is_admin,
         should_check_teacher,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = user_email
         mock_teacher.isadmin = is_admin
         mock_teacher.email = user_email
@@ -168,7 +169,7 @@ class TestMaterialsRouter:
         mock_course_service.get_course.assert_called_once_with(mock_course.course_id)
         mock_section_service.get_section.assert_called_once_with(mock_course, mock_section.section_id)
         mock_material_service.create_material.assert_called_once_with(
-            mock_section, "Test Material", "Test Description", mock_teacher
+            mock_section, "Test Material", "Test Description", mock_teacher,
         )
         mock_db.commit.assert_called_once()
         mock_validate.assert_called_once_with(mock_material)
@@ -181,7 +182,7 @@ class TestMaterialsRouter:
             ("section_not_found", section_errors.SectionNotFoundError(1, "course-123"), 400),
             ("teacher_role_required", teacher_errors.TeacherRoleRequiredError("student@test.com", "course-123"), 403),
         ],
-        ids=["user_not_found", "course_not_found", "section_not_found", "teacher_role_required"]
+        ids=["user_not_found", "course_not_found", "section_not_found", "teacher_role_required"],
     )
     async def test_create_material_errors(
         self,
@@ -196,7 +197,7 @@ class TestMaterialsRouter:
         error_scenario,
         side_effect,
         expected_status,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 
@@ -249,7 +250,7 @@ class TestMaterialsRouter:
             ("material_not_found", material_errors.MaterialNotFoundError("course-123", 999), 400, True),
             ("teacher_role_required", teacher_errors.TeacherRoleRequiredError("student@test.com", "course-123"), 403, True),
         ],
-        ids=["user_not_found", "course_not_found", "material_not_found", "teacher_role_required"]
+        ids=["user_not_found", "course_not_found", "material_not_found", "teacher_role_required"],
     )
     async def test_remove_material_errors(
         self,
@@ -264,7 +265,7 @@ class TestMaterialsRouter:
         side_effect,
         expected_status,
         should_check_teacher,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 
@@ -311,7 +312,7 @@ class TestMaterialsRouter:
         mock_teacher,
         mock_course,
         mock_material,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 
@@ -341,7 +342,7 @@ class TestMaterialsRouter:
         mock_user,
         mock_course,
         mock_material,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
         mock_user.isadmin = False
 
@@ -377,7 +378,7 @@ class TestMaterialsRouter:
             ("material_not_found", material_errors.MaterialNotFoundError("course-123", 999), 404, True),
             ("participant_role_required", course_errors.ParticipantRoleRequiredError("user@test.com", "course-123"), 403, True),
         ],
-        ids=["user_not_found", "course_not_found", "material_not_found", "participant_role_required"]
+        ids=["user_not_found", "course_not_found", "material_not_found", "participant_role_required"],
     )
     async def test_get_material_errors(
         self,
@@ -392,7 +393,7 @@ class TestMaterialsRouter:
         side_effect,
         expected_status,
         should_check_access,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
         mock_user.isadmin = False
 

@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock
+
 import pytest
+
 from src.exceptions.teachers import (
     InstructorRoleRequiredError,
     TeacherRoleConflictError,
@@ -9,31 +11,32 @@ from src.policies import TeacherPolicy
 from src.repo.courses import Course
 from src.repo.users import User
 
+
 class TestTeacherPolicy:
     @pytest.fixture
-    def mock_db(self):
+    def mock_db(self) -> MagicMock:
         return MagicMock()
 
     @pytest.fixture
-    def mock_instructor(self):
+    def mock_instructor(self) -> MagicMock:
         user = MagicMock(spec=User)
         user.email = "instructor@test.com"
         return user
 
     @pytest.fixture
-    def mock_teacher(self):
+    def mock_teacher(self) -> MagicMock:
         user = MagicMock(spec=User)
         user.email = "teacher@test.com"
         return user
 
     @pytest.fixture
-    def mock_user(self):
+    def mock_user(self) -> MagicMock:
         user = MagicMock(spec=User)
         user.email = "user@test.com"
         return user
 
     @pytest.fixture
-    def mock_course(self):
+    def mock_course(self) -> MagicMock:
         course = MagicMock(spec=Course)
         course.instructor = "instructor@test.com"
         course.course_id = 1
@@ -67,7 +70,7 @@ class TestTeacherPolicy:
             "assert_not_teacher_conflict_instructor",
             "assert_not_teacher_conflict_teacher",
             "assert_not_teacher_success_teacher_not_found",
-        ]
+        ],
     )
     def test_teacher_assertions(
         self,
@@ -78,7 +81,7 @@ class TestTeacherPolicy:
         user_fixture,
         teacher_exists,
         expected_exception,
-    ):
+    ) -> None:
         user = request.getfixturevalue(user_fixture)
         if teacher_exists is not None:
             mock_db.query.return_value.scalar.return_value = teacher_exists
@@ -108,7 +111,7 @@ class TestTeacherPolicy:
             "teacher_exists_true",
             "teacher_not_found_false",
             "user_false",
-        ]
+        ],
     )
     def test_check_teacher_access(
         self,
@@ -118,7 +121,7 @@ class TestTeacherPolicy:
         user_fixture,
         teacher_exists,
         expected_result,
-    ):
+    ) -> None:
         user = request.getfixturevalue(user_fixture)
         if teacher_exists is not None:
             mock_db.query.return_value.scalar.return_value = teacher_exists

@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from fastapi import HTTPException
 
 from src.exceptions import admins as admin_errors
@@ -34,7 +35,7 @@ def mock_get_current_user():
 
 class TestAdminRouter:
 
-    async def test_remove_user_success(self, mock_db, mock_user_service, mock_get_current_user):
+    async def test_remove_user_success(self, mock_db, mock_user_service, mock_get_current_user) -> None:
         mock_get_current_user.return_value = "admin@test.com"
         mock_admin = MagicMock()
         mock_deleted_user = MagicMock()
@@ -55,9 +56,9 @@ class TestAdminRouter:
             ("admin@test.com", "user@test.com", [MagicMock(), user_errors.UserNotFoundError("user@test.com")], 404),
             ("non_admin@test.com", "target@test.com", admin_errors.AdminRoleRequiredError("non_admin@test.com"), 403),
             ("admin@test.com", "admin@test.com", admin_errors.DeleteLastAdminError(), 403),
-        ]
+        ],
     )
-    async def test_remove_user_errors(self, mock_db, mock_user_service, mock_get_current_user, current_user, target_user, side_effect, expected_status):
+    async def test_remove_user_errors(self, mock_db, mock_user_service, mock_get_current_user, current_user, target_user, side_effect, expected_status) -> None:
         mock_get_current_user.return_value = current_user
 
         if isinstance(side_effect, list):
@@ -66,7 +67,7 @@ class TestAdminRouter:
                 await remove_user(target_user, mock_db, current_user)
             assert exc.value.status_code == expected_status
             mock_user_service.delete_user.assert_not_called()
-            
+
         elif isinstance(side_effect, admin_errors.DeleteLastAdminError):
             mock_admin_user = MagicMock()
             mock_deleted_user = MagicMock()
@@ -81,7 +82,7 @@ class TestAdminRouter:
             mock_db.commit.assert_not_called()
             mock_user_service.delete_user.assert_called_once()
             return
-            
+
         elif isinstance(side_effect, admin_errors.AdminRoleRequiredError):
             mock_user_service.get_user.side_effect = [MagicMock(), MagicMock()]
             with patch.object(AdminPolicy, "assert_user_is_admin", side_effect=side_effect):
@@ -89,7 +90,7 @@ class TestAdminRouter:
                     await remove_user(target_user, mock_db, current_user)
                 assert exc.value.status_code == expected_status
                 mock_user_service.delete_user.assert_not_called()
-                
+
         else:
             mock_user_service.get_user.side_effect = side_effect
             with pytest.raises(HTTPException) as exc:
@@ -99,7 +100,7 @@ class TestAdminRouter:
 
         mock_db.commit.assert_not_called()
 
-    async def test_give_admin_permissions_success(self, mock_db, mock_user_service, mock_get_current_user):
+    async def test_give_admin_permissions_success(self, mock_db, mock_user_service, mock_get_current_user) -> None:
         mock_get_current_user.return_value = "admin@test.com"
         mock_admin = MagicMock()
         mock_new_admin = MagicMock()
@@ -119,9 +120,9 @@ class TestAdminRouter:
             ("admin@test.com", "new_admin@test.com", user_errors.UserNotFoundError("admin@test.com"), 401),
             ("admin@test.com", "new_admin@test.com", [MagicMock(), user_errors.UserNotFoundError("new_admin@test.com")], 404),
             ("non_admin@test.com", "new_admin@test.com", admin_errors.AdminRoleRequiredError("non_admin@test.com"), 403),
-        ]
+        ],
     )
-    async def test_give_admin_permissions_errors(self, mock_db, mock_user_service, mock_get_current_user, current_user, target_user, side_effect, expected_status):
+    async def test_give_admin_permissions_errors(self, mock_db, mock_user_service, mock_get_current_user, current_user, target_user, side_effect, expected_status) -> None:
         mock_get_current_user.return_value = current_user
 
         if isinstance(side_effect, list):
@@ -143,7 +144,7 @@ class TestAdminRouter:
         mock_user_service.give_admin_permissions.assert_not_called()
         mock_db.commit.assert_not_called()
 
-    async def test_get_all_users_success(self, mock_db, mock_user_service):
+    async def test_get_all_users_success(self, mock_db, mock_user_service) -> None:
         mock_admin = MagicMock()
         mock_users = [MagicMock(), MagicMock()]
         mock_user_service.get_user.return_value = mock_admin
@@ -158,7 +159,7 @@ class TestAdminRouter:
         mock_user_service.get_all_users.assert_called_once()
         assert mock_validate.call_count == 2
 
-    async def test_get_admins_success(self, mock_db, mock_user_service):
+    async def test_get_admins_success(self, mock_db, mock_user_service) -> None:
         mock_admins = [MagicMock(), MagicMock()]
         mock_user_service.get_admins.return_value = mock_admins
 
@@ -170,7 +171,7 @@ class TestAdminRouter:
         mock_user_service.get_admins.assert_called_once()
         assert mock_validate.call_count == 2
 
-    async def test_get_all_courses_success(self, mock_db, mock_user_service):
+    async def test_get_all_courses_success(self, mock_db, mock_user_service) -> None:
         with patch("src.routers.admins.CourseService") as mock_course_service_class:
             mock_course_service = MagicMock()
             mock_course_service_class.return_value = mock_course_service

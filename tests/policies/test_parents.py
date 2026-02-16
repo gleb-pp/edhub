@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock, patch
+
 import pytest
+
 from src.exceptions.parents import (
     NoAccessToParentInfoError,
     ParentOfStudentRoleConflictError,
@@ -11,26 +13,27 @@ from src.policies import ParentPolicy
 from src.repo.courses import Course
 from src.repo.users import User
 
+
 class TestParentPolicy:
     @pytest.fixture
-    def mock_db(self):
+    def mock_db(self) -> MagicMock:
         return MagicMock()
 
     @pytest.fixture
-    def mock_parent(self):
+    def mock_parent(self) -> MagicMock:
         parent = MagicMock(spec=User)
         parent.email = "parent@test.com"
         parent.isadmin = False
         return parent
 
     @pytest.fixture
-    def mock_student(self):
+    def mock_student(self) -> MagicMock:
         student = MagicMock(spec=User)
         student.email = "student@test.com"
         return student
 
     @pytest.fixture
-    def mock_course(self):
+    def mock_course(self) -> MagicMock:
         course = MagicMock(spec=Course)
         course.course_id = 1
         return course
@@ -56,7 +59,7 @@ class TestParentPolicy:
             "assert_parent_of_student_fail",
             "assert_not_parent_of_student_fail",
             "assert_not_parent_of_student_success",
-        ]
+        ],
     )
     def test_parent_assertions(
         self,
@@ -69,7 +72,7 @@ class TestParentPolicy:
         args,
         check_exists,
         expected_exception,
-    ):
+    ) -> None:
         mock_db.query.return_value.scalar.return_value = check_exists
         resolved_args = [request.getfixturevalue(arg) if isinstance(arg, str) else arg for arg in args]
         method = getattr(ParentPolicy, method_name)
@@ -98,7 +101,7 @@ class TestParentPolicy:
             "allowed_teacher",
             "allowed_admin",
             "parent_not_in_course",
-        ]
+        ],
     )
     @patch("src.policies.parents.CoursePolicy.assert_course_access")
     @patch("src.policies.parents.TeacherPolicy.check_teacher_access")
@@ -115,7 +118,7 @@ class TestParentPolicy:
         teacher_check,
         parent_exists,
         expected_exception,
-    ):
+    ) -> None:
         if scenario == "allowed_same_user":
             mock_user = mock_parent
             mock_user.isadmin = is_admin

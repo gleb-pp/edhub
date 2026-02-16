@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from sqlalchemy.orm import Session
 
 import src.exceptions.assignments as assignment_errors
@@ -10,28 +11,28 @@ from src.services import AssignmentService
 class TestAssignmentService:
 
     @pytest.fixture
-    def mock_db(self):
+    def mock_db(self) -> MagicMock:
         return MagicMock(spec=Session)
 
     @pytest.fixture
-    def service(self, mock_db):
+    def service(self, mock_db) -> AssignmentService:
         return AssignmentService(mock_db)
 
     @pytest.fixture
-    def mock_section(self):
+    def mock_section(self) -> MagicMock:
         section = MagicMock(spec=CourseSection)
         section.course_id = 1
         section.section_id = 2
         return section
 
     @pytest.fixture
-    def mock_course(self):
+    def mock_course(self) -> MagicMock:
         course = MagicMock(spec=Course)
         course.course_id = 1
         return course
 
     @pytest.fixture
-    def mock_author(self):
+    def mock_author(self) -> MagicMock:
         author = MagicMock(spec=User)
         author.email = "teacher@test.com"
         return author
@@ -43,7 +44,7 @@ class TestAssignmentService:
             [],
         ],
     )
-    def test_get_section_assignments(self, service, mock_db, mock_section, returned_value):
+    def test_get_section_assignments(self, service, mock_db, mock_section, returned_value) -> None:
         mock_db.query.return_value.filter.return_value.all.return_value = returned_value
 
         result = service.get_section_assignments(mock_section)
@@ -69,7 +70,7 @@ class TestAssignmentService:
         mock_author,
         title,
         description,
-    ):
+    ) -> None:
         result = service.create_assignment(
             mock_section,
             title,
@@ -95,7 +96,7 @@ class TestAssignmentService:
             (999, None, True),
         ],
     )
-    def test_get_assignment(self, service, mock_db, mock_course, assignment_id, db_result, should_raise):
+    def test_get_assignment(self, service, mock_db, mock_course, assignment_id, db_result, should_raise) -> None:
         mock_db.query.return_value.filter.return_value.first.return_value = db_result
 
         if should_raise:
@@ -115,7 +116,7 @@ class TestAssignmentService:
             [],
         ],
     )
-    def test_get_course_assignments(self, service, mock_db, mock_course, returned_value):
+    def test_get_course_assignments(self, service, mock_db, mock_course, returned_value) -> None:
         mock_db.query.return_value.join.return_value.filter.return_value.order_by.return_value.all.return_value = returned_value
 
         result = service.get_course_assignments(mock_course)
@@ -124,7 +125,7 @@ class TestAssignmentService:
         mock_db.query.assert_called_once_with(CourseAssignment)
 
     @patch.object(AssignmentService.logger, "info")
-    def test_delete_assignment(self, mock_logger, service, mock_db):
+    def test_delete_assignment(self, mock_logger, service, mock_db) -> None:
         mock_assignment = MagicMock(spec=CourseAssignment)
 
         service.delete_assignment(mock_assignment)

@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from fastapi import HTTPException
 
 from src.exceptions import assignments as assignment_errors
@@ -8,11 +9,10 @@ from src.exceptions import students as student_errors
 from src.exceptions import submissions as submission_errors
 from src.exceptions import teachers as teacher_errors
 from src.exceptions import users as user_errors
-from src.models.common import Success
 from src.routers.submissions import (
-    submit_assignment,
     get_assignment_submissions,
-    get_submission
+    get_submission,
+    submit_assignment,
 )
 
 pytestmark = pytest.mark.asyncio
@@ -113,7 +113,7 @@ class TestSubmissionsRouter:
             ("update", MagicMock(), "update_submission"),
             ("create", submission_errors.SubmissionNotFoundError("course-123", 10, "student@test.com"), "create_submission"),
         ],
-        ids=["update_existing", "create_new"]
+        ids=["update_existing", "create_new"],
     )
     async def test_submit_assignment_success(
         self,
@@ -130,7 +130,7 @@ class TestSubmissionsRouter:
         scenario,
         get_submission_effect,
         expected_method,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "student@test.com"
         mock_user_service.get_user.return_value = mock_student
         mock_course_service.get_course.return_value = mock_course
@@ -168,7 +168,7 @@ class TestSubmissionsRouter:
             mock_submission_service.get_submission.assert_called_once_with(mock_assignment, mock_student)
             mock_assert_not_graded.assert_not_called()
             mock_submission_service.create_submission.assert_called_once_with(
-                mock_assignment, mock_student, "Test submission"
+                mock_assignment, mock_student, "Test submission",
             )
             mock_submission_service.update_submission.assert_not_called()
 
@@ -183,7 +183,7 @@ class TestSubmissionsRouter:
             ("student_role_required", student_errors.StudentRoleRequiredError("non-student@test.com", "course-123"), 403, True),
             ("submission_graded", submission_errors.SubmissionGradedError("course-123", 10, "student@test.com"), 409, True),
         ],
-        ids=["user_not_found", "course_not_found", "assignment_not_found", "student_role_required", "submission_graded"]
+        ids=["user_not_found", "course_not_found", "assignment_not_found", "student_role_required", "submission_graded"],
     )
     async def test_submit_assignment_errors(
         self,
@@ -201,7 +201,7 @@ class TestSubmissionsRouter:
         side_effect,
         expected_status,
         should_check_policies,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "student@test.com"
 
         if error_scenario == "user_not_found":
@@ -252,7 +252,7 @@ class TestSubmissionsRouter:
             ("teacher@test.com", False, True),
             ("admin@test.com", True, False),
         ],
-        ids=["as_teacher", "as_admin"]
+        ids=["as_teacher", "as_admin"],
     )
     async def test_get_assignment_submissions_success(
         self,
@@ -268,7 +268,7 @@ class TestSubmissionsRouter:
         user_email,
         is_admin,
         should_check_teacher,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = user_email
         mock_teacher.isadmin = is_admin
         mock_teacher.email = user_email
@@ -286,7 +286,7 @@ class TestSubmissionsRouter:
         ):
             mock_validate.side_effect = lambda x: f"validated_{x}"
             result = await get_assignment_submissions(
-                mock_course.course_id, mock_assignment.assignment_id, mock_db, user_email
+                mock_course.course_id, mock_assignment.assignment_id, mock_db, user_email,
             )
 
         assert len(result) == 2
@@ -309,7 +309,7 @@ class TestSubmissionsRouter:
             ("assignment_not_found", assignment_errors.AssignmentNotFoundError("course-123", 10), 400, True),
             ("teacher_role_required", teacher_errors.TeacherRoleRequiredError("student@test.com", "course-123"), 403, True),
         ],
-        ids=["user_not_found", "course_not_found", "assignment_not_found", "teacher_role_required"]
+        ids=["user_not_found", "course_not_found", "assignment_not_found", "teacher_role_required"],
     )
     async def test_get_assignment_submissions_errors(
         self,
@@ -325,7 +325,7 @@ class TestSubmissionsRouter:
         side_effect,
         expected_status,
         should_check_policy,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 
@@ -350,7 +350,7 @@ class TestSubmissionsRouter:
                     mock_assert_teacher.side_effect = side_effect
 
                 await get_assignment_submissions(
-                    mock_course.course_id, 10, mock_db, "teacher@test.com"
+                    mock_course.course_id, 10, mock_db, "teacher@test.com",
                 )
 
             assert exc_info.value.status_code == expected_status
@@ -366,7 +366,7 @@ class TestSubmissionsRouter:
             ("teacher", "teacher@test.com"),
             ("student", "student@test.com"),
         ],
-        ids=["as_teacher", "as_student"]
+        ids=["as_teacher", "as_student"],
     )
     async def test_get_submission_success(
         self,
@@ -383,7 +383,7 @@ class TestSubmissionsRouter:
         mock_submission,
         user_role,
         user_email,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = user_email
 
         mock_user = mock_teacher if user_role == "teacher" else mock_student
@@ -433,8 +433,8 @@ class TestSubmissionsRouter:
             "course_not_found",
             "assignment_not_found",
             "submission_not_found",
-            "access_denied"
-        ]
+            "access_denied",
+        ],
     )
     async def test_get_submission_errors(
         self,
@@ -452,12 +452,10 @@ class TestSubmissionsRouter:
         side_effect,
         expected_status,
         should_check_access,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
 
-        if error_scenario == "user_not_found":
-            mock_user_service.get_user.side_effect = side_effect
-        elif error_scenario == "student_not_found":
+        if error_scenario == "user_not_found" or error_scenario == "student_not_found":
             mock_user_service.get_user.side_effect = side_effect
         else:
             mock_user_service.get_user.side_effect = [mock_user, mock_student]

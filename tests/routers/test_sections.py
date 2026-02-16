@@ -1,19 +1,19 @@
-import pytest
-from unittest.mock import MagicMock, patch
-from fastapi import HTTPException
 from datetime import datetime
+from unittest.mock import MagicMock, patch
+
+import pytest
+from fastapi import HTTPException
 
 from src.exceptions import courses as course_errors
 from src.exceptions import sections as section_errors
 from src.exceptions import teachers as teacher_errors
 from src.exceptions import users as user_errors
-from src.models.common import Success
 from src.routers.sections import (
-    get_course_sections,
-    get_course_feed,
-    create_section,
     change_section_order,
-    remove_section
+    create_section,
+    get_course_feed,
+    get_course_sections,
+    remove_section,
 )
 
 pytestmark = pytest.mark.asyncio
@@ -113,7 +113,7 @@ class TestSectionsRouter:
         mock_get_current_user,
         mock_user,
         mock_course,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
         mock_user.isadmin = False
         mock_user_service.get_user.return_value = mock_user
@@ -124,7 +124,7 @@ class TestSectionsRouter:
 
         with (
             patch("src.routers.sections.CoursePolicy.assert_course_access") as mock_assert_access,
-            patch("src.routers.sections.Section.model_validate") as mock_validate
+            patch("src.routers.sections.Section.model_validate") as mock_validate,
         ):
             mock_validate.side_effect = lambda x: f"validated_{x}"
             result = await get_course_sections(mock_course.course_id, mock_db, "user@test.com")
@@ -143,7 +143,7 @@ class TestSectionsRouter:
             ("course_not_found", course_errors.CourseNotFoundError("course-123"), 400, False),
             ("participant_role_required", course_errors.ParticipantRoleRequiredError("user@test.com", "course-123"), 403, True),
         ],
-        ids=["user_not_found", "course_not_found", "participant_role_required"]
+        ids=["user_not_found", "course_not_found", "participant_role_required"],
     )
     async def test_get_course_sections_errors(
         self,
@@ -158,7 +158,7 @@ class TestSectionsRouter:
         side_effect,
         expected_status,
         should_check_policy,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
 
         if error_scenario == "user_not_found":
@@ -200,7 +200,7 @@ class TestSectionsRouter:
         mock_user,
         mock_course,
         mock_section,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
         mock_user.isadmin = False
         mock_user_service.get_user.return_value = mock_user
@@ -246,7 +246,7 @@ class TestSectionsRouter:
 
         with (
             patch("src.routers.sections.CoursePolicy.assert_course_access"),
-            patch("src.routers.sections.Section.model_validate") as mock_validate
+            patch("src.routers.sections.Section.model_validate") as mock_validate,
         ):
             mock_validate.side_effect = lambda x: x
             result = await get_course_feed(mock_course.course_id, mock_db, "user@test.com")
@@ -272,7 +272,7 @@ class TestSectionsRouter:
         mock_user,
         mock_course,
         mock_section,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
         mock_user.isadmin = False
         mock_user_service.get_user.return_value = mock_user
@@ -306,7 +306,7 @@ class TestSectionsRouter:
 
         with (
             patch("src.routers.sections.CoursePolicy.assert_course_access"),
-            patch("src.routers.sections.Section.model_validate") as mock_validate
+            patch("src.routers.sections.Section.model_validate") as mock_validate,
         ):
             mock_validate.side_effect = lambda x: x
             result = await get_course_feed(mock_course.course_id, mock_db, "user@test.com")
@@ -321,7 +321,7 @@ class TestSectionsRouter:
             ("course_not_found", course_errors.CourseNotFoundError("course-123"), 400, False),
             ("participant_role_required", course_errors.ParticipantRoleRequiredError("user@test.com", "course-123"), 403, True),
         ],
-        ids=["user_not_found", "course_not_found", "participant_role_required"]
+        ids=["user_not_found", "course_not_found", "participant_role_required"],
     )
     async def test_get_course_feed_errors(
         self,
@@ -336,7 +336,7 @@ class TestSectionsRouter:
         side_effect,
         expected_status,
         should_check_policy,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
 
         if error_scenario == "user_not_found":
@@ -369,7 +369,7 @@ class TestSectionsRouter:
             ("teacher@test.com", False, True),
             ("admin@test.com", True, False),
         ],
-        ids=["as_teacher", "as_admin"]
+        ids=["as_teacher", "as_admin"],
     )
     async def test_create_section_success(
         self,
@@ -384,7 +384,7 @@ class TestSectionsRouter:
         user_email,
         is_admin,
         should_check_teacher,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = user_email
         mock_teacher.isadmin = is_admin
         mock_teacher.email = user_email
@@ -401,13 +401,13 @@ class TestSectionsRouter:
             if should_check_teacher:
                 with patch("src.routers.sections.TeacherPolicy.assert_teacher_access") as mock_assert_teacher:
                     result = await create_section(
-                        mock_course.course_id, mock_db, user_email, "New Section"
+                        mock_course.course_id, mock_db, user_email, "New Section",
                     )
                     mock_assert_teacher.assert_called_once_with(mock_teacher, mock_course, mock_db)
             else:
                 with patch("src.routers.sections.TeacherPolicy.assert_teacher_access") as mock_assert_teacher:
                     result = await create_section(
-                        mock_course.course_id, mock_db, user_email, "New Section"
+                        mock_course.course_id, mock_db, user_email, "New Section",
                     )
                     mock_assert_teacher.assert_not_called()
 
@@ -425,7 +425,7 @@ class TestSectionsRouter:
             ("course_not_found", course_errors.CourseNotFoundError("course-123"), 400, False),
             ("teacher_role_required", teacher_errors.TeacherRoleRequiredError("student@test.com", "course-123"), 403, True),
         ],
-        ids=["user_not_found", "course_not_found", "teacher_role_required"]
+        ids=["user_not_found", "course_not_found", "teacher_role_required"],
     )
     async def test_create_section_errors(
         self,
@@ -440,7 +440,7 @@ class TestSectionsRouter:
         side_effect,
         expected_status,
         should_check_policy,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 
@@ -477,7 +477,7 @@ class TestSectionsRouter:
             ("teacher@test.com", False, True),
             ("admin@test.com", True, False),
         ],
-        ids=["as_teacher", "as_admin"]
+        ids=["as_teacher", "as_admin"],
     )
     async def test_change_section_order_success(
         self,
@@ -491,7 +491,7 @@ class TestSectionsRouter:
         user_email,
         is_admin,
         should_check_teacher,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = user_email
         mock_teacher.isadmin = is_admin
         mock_teacher.email = user_email
@@ -504,13 +504,13 @@ class TestSectionsRouter:
         if should_check_teacher:
             with patch("src.routers.sections.TeacherPolicy.assert_teacher_access") as mock_assert_teacher:
                 result = await change_section_order(
-                    mock_course.course_id, mock_db, new_order, user_email
+                    mock_course.course_id, mock_db, new_order, user_email,
                 )
                 mock_assert_teacher.assert_called_once_with(mock_teacher, mock_course, mock_db)
         else:
             with patch("src.routers.sections.TeacherPolicy.assert_teacher_access") as mock_assert_teacher:
                 result = await change_section_order(
-                    mock_course.course_id, mock_db, new_order, user_email
+                    mock_course.course_id, mock_db, new_order, user_email,
                 )
                 mock_assert_teacher.assert_not_called()
 
@@ -528,7 +528,7 @@ class TestSectionsRouter:
             ("teacher_role_required", teacher_errors.TeacherRoleRequiredError("student@test.com", "course-123"), 403, True),
             ("incorrect_order", section_errors.IncorrectSectionOrderError(), 400, True),
         ],
-        ids=["user_not_found", "course_not_found", "teacher_role_required", "incorrect_order"]
+        ids=["user_not_found", "course_not_found", "teacher_role_required", "incorrect_order"],
     )
     async def test_change_section_order_errors(
         self,
@@ -543,7 +543,7 @@ class TestSectionsRouter:
         side_effect,
         expected_status,
         should_check_policy,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 
@@ -582,7 +582,7 @@ class TestSectionsRouter:
             ("teacher@test.com", False, True),
             ("admin@test.com", True, False),
         ],
-        ids=["as_teacher", "as_admin"]
+        ids=["as_teacher", "as_admin"],
     )
     async def test_remove_section_success(
         self,
@@ -597,7 +597,7 @@ class TestSectionsRouter:
         user_email,
         is_admin,
         should_check_teacher,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = user_email
         mock_teacher.isadmin = is_admin
         mock_teacher.email = user_email
@@ -609,13 +609,13 @@ class TestSectionsRouter:
         if should_check_teacher:
             with patch("src.routers.sections.TeacherPolicy.assert_teacher_access") as mock_assert_teacher:
                 result = await remove_section(
-                    mock_course.course_id, mock_section.section_id, mock_db, user_email
+                    mock_course.course_id, mock_section.section_id, mock_db, user_email,
                 )
                 mock_assert_teacher.assert_called_once_with(mock_teacher, mock_course, mock_db)
         else:
             with patch("src.routers.sections.TeacherPolicy.assert_teacher_access") as mock_assert_teacher:
                 result = await remove_section(
-                    mock_course.course_id, mock_section.section_id, mock_db, user_email
+                    mock_course.course_id, mock_section.section_id, mock_db, user_email,
                 )
                 mock_assert_teacher.assert_not_called()
 
@@ -635,7 +635,7 @@ class TestSectionsRouter:
             ("teacher_role_required", teacher_errors.TeacherRoleRequiredError("student@test.com", "course-123"), 403, True),
             ("last_section", section_errors.LastSectionDeleteError(5, "course-123"), 409, True),
         ],
-        ids=["user_not_found", "course_not_found", "section_not_found", "teacher_role_required", "last_section"]
+        ids=["user_not_found", "course_not_found", "section_not_found", "teacher_role_required", "last_section"],
     )
     async def test_remove_section_errors(
         self,
@@ -650,7 +650,7 @@ class TestSectionsRouter:
         side_effect,
         expected_status,
         should_check_policy,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 

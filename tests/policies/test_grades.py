@@ -9,7 +9,7 @@ from src.repo.submissions import AssignmentSubmission
 
 class TestGradePolicy:
 
-    def test_assert_not_graded_success(self):
+    def test_assert_not_graded_success(self) -> None:
         mock_submission = MagicMock(spec=AssignmentSubmission)
         mock_submission.course_id = 1
         mock_submission.assignment_id = 2
@@ -20,7 +20,7 @@ class TestGradePolicy:
 
         GradePolicy.assert_not_graded(mock_submission, mock_db)
 
-    def test_assert_not_graded_fail(self):
+    def test_assert_not_graded_fail(self) -> None:
         mock_submission = MagicMock(spec=AssignmentSubmission)
         mock_submission.course_id = 1
         mock_submission.assignment_id = 2

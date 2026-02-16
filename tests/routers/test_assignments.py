@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from fastapi import HTTPException
 
 from src.exceptions import assignments as assignment_errors
@@ -100,10 +101,10 @@ class TestAssignmentsRouter:
     @pytest.mark.parametrize(
         "user_email,is_admin,policy_check",
         [
-            ("teacher@test.com", False, True),   # обычный учитель
-            ("admin@test.com", True, False),     # админ (без проверки политики)
+            ("teacher@test.com", False, True),
+            ("admin@test.com", True, False),
         ],
-        ids=["as_teacher", "as_admin"]
+        ids=["as_teacher", "as_admin"],
     )
     async def test_create_assignment_success(
         self,
@@ -120,7 +121,7 @@ class TestAssignmentsRouter:
         user_email,
         is_admin,
         policy_check,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = user_email
         mock_user.isadmin = is_admin
         mock_user.email = user_email
@@ -177,7 +178,7 @@ class TestAssignmentsRouter:
             ("section_not_found", section_errors.SectionNotFoundError(1, "course-123"), 400),
             ("teacher_role_required", teacher_errors.TeacherRoleRequiredError("student@test.com", "course-123"), 403),
         ],
-        ids=["user_not_found", "course_not_found", "section_not_found", "teacher_role_required"]
+        ids=["user_not_found", "course_not_found", "section_not_found", "teacher_role_required"],
     )
     async def test_create_assignment_errors(
         self,
@@ -192,7 +193,7 @@ class TestAssignmentsRouter:
         error_scenario,
         side_effect,
         expected_status,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "teacher@test.com"
         mock_user.isadmin = False
         mock_user.email = "teacher@test.com"
@@ -234,7 +235,7 @@ class TestAssignmentsRouter:
             ("course_not_found", course_errors.CourseNotFoundError("course-123"), 400),
             ("assignment_not_found", assignment_errors.AssignmentNotFoundError("course-123", 999), 400),
         ],
-        ids=["user_not_found", "course_not_found", "assignment_not_found"]
+        ids=["user_not_found", "course_not_found", "assignment_not_found"],
     )
     async def test_remove_assignment_errors(
         self,
@@ -248,7 +249,7 @@ class TestAssignmentsRouter:
         error_scenario,
         side_effect,
         expected_status,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "teacher@test.com"
         mock_user.isadmin = False
         mock_user.email = "teacher@test.com"
@@ -285,7 +286,7 @@ class TestAssignmentsRouter:
         mock_user,
         mock_course,
         mock_assignment,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "teacher@test.com"
         mock_user.isadmin = False
         mock_user.email = "teacher@test.com"
@@ -314,7 +315,7 @@ class TestAssignmentsRouter:
             ("assignment_not_found", assignment_errors.AssignmentNotFoundError("course-123", 999), 404),
             ("participant_role_required", course_errors.ParticipantRoleRequiredError("user@test.com", "course-123"), 403),
         ],
-        ids=["user_not_found", "course_not_found", "assignment_not_found", "participant_role_required"]
+        ids=["user_not_found", "course_not_found", "assignment_not_found", "participant_role_required"],
     )
     async def test_get_assignment_errors(
         self,
@@ -328,7 +329,7 @@ class TestAssignmentsRouter:
         error_scenario,
         side_effect,
         expected_status,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
         mock_user.isadmin = False
         mock_user.email = "user@test.com"
@@ -366,7 +367,7 @@ class TestAssignmentsRouter:
         mock_user,
         mock_course,
         mock_assignment,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
         mock_user.isadmin = False
         mock_user.email = "user@test.com"
@@ -383,7 +384,7 @@ class TestAssignmentsRouter:
 
         with (
             patch("src.routers.assignments.CoursePolicy.assert_course_access") as mock_assert_access,
-            patch("src.routers.assignments.Assignment.model_validate") as mock_validate
+            patch("src.routers.assignments.Assignment.model_validate") as mock_validate,
         ):
             mock_validate.return_value = expected_result
             result = await get_assignment(mock_course.course_id, 10, mock_db, "user@test.com")
@@ -401,7 +402,7 @@ class TestAssignmentsRouter:
             ([MagicMock(), MagicMock()], 2),
             ([], 0),
         ],
-        ids=["with_assignments", "empty"]
+        ids=["with_assignments", "empty"],
     )
     async def test_get_course_assignments(
         self,
@@ -414,7 +415,7 @@ class TestAssignmentsRouter:
         mock_course,
         assignments_list,
         expected_count,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "student@test.com"
         mock_user.isadmin = False
         mock_user.email = "student@test.com"
@@ -425,7 +426,7 @@ class TestAssignmentsRouter:
 
         with (
             patch("src.routers.assignments.CoursePolicy.assert_course_access"),
-            patch("src.routers.assignments.Assignment.model_validate") as mock_validate
+            patch("src.routers.assignments.Assignment.model_validate") as mock_validate,
         ):
             mock_validate.side_effect = lambda x: {"course_id": x.course_id if hasattr(x, "course_id") else "course-123"}
             result = await get_course_assignments(mock_course.course_id, mock_db, "student@test.com")
@@ -443,7 +444,7 @@ class TestAssignmentsRouter:
             ("course_not_found", course_errors.CourseNotFoundError("course-123"), 400),
             ("participant_role_required", course_errors.ParticipantRoleRequiredError("user@test.com", "course-123"), 403),
         ],
-        ids=["user_not_found", "course_not_found", "participant_role_required"]
+        ids=["user_not_found", "course_not_found", "participant_role_required"],
     )
     async def test_get_course_assignments_errors(
         self,
@@ -456,7 +457,7 @@ class TestAssignmentsRouter:
         error_scenario,
         side_effect,
         expected_status,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
         mock_user.isadmin = False
         mock_user.email = "user@test.com"

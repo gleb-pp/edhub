@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from sqlalchemy.orm import Session
 
 import src.exceptions.materials as material_errors
@@ -10,28 +11,28 @@ from src.services import MaterialService
 class TestMaterialService:
 
     @pytest.fixture
-    def mock_db(self):
+    def mock_db(self) -> MagicMock:
         return MagicMock(spec=Session)
 
     @pytest.fixture
-    def service(self, mock_db):
+    def service(self, mock_db) -> MaterialService:
         return MaterialService(mock_db)
 
     @pytest.fixture
-    def mock_section(self):
+    def mock_section(self) -> MagicMock:
         section = MagicMock(spec=CourseSection)
         section.course_id = 1
         section.section_id = 2
         return section
 
     @pytest.fixture
-    def mock_course(self):
+    def mock_course(self) -> MagicMock:
         course = MagicMock(spec=Course)
         course.course_id = 1
         return course
 
     @pytest.fixture
-    def mock_author(self):
+    def mock_author(self) -> MagicMock:
         author = MagicMock(spec=User)
         author.email = "teacher@test.com"
         return author
@@ -43,7 +44,7 @@ class TestMaterialService:
             [],
         ],
     )
-    def test_get_section_materials(self, service, mock_db, mock_section, returned_value):
+    def test_get_section_materials(self, service, mock_db, mock_section, returned_value) -> None:
         mock_query = mock_db.query.return_value
         mock_query.filter.return_value.all.return_value = returned_value
 
@@ -71,7 +72,7 @@ class TestMaterialService:
         mock_author,
         title,
         description,
-    ):
+    ) -> None:
         result = service.create_material(
             mock_section,
             title,
@@ -106,7 +107,7 @@ class TestMaterialService:
         mock_course,
         db_result,
         should_raise,
-    ):
+    ) -> None:
         mock_query = mock_db.query.return_value
         mock_query.filter.return_value.first.return_value = db_result
 
@@ -124,7 +125,7 @@ class TestMaterialService:
             mock_query.filter.assert_called_once()
 
     @patch.object(MaterialService.logger, "info")
-    def test_delete_material(self, mock_logger, service, mock_db):
+    def test_delete_material(self, mock_logger, service, mock_db) -> None:
         mock_material = MagicMock(spec=CourseMaterial)
 
         service.delete_material(mock_material)

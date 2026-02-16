@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock, patch
+
 import pytest
+
 from src.exceptions.students import (
     NoAccessToStudentInfoError,
     StudentRoleConflictError,
@@ -9,26 +11,27 @@ from src.policies import StudentPolicy
 from src.repo.courses import Course
 from src.repo.users import User
 
+
 class TestStudentPolicy:
     @pytest.fixture
-    def mock_db(self):
+    def mock_db(self) -> MagicMock:
         return MagicMock()
 
     @pytest.fixture
-    def mock_user(self):
+    def mock_user(self) -> MagicMock:
         user = MagicMock(spec=User)
         user.email = "user@test.com"
         user.isadmin = False
         return user
 
     @pytest.fixture
-    def mock_student(self):
+    def mock_student(self) -> MagicMock:
         student = MagicMock(spec=User)
         student.email = "student@test.com"
         return student
 
     @pytest.fixture
-    def mock_course(self):
+    def mock_course(self) -> MagicMock:
         course = MagicMock(spec=Course)
         course.course_id = 1
         course.id = 1
@@ -48,7 +51,7 @@ class TestStudentPolicy:
             "assert_student_access_fail",
             "assert_not_student_success",
             "assert_not_student_conflict",
-        ]
+        ],
     )
     def test_student_assertions(
         self,
@@ -58,7 +61,7 @@ class TestStudentPolicy:
         method_name,
         check_exists,
         expected_exception,
-    ):
+    ) -> None:
         mock_db.query.return_value.scalar.return_value = check_exists
         method = getattr(StudentPolicy, method_name)
 
@@ -88,7 +91,7 @@ class TestStudentPolicy:
             "allowed_parent",
             "allowed_admin",
             "student_not_in_course",
-        ]
+        ],
     )
     @patch("src.policies.students.CoursePolicy.assert_course_access")
     @patch("src.policies.students.TeacherPolicy.check_teacher_access")
@@ -108,7 +111,7 @@ class TestStudentPolicy:
         parent_check,
         student_exists,
         expected_exception,
-    ):
+    ) -> None:
         if scenario == "allowed_self":
             mock_user = mock_student
             mock_user.isadmin = is_admin

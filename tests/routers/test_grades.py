@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from fastapi import HTTPException
 
 from src.exceptions import assignments as assignment_errors
@@ -9,7 +10,7 @@ from src.exceptions import submissions as submission_errors
 from src.exceptions import teachers as teacher_errors
 from src.exceptions import users as user_errors
 from src.models.common import Success
-from src.routers.grades import grade_submission, get_submission_grade
+from src.routers.grades import get_submission_grade, grade_submission
 
 pytestmark = pytest.mark.asyncio
 
@@ -117,7 +118,7 @@ class TestGradesRouter:
             ("Good job!", "Good job!"),
             (None, None),
         ],
-        ids=["with_comment", "without_comment"]
+        ids=["with_comment", "without_comment"],
     )
     async def test_grade_submission_success(
         self,
@@ -135,7 +136,7 @@ class TestGradesRouter:
         mock_submission,
         comment,
         expected_comment,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "teacher@test.com"
         mock_user_service.get_user.side_effect = [mock_teacher, mock_student]
         mock_course_service.get_course.return_value = mock_course
@@ -167,7 +168,7 @@ class TestGradesRouter:
         mock_assignment_service.get_assignment.assert_called_once_with(mock_course, mock_assignment.assignment_id)
         mock_submission_service.get_submission.assert_called_once_with(mock_assignment, mock_student)
         mock_grade_service.update_submission_grade.assert_called_once_with(
-            mock_submission, 85, expected_comment, mock_teacher
+            mock_submission, 85, expected_comment, mock_teacher,
         )
         mock_db.commit.assert_called_once()
 
@@ -190,7 +191,7 @@ class TestGradesRouter:
             "student_role_required",
             "assignment_not_found",
             "submission_not_found",
-        ]
+        ],
     )
     async def test_grade_submission_errors(
         self,
@@ -208,12 +209,10 @@ class TestGradesRouter:
         side_effect,
         expected_status,
         should_call_policies,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "teacher@test.com"
 
-        if error_scenario == "teacher_not_found":
-            mock_user_service.get_user.side_effect = side_effect
-        elif error_scenario == "student_not_found":
+        if error_scenario == "teacher_not_found" or error_scenario == "student_not_found":
             mock_user_service.get_user.side_effect = side_effect
         else:
             mock_user_service.get_user.side_effect = [mock_teacher, mock_student]
@@ -280,7 +279,7 @@ class TestGradesRouter:
             ("student", "student@test.com"),
             ("parent", "parent@test.com"),
         ],
-        ids=["as_teacher", "as_student", "as_parent"]
+        ids=["as_teacher", "as_student", "as_parent"],
     )
     async def test_get_submission_grade_success(
         self,
@@ -299,7 +298,7 @@ class TestGradesRouter:
         mock_grade,
         user_role,
         user_email,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = user_email
 
         mock_user = mock_teacher if user_role == "teacher" else MagicMock()
@@ -354,7 +353,7 @@ class TestGradesRouter:
             "submission_not_found",
             "grade_not_found",
             "access_denied",
-        ]
+        ],
     )
     async def test_get_submission_grade_errors(
         self,
@@ -371,12 +370,10 @@ class TestGradesRouter:
         side_effect,
         expected_status,
         should_check_access,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
 
-        if error_scenario == "user_not_found":
-            mock_user_service.get_user.side_effect = side_effect
-        elif error_scenario == "student_not_found":
+        if error_scenario == "user_not_found" or error_scenario == "student_not_found":
             mock_user_service.get_user.side_effect = side_effect
         else:
             mock_user_service.get_user.side_effect = [MagicMock(), mock_student]

@@ -1,23 +1,23 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from fastapi import HTTPException
 
 from src.exceptions import courses as course_errors
 from src.exceptions import teachers as teacher_errors
 from src.exceptions import users as user_errors
-from src.models.common import Success
 from src.routers.teachers import (
+    change_course_instructor,
     get_course_teachers,
     invite_teacher,
     remove_teacher,
-    change_course_instructor
 )
 
 pytestmark = pytest.mark.asyncio
 
 
 @pytest.fixture
-def mock_db():
+def mock_db() -> MagicMock:
     return MagicMock()
 
 
@@ -60,7 +60,7 @@ def mock_get_current_user():
 
 
 @pytest.fixture
-def mock_user():
+def mock_user() -> MagicMock:
     user = MagicMock()
     user.isadmin = False
     user.email = "user@test.com"
@@ -68,7 +68,7 @@ def mock_user():
 
 
 @pytest.fixture
-def mock_instructor():
+def mock_instructor() -> MagicMock:
     instructor = MagicMock()
     instructor.isadmin = False
     instructor.email = "instructor@test.com"
@@ -76,7 +76,7 @@ def mock_instructor():
 
 
 @pytest.fixture
-def mock_teacher():
+def mock_teacher() -> MagicMock:
     teacher = MagicMock()
     teacher.isadmin = False
     teacher.email = "teacher@test.com"
@@ -84,7 +84,7 @@ def mock_teacher():
 
 
 @pytest.fixture
-def mock_course():
+def mock_course() -> MagicMock:
     course = MagicMock()
     course.course_id = "course-123"
     course.instructor = "instructor@test.com"
@@ -102,7 +102,7 @@ class TestTeachersRouter:
         mock_get_current_user,
         mock_user,
         mock_course,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
         mock_user.isadmin = False
         mock_user_service.get_user.return_value = mock_user
@@ -113,7 +113,7 @@ class TestTeachersRouter:
 
         with (
             patch("src.routers.teachers.CoursePolicy.assert_course_access") as mock_assert_access,
-            patch("src.routers.teachers.User.model_validate") as mock_validate
+            patch("src.routers.teachers.User.model_validate") as mock_validate,
         ):
             mock_validate.side_effect = lambda x: f"validated_{x}"
             result = await get_course_teachers(mock_course.course_id, mock_db, "user@test.com")
@@ -132,7 +132,7 @@ class TestTeachersRouter:
             ("course_not_found", course_errors.CourseNotFoundError("course-123"), 400, False),
             ("participant_role_required", course_errors.ParticipantRoleRequiredError("user@test.com", "course-123"), 403, True),
         ],
-        ids=["user_not_found", "course_not_found", "participant_role_required"]
+        ids=["user_not_found", "course_not_found", "participant_role_required"],
     )
     async def test_get_course_teachers_errors(
         self,
@@ -147,7 +147,7 @@ class TestTeachersRouter:
         side_effect,
         expected_status,
         should_check_policy,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
 
         if error_scenario == "user_not_found":
@@ -188,7 +188,7 @@ class TestTeachersRouter:
         mock_instructor,
         mock_teacher,
         mock_course,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "instructor@test.com"
         mock_instructor.isadmin = False
 
@@ -199,10 +199,10 @@ class TestTeachersRouter:
             patch("src.routers.teachers.TeacherPolicy.assert_instructor_access") as mock_assert_instructor,
             patch("src.routers.teachers.TeacherPolicy.assert_not_teacher") as mock_assert_not_teacher,
             patch("src.routers.teachers.StudentPolicy.assert_not_student") as mock_assert_not_student,
-            patch("src.routers.teachers.ParentPolicy.assert_not_parent") as mock_assert_not_parent
+            patch("src.routers.teachers.ParentPolicy.assert_not_parent") as mock_assert_not_parent,
         ):
             result = await invite_teacher(
-                mock_course.course_id, mock_teacher.email, mock_db, "instructor@test.com"
+                mock_course.course_id, mock_teacher.email, mock_db, "instructor@test.com",
             )
 
         assert result.success is True
@@ -231,8 +231,8 @@ class TestTeachersRouter:
             "new_teacher_not_found",
             "course_not_found",
             "instructor_role_required",
-            "conflict"
-        ]
+            "conflict",
+        ],
     )
     async def test_invite_teacher_errors(
         self,
@@ -249,13 +249,11 @@ class TestTeachersRouter:
         side_effect,
         expected_status,
         should_check_policies,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "instructor@test.com"
         mock_instructor.isadmin = False
 
-        if error_scenario == "instructor_not_found":
-            mock_user_service.get_user.side_effect = side_effect
-        elif error_scenario == "new_teacher_not_found":
+        if error_scenario == "instructor_not_found" or error_scenario == "new_teacher_not_found":
             mock_user_service.get_user.side_effect = side_effect
         else:
             mock_user_service.get_user.side_effect = [mock_instructor, mock_teacher]
@@ -269,7 +267,7 @@ class TestTeachersRouter:
             patch("src.routers.teachers.TeacherPolicy.assert_instructor_access") as mock_assert_instructor,
             patch("src.routers.teachers.TeacherPolicy.assert_not_teacher") as mock_assert_not_teacher,
             patch("src.routers.teachers.StudentPolicy.assert_not_student") as mock_assert_not_student,
-            patch("src.routers.teachers.ParentPolicy.assert_not_parent") as mock_assert_not_parent
+            patch("src.routers.teachers.ParentPolicy.assert_not_parent") as mock_assert_not_parent,
         ):
             with pytest.raises(HTTPException) as exc_info:
                 if error_scenario == "instructor_role_required":
@@ -278,7 +276,7 @@ class TestTeachersRouter:
                     mock_assert_not_teacher.side_effect = side_effect
 
                 await invite_teacher(
-                    mock_course.course_id, mock_teacher.email, mock_db, "instructor@test.com"
+                    mock_course.course_id, mock_teacher.email, mock_db, "instructor@test.com",
                 )
 
             assert exc_info.value.status_code == expected_status
@@ -293,7 +291,7 @@ class TestTeachersRouter:
             ("instructor@test.com", False, 1),
             ("admin@test.com", True, 2),
         ],
-        ids=["as_instructor", "as_admin"]
+        ids=["as_instructor", "as_admin"],
     )
     async def test_remove_teacher_success(
         self,
@@ -309,12 +307,11 @@ class TestTeachersRouter:
         user_email,
         is_admin,
         expected_instructor_calls,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = user_email
         mock_instructor.isadmin = is_admin
 
         if is_admin:
-            # Для админа: сначала получаем админа, потом инcтруктора из курса
             mock_admin = MagicMock()
             mock_admin.isadmin = True
             mock_admin.email = user_email
@@ -329,18 +326,18 @@ class TestTeachersRouter:
             if not is_admin:
                 with patch("src.routers.teachers.TeacherPolicy.assert_instructor_access") as mock_assert_instructor:
                     result = await remove_teacher(
-                        mock_course.course_id, mock_teacher.email, mock_db, user_email
+                        mock_course.course_id, mock_teacher.email, mock_db, user_email,
                     )
                     mock_assert_instructor.assert_called_once_with(mock_instructor, mock_course, mock_db)
             else:
                 result = await remove_teacher(
-                    mock_course.course_id, mock_teacher.email, mock_db, user_email
+                    mock_course.course_id, mock_teacher.email, mock_db, user_email,
                 )
 
             mock_assert_teacher.assert_called_once_with(mock_teacher, mock_course, mock_db)
 
         assert result.success is True
-        assert mock_user_service.get_user.call_count == expected_instructor_calls + 1  # +1 для teacher
+        assert mock_user_service.get_user.call_count == expected_instructor_calls + 1
         mock_course_service.get_course.assert_called_once_with(mock_course.course_id)
         mock_teacher_service.remove_teacher.assert_called_once_with(mock_teacher, mock_course)
         mock_personalization_service.remove_course_participant.assert_called_once_with(mock_course, mock_teacher)
@@ -360,8 +357,8 @@ class TestTeachersRouter:
             "teacher_not_found",
             "course_not_found",
             "instructor_role_required",
-            "teacher_role_required"
-        ]
+            "teacher_role_required",
+        ],
     )
     async def test_remove_teacher_errors(
         self,
@@ -378,13 +375,11 @@ class TestTeachersRouter:
         side_effect,
         expected_status,
         should_check_policies,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "instructor@test.com"
         mock_instructor.isadmin = False
 
-        if error_scenario == "instructor_not_found":
-            mock_user_service.get_user.side_effect = side_effect
-        elif error_scenario == "teacher_not_found":
+        if error_scenario == "instructor_not_found" or error_scenario == "teacher_not_found":
             mock_user_service.get_user.side_effect = side_effect
         else:
             mock_user_service.get_user.side_effect = [mock_instructor, mock_teacher]
@@ -396,7 +391,7 @@ class TestTeachersRouter:
 
         with (
             patch("src.routers.teachers.TeacherPolicy.assert_instructor_access") as mock_assert_instructor,
-            patch("src.routers.teachers.TeacherPolicy.assert_teacher_access") as mock_assert_teacher
+            patch("src.routers.teachers.TeacherPolicy.assert_teacher_access") as mock_assert_teacher,
         ):
             with pytest.raises(HTTPException) as exc_info:
                 if error_scenario == "instructor_role_required":
@@ -405,7 +400,7 @@ class TestTeachersRouter:
                     mock_assert_teacher.side_effect = side_effect
 
                 await remove_teacher(
-                    mock_course.course_id, mock_teacher.email, mock_db, "instructor@test.com"
+                    mock_course.course_id, mock_teacher.email, mock_db, "instructor@test.com",
                 )
 
             assert exc_info.value.status_code == expected_status
@@ -424,7 +419,7 @@ class TestTeachersRouter:
         mock_instructor,
         mock_teacher,
         mock_course,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "instructor@test.com"
         mock_instructor.isadmin = False
 
@@ -433,10 +428,10 @@ class TestTeachersRouter:
 
         with (
             patch("src.routers.teachers.TeacherPolicy.assert_instructor_access") as mock_assert_instructor,
-            patch("src.routers.teachers.TeacherPolicy.assert_teacher_access") as mock_assert_teacher
+            patch("src.routers.teachers.TeacherPolicy.assert_teacher_access") as mock_assert_teacher,
         ):
             result = await change_course_instructor(
-                mock_course.course_id, mock_teacher.email, mock_db, "instructor@test.com"
+                mock_course.course_id, mock_teacher.email, mock_db, "instructor@test.com",
             )
 
         assert result.success is True
@@ -462,8 +457,8 @@ class TestTeachersRouter:
             "new_instructor_not_found",
             "course_not_found",
             "instructor_role_required",
-            "teacher_role_required"
-        ]
+            "teacher_role_required",
+        ],
     )
     async def test_change_course_instructor_errors(
         self,
@@ -479,13 +474,11 @@ class TestTeachersRouter:
         side_effect,
         expected_status,
         should_check_policies,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "instructor@test.com"
         mock_instructor.isadmin = False
 
-        if error_scenario == "instructor_not_found":
-            mock_user_service.get_user.side_effect = side_effect
-        elif error_scenario == "new_instructor_not_found":
+        if error_scenario == "instructor_not_found" or error_scenario == "new_instructor_not_found":
             mock_user_service.get_user.side_effect = side_effect
         else:
             mock_user_service.get_user.side_effect = [mock_instructor, mock_teacher]
@@ -497,7 +490,7 @@ class TestTeachersRouter:
 
         with (
             patch("src.routers.teachers.TeacherPolicy.assert_instructor_access") as mock_assert_instructor,
-            patch("src.routers.teachers.TeacherPolicy.assert_teacher_access") as mock_assert_teacher
+            patch("src.routers.teachers.TeacherPolicy.assert_teacher_access") as mock_assert_teacher,
         ):
             with pytest.raises(HTTPException) as exc_info:
                 if error_scenario == "instructor_role_required":
@@ -506,7 +499,7 @@ class TestTeachersRouter:
                     mock_assert_teacher.side_effect = side_effect
 
                 await change_course_instructor(
-                    mock_course.course_id, mock_teacher.email, mock_db, "instructor@test.com"
+                    mock_course.course_id, mock_teacher.email, mock_db, "instructor@test.com",
                 )
 
             assert exc_info.value.status_code == expected_status

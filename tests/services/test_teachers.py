@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from sqlalchemy.orm import Session
 
 from src.repo import Course, Teaches, User
@@ -9,33 +10,33 @@ from src.services import TeacherService
 class TestTeacherService:
 
     @pytest.fixture
-    def mock_db(self):
+    def mock_db(self) -> MagicMock:
         return MagicMock(spec=Session)
 
     @pytest.fixture
-    def service(self, mock_db):
+    def service(self, mock_db) -> TeacherService:
         return TeacherService(mock_db)
 
     @pytest.fixture
-    def mock_course(self):
+    def mock_course(self) -> MagicMock:
         course = MagicMock(spec=Course)
         course.course_id = 1
         return course
 
     @pytest.fixture
-    def mock_teacher(self):
+    def mock_teacher(self) -> MagicMock:
         teacher = MagicMock(spec=User)
         teacher.email = "teacher@test.com"
         return teacher
 
     @pytest.mark.parametrize(
-        "existing_teachers, expected_count",
+        ("existing_teachers", "expected_count"),
         [
             ([MagicMock(spec=User), MagicMock(spec=User)], 2),
             ([], 0),
-        ]
+        ],
     )
-    def test_get_course_teachers(self, service, mock_db, mock_course, existing_teachers, expected_count):
+    def test_get_course_teachers(self, service, mock_db, mock_course, existing_teachers, expected_count) -> None:
         mock_query = mock_db.query.return_value
         mock_join = mock_query.join.return_value
         mock_filter = mock_join.filter.return_value
@@ -51,7 +52,7 @@ class TestTeacherService:
             mock_filter.order_by.assert_called_once()
 
     @patch.object(TeacherService.logger, "info")
-    def test_change_course_instructor(self, mock_logger, service, mock_db):
+    def test_change_course_instructor(self, mock_logger, service, mock_db) -> None:
         old_instructor = MagicMock(spec=User)
         old_instructor.email = "old@test.com"
         new_teacher = MagicMock(spec=User)
@@ -74,7 +75,7 @@ class TestTeacherService:
         assert mock_logger.call_count == 3
 
     @patch.object(TeacherService.logger, "info")
-    def test_change_course_instructor_same_person(self, mock_logger, service, mock_db):
+    def test_change_course_instructor_same_person(self, mock_logger, service, mock_db) -> None:
         old_instructor = MagicMock(spec=User)
         old_instructor.email = "same@test.com"
         new_teacher = MagicMock(spec=User)

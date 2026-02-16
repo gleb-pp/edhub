@@ -1,19 +1,19 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from fastapi import HTTPException
 
 from src.exceptions import admins as admin_errors
 from src.exceptions import courses as course_errors
 from src.exceptions import users as user_errors
-from src.models.common import Success
 from src.routers.users import (
-    get_user_info,
-    get_my_role,
-    create_user,
-    login,
     change_password,
+    create_user,
     get_my_instructor_courses,
-    remove_user
+    get_my_role,
+    get_user_info,
+    login,
+    remove_user,
 )
 
 pytestmark = pytest.mark.asyncio
@@ -69,7 +69,7 @@ class TestUsersRouter:
         mock_db,
         mock_user_service,
         mock_user,
-    ):
+    ) -> None:
         mock_user_service.get_user.return_value = mock_user
 
         with patch("src.routers.users.User.model_validate") as mock_validate:
@@ -85,7 +85,7 @@ class TestUsersRouter:
         self,
         mock_db,
         mock_user_service,
-    ):
+    ) -> None:
         mock_user_service.get_user.side_effect = user_errors.UserNotFoundError("user@test.com")
 
         with pytest.raises(HTTPException) as exc_info:
@@ -102,7 +102,7 @@ class TestUsersRouter:
             ((False, False, False, True), "parent"),
             ((False, False, False, False), "none"),
         ],
-        ids=["instructor", "teacher", "student", "parent", "none"]
+        ids=["instructor", "teacher", "student", "parent", "none"],
     )
     async def test_get_my_role_success(
         self,
@@ -114,7 +114,7 @@ class TestUsersRouter:
         mock_course,
         role_checks,
         expected_role,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = mock_user.email
         mock_user.isadmin = False
         mock_user_service.get_user.return_value = mock_user
@@ -126,7 +126,7 @@ class TestUsersRouter:
             patch("src.routers.users.TeacherPolicy.check_instructor_access", return_value=instructor_check),
             patch("src.routers.users.TeacherPolicy.check_teacher_access", return_value=teacher_check),
             patch("src.routers.users.StudentPolicy.check_student_access", return_value=student_check),
-            patch("src.routers.users.ParentPolicy.check_parent_access", return_value=parent_check)
+            patch("src.routers.users.ParentPolicy.check_parent_access", return_value=parent_check),
         ):
             result = await get_my_role(mock_course.course_id, mock_db, mock_user.email)
 
@@ -144,7 +144,7 @@ class TestUsersRouter:
             ("user_not_found", user_errors.UserNotFoundError("user@test.com"), 401),
             ("course_not_found", course_errors.CourseNotFoundError("course-123"), 400),
         ],
-        ids=["user_not_found", "course_not_found"]
+        ids=["user_not_found", "course_not_found"],
     )
     async def test_get_my_role_errors(
         self,
@@ -157,7 +157,7 @@ class TestUsersRouter:
         error_scenario,
         side_effect,
         expected_status,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
 
         if error_scenario == "user_not_found":
@@ -176,7 +176,7 @@ class TestUsersRouter:
         mock_db,
         mock_user_service,
         mock_user,
-    ):
+    ) -> None:
         mock_user_service.create_user.return_value = mock_user
         mock_user_service.get_access_token.return_value = "jwt_token"
 
@@ -195,7 +195,7 @@ class TestUsersRouter:
             ("validation_error", user_errors.EmailFormatError(), 422),
             ("user_exists", user_errors.UserExistsError("user@test.com"), 409),
         ],
-        ids=["validation_error", "user_exists"]
+        ids=["validation_error", "user_exists"],
     )
     async def test_create_user_errors(
         self,
@@ -204,7 +204,7 @@ class TestUsersRouter:
         error_scenario,
         side_effect,
         expected_status,
-    ):
+    ) -> None:
         if error_scenario == "validation_error":
             mock_user_service.validate_user_email.side_effect = side_effect
         else:
@@ -223,7 +223,7 @@ class TestUsersRouter:
         mock_db,
         mock_user_service,
         mock_user,
-    ):
+    ) -> None:
         mock_user_service.get_user.return_value = mock_user
         mock_user_service.get_access_token.return_value = "jwt_token"
 
@@ -240,7 +240,7 @@ class TestUsersRouter:
             ("user_not_found", user_errors.UserNotFoundError("user@test.com")),
             ("invalid_password", user_errors.InvalidPasswordError()),
         ],
-        ids=["user_not_found", "invalid_password"]
+        ids=["user_not_found", "invalid_password"],
     )
     async def test_login_errors(
         self,
@@ -249,7 +249,7 @@ class TestUsersRouter:
         mock_user,
         error_scenario,
         side_effect,
-    ):
+    ) -> None:
         if error_scenario == "user_not_found":
             mock_user_service.get_user.side_effect = side_effect
         else:
@@ -266,7 +266,7 @@ class TestUsersRouter:
         mock_db,
         mock_user_service,
         mock_user,
-    ):
+    ) -> None:
         mock_user_service.get_user.return_value = mock_user
 
         result = await change_password(mock_user.email, "old_pass", "new_pass123!@#", mock_db)
@@ -284,7 +284,7 @@ class TestUsersRouter:
             ("user_not_found", user_errors.UserNotFoundError("user@test.com"), 401),
             ("weak_password", user_errors.WeakPasswordError(), 422),
         ],
-        ids=["user_not_found", "weak_password"]
+        ids=["user_not_found", "weak_password"],
     )
     async def test_change_password_errors(
         self,
@@ -294,7 +294,7 @@ class TestUsersRouter:
         error_scenario,
         side_effect,
         expected_status,
-    ):
+    ) -> None:
         if error_scenario == "user_not_found":
             mock_user_service.get_user.side_effect = side_effect
         else:
@@ -313,7 +313,7 @@ class TestUsersRouter:
         mock_user_service,
         mock_get_current_user,
         mock_user,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = mock_user.email
         mock_user_service.get_user.return_value = mock_user
 
@@ -334,7 +334,7 @@ class TestUsersRouter:
         mock_db,
         mock_user_service,
         mock_get_current_user,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
         mock_user_service.get_user.side_effect = user_errors.UserNotFoundError("user@test.com")
 
@@ -349,7 +349,7 @@ class TestUsersRouter:
         mock_user_service,
         mock_get_current_user,
         mock_user,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = mock_user.email
         mock_user_service.get_user.return_value = mock_user
 
@@ -366,7 +366,7 @@ class TestUsersRouter:
             ("user_not_found", user_errors.UserNotFoundError("user@test.com"), 401),
             ("last_admin", admin_errors.DeleteLastAdminError(), 403),
         ],
-        ids=["user_not_found", "last_admin"]
+        ids=["user_not_found", "last_admin"],
     )
     async def test_remove_user_errors(
         self,
@@ -377,7 +377,7 @@ class TestUsersRouter:
         error_scenario,
         side_effect,
         expected_status,
-    ):
+    ) -> None:
         mock_get_current_user.return_value = "user@test.com"
 
         if error_scenario == "user_not_found":
