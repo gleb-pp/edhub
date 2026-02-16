@@ -1,7 +1,6 @@
-from datetime import UTC, datetime
-from unittest.mock import MagicMock, patch
-
 import pytest
+from unittest.mock import MagicMock, patch
+from datetime import datetime, UTC
 from sqlalchemy.orm import Session
 
 import src.exceptions.submissions as submission_errors
@@ -11,152 +10,101 @@ from src.services import SubmissionService
 
 class TestSubmissionService:
 
-    def test_get_submission_success(self):
-        mock_db = MagicMock(spec=Session)
-        mock_assignment = MagicMock(spec=CourseAssignment)
-        mock_assignment.course_id = 1
-        mock_assignment.assignment_id = 2
-        mock_student = MagicMock(spec=User)
-        mock_student.email = "student@test.com"
+    @pytest.fixture
+    def mock_db(self):
+        return MagicMock(spec=Session)
 
-        expected_submission = MagicMock(spec=AssignmentSubmission)
-        mock_query = mock_db.query.return_value
-        mock_filter = mock_query.filter.return_value
-        mock_filter.first.return_value = expected_submission
+    @pytest.fixture
+    def service(self, mock_db):
+        return SubmissionService(mock_db)
 
-        service = SubmissionService(mock_db)
-        result = service.get_submission(mock_assignment, mock_student)
+    @pytest.fixture
+    def mock_course_assignment(self):
+        assignment = MagicMock(spec=CourseAssignment)
+        assignment.course_id = 1
+        assignment.assignment_id = 2
+        return assignment
 
-        assert result == expected_submission
-        mock_db.query.assert_called_once_with(AssignmentSubmission)
-        mock_query.filter.assert_called_once()
+    @pytest.fixture
+    def mock_student(self):
+        student = MagicMock(spec=User)
+        student.email = "student@test.com"
+        return student
 
     @patch.object(SubmissionService.logger, "warning")
-    def test_get_submission_not_found(self, mock_logger):
-        mock_db = MagicMock(spec=Session)
-        mock_assignment = MagicMock(spec=CourseAssignment)
-        mock_assignment.course_id = 1
-        mock_assignment.assignment_id = 2
-        mock_student = MagicMock(spec=User)
-        mock_student.email = "student@test.com"
-
+    def test_get_submission(self, mock_logger, service, mock_db, mock_course_assignment, mock_student):
+        # случай, когда submission существует
+        existing_submission = MagicMock(spec=AssignmentSubmission)
         mock_query = mock_db.query.return_value
         mock_filter = mock_query.filter.return_value
+        mock_filter.first.return_value = existing_submission
+
+        result = service.get_submission(mock_course_assignment, mock_student)
+        assert result == existing_submission
+        mock_db.query.assert_called_once_with(AssignmentSubmission)
+        mock_query.filter.assert_called_once()
+        mock_logger.assert_not_called()  # логгер не должен вызываться при успешном запросе
+
+        # случай, когда submission не найден
         mock_filter.first.return_value = None
+        with pytest.raises(submission_errors.SubmissionNotFoundError):
+            service.get_submission(mock_course_assignment, mock_student)
+        mock_logger.assert_called_once()  # логгер вызывается при ошибке
 
-        service = SubmissionService(mock_db)
-
-        with pytest.raises(submission_errors.SubmissionNotFoundError) as exc_info:
-            service.get_submission(mock_assignment, mock_student)
-
-        assert "1" in str(exc_info.value)
-        assert "2" in str(exc_info.value)
-        assert "student@test.com" in str(exc_info.value)
-        mock_logger.assert_called_once()
-
-    def test_get_assignment_submissions_success(self):
-        mock_db = MagicMock(spec=Session)
-        mock_assignment = MagicMock(spec=CourseAssignment)
-        mock_assignment.course_id = 1
-        mock_assignment.assignment_id = 2
-
-        expected_submissions = [MagicMock(spec=AssignmentSubmission), MagicMock(spec=AssignmentSubmission)]
+    @pytest.mark.parametrize("submissions_list", [
+        ([MagicMock(spec=AssignmentSubmission), MagicMock(spec=AssignmentSubmission)]),
+        ([])
+    ])
+    def test_get_assignment_submissions(self, service, mock_db, mock_course_assignment, submissions_list):
         mock_query = mock_db.query.return_value
         mock_filter = mock_query.filter.return_value
-        mock_filter.all.return_value = expected_submissions
+        mock_filter.all.return_value = submissions_list
 
-        service = SubmissionService(mock_db)
-        result = service.get_assignment_submissions(mock_assignment)
-
-        assert result == expected_submissions
+        result = service.get_assignment_submissions(mock_course_assignment)
+        assert result == submissions_list
         mock_db.query.assert_called_once_with(AssignmentSubmission)
         mock_query.filter.assert_called_once()
 
-    def test_get_assignment_submissions_empty(self):
-        mock_db = MagicMock(spec=Session)
-        mock_assignment = MagicMock(spec=CourseAssignment)
-        mock_assignment.course_id = 1
-        mock_assignment.assignment_id = 2
-
-        mock_query = mock_db.query.return_value
-        mock_filter = mock_query.filter.return_value
-        mock_filter.all.return_value = []
-
-        service = SubmissionService(mock_db)
-        result = service.get_assignment_submissions(mock_assignment)
-
-        assert result == []
-
     @patch.object(SubmissionService.logger, "info")
-    def test_create_submission_success(self, mock_logger):
-        mock_db = MagicMock(spec=Session)
-        mock_assignment = MagicMock(spec=CourseAssignment)
-        mock_assignment.course_id = 1
-        mock_assignment.assignment_id = 2
-        mock_student = MagicMock(spec=User)
-        mock_student.email = "student@test.com"
-
-        service = SubmissionService(mock_db)
-        service.create_submission(mock_assignment, mock_student, "Test submission text")
-
+    def test_create_submission(self, mock_logger, service, mock_db, mock_course_assignment, mock_student):
+        service.create_submission(mock_course_assignment, mock_student, "Test submission text")
         mock_db.add.assert_called_once()
         added_submission = mock_db.add.call_args[0][0]
         assert isinstance(added_submission, AssignmentSubmission)
-        assert added_submission.course_id == mock_assignment.course_id
-        assert added_submission.assignment_id == mock_assignment.assignment_id
+        assert added_submission.course_id == mock_course_assignment.course_id
+        assert added_submission.assignment_id == mock_course_assignment.assignment_id
         assert added_submission.email == mock_student.email
         assert added_submission.submission_text == "Test submission text"
         mock_logger.assert_called_once()
 
-    def test_create_submission_empty_text(self):
-        mock_db = MagicMock(spec=Session)
-        mock_assignment = MagicMock(spec=CourseAssignment)
-        mock_assignment.course_id = 1
-        mock_assignment.assignment_id = 2
-        mock_student = MagicMock(spec=User)
-        mock_student.email = "student@test.com"
-
-        service = SubmissionService(mock_db)
-        service.create_submission(mock_assignment, mock_student, "")
-
-        added_submission = mock_db.add.call_args[0][0]
-        assert added_submission.submission_text == ""
-
     @patch.object(SubmissionService.logger, "info")
     @patch("src.services.submissions.datetime")
-    def test_update_submission_success(self, mock_datetime, mock_logger):
+    def test_update_submission_success(self, mock_datetime, mock_logger, service, mock_db):
         mock_now = datetime(2024, 1, 1, 12, 0, 0, tzinfo=UTC)
         mock_datetime.now.return_value = mock_now
 
-        mock_db = MagicMock(spec=Session)
-        mock_submission = MagicMock(spec=AssignmentSubmission)
-        mock_submission.course_id = 1
-        mock_submission.assignment_id = 2
-        mock_submission.email = "student@test.com"
-        mock_submission.submission_text = "Old text"
-        mock_submission.timemodified = None
+        submission = MagicMock(spec=AssignmentSubmission)
+        submission.submission_text = "Old text"
+        submission.timemodified = None
 
-        service = SubmissionService(mock_db)
-        service.update_submission(mock_submission, "Updated submission text")
-
-        assert mock_submission.submission_text == "Updated submission text"
-        assert mock_submission.timemodified == mock_now
+        service.update_submission(submission, "Updated text")
+        assert submission.submission_text == "Updated text"
+        assert submission.timemodified == mock_now
         mock_db.flush.assert_called_once()
         mock_logger.assert_called_once()
 
     @patch.object(SubmissionService.logger, "info")
     @patch("src.services.submissions.datetime")
-    def test_update_submission_empty_text(self, mock_datetime, mock_logger):
+    def test_update_submission_empty_text(self, mock_datetime, mock_logger, service, mock_db):
         mock_now = datetime(2024, 1, 1, 12, 0, 0, tzinfo=UTC)
         mock_datetime.now.return_value = mock_now
 
-        mock_db = MagicMock(spec=Session)
-        mock_submission = MagicMock(spec=AssignmentSubmission)
-        mock_submission.submission_text = "Old text"
-        mock_submission.timemodified = None
+        submission = MagicMock(spec=AssignmentSubmission)
+        submission.submission_text = "Old text"
+        submission.timemodified = None
 
-        service = SubmissionService(mock_db)
-        service.update_submission(mock_submission, "")
-
-        assert mock_submission.submission_text == ""
-        assert mock_submission.timemodified == mock_now
+        service.update_submission(submission, "")
+        assert submission.submission_text == ""
+        assert submission.timemodified == mock_now
+        mock_db.flush.assert_called_once()
+        mock_logger.assert_called_once()

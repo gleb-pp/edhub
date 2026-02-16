@@ -62,9 +62,6 @@ class SectionService:
 
     def remove_section(self, section: CourseSection) -> None:
         """Delete the provided section from the course."""
-        self.logger.info(
-            f"Removing section {section.section_id} from course {section.course_id}",
-        )
         section_count = (
             self.db.query(func.count(CourseSection.section_id))
             .filter(CourseSection.course_id == section.course_id)
@@ -74,6 +71,9 @@ class SectionService:
             raise section_errors.LastSectionDeleteError(
                 section.section_id, section.course_id,
             )
+        self.logger.info(
+            f"Removing section {section.section_id} from course {section.course_id}",
+        )
         self.db.delete(section)
 
     def change_section_order(self, course: Course, new_order: list[int]) -> None:

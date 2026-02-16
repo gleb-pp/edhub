@@ -1,6 +1,5 @@
-from unittest.mock import MagicMock, patch
-
 import pytest
+from unittest.mock import MagicMock, patch
 from sqlalchemy.orm import Session
 
 from src.exceptions import courses as course_errors
@@ -10,147 +9,102 @@ from src.services import CourseService
 
 class TestCourseService:
 
-    def test_get_course_success(self):
-        mock_db = MagicMock(spec=Session)
-        mock_query = mock_db.query.return_value
-        expected_course = MagicMock(spec=Course)
-        mock_query.filter.return_value.first.return_value = expected_course
+    @pytest.fixture
+    def mock_db(self):
+        return MagicMock(spec=Session)
 
-        service = CourseService(mock_db)
-        result = service.get_course("course-123")
+    @pytest.fixture
+    def service(self, mock_db):
+        return CourseService(mock_db)
 
-        assert result == expected_course
-        mock_db.query.assert_called_once_with(Course)
-        mock_query.filter.assert_called_once()
+    @pytest.fixture
+    def mock_user(self):
+        user = MagicMock(spec=User)
+        user.email = "student@test.com"
+        return user
 
-    def test_get_course_not_found(self):
-        mock_db = MagicMock(spec=Session)
-        mock_query = mock_db.query.return_value
-        mock_query.filter.return_value.first.return_value = None
+    @pytest.mark.parametrize(
+        "db_result, should_raise",
+        [
+            (MagicMock(spec=Course), False),
+            (None, True),
+        ],
+    )
+    def test_get_course(self, service, mock_db, db_result, should_raise):
+        mock_db.query.return_value.filter.return_value.first.return_value = db_result
 
-        service = CourseService(mock_db)
+        if should_raise:
+            with pytest.raises(course_errors.CourseNotFoundError) as exc_info:
+                service.get_course("course-123")
+            assert "course-123" in str(exc_info.value)
+        else:
+            result = service.get_course("course-123")
+            assert result == db_result
+            mock_db.query.assert_called_once_with(Course)
 
-        with pytest.raises(course_errors.CourseNotFoundError) as exc_info:
-            service.get_course("non-existent")
+    @pytest.mark.parametrize(
+        "returned_value",
+        [
+            [MagicMock(spec=Course), MagicMock(spec=Course)],
+            [],
+        ],
+    )
+    def test_get_available_courses(self, service, mock_db, mock_user, returned_value):
+        mock_db.query.return_value.join.return_value.filter.return_value.order_by.return_value.all.return_value = returned_value
 
-        assert "non-existent" in str(exc_info.value)
-
-    def test_get_available_courses_success(self):
-        mock_db = MagicMock(spec=Session)
-        mock_user = MagicMock(spec=User)
-        mock_user.email = "student@test.com"
-
-        mock_query = mock_db.query.return_value
-        expected_courses = [MagicMock(spec=Course), MagicMock(spec=Course)]
-        mock_query.join.return_value.filter.return_value.order_by.return_value.all.return_value = expected_courses
-
-        service = CourseService(mock_db)
         result = service.get_available_courses(mock_user)
 
-        assert result == expected_courses
-        mock_db.query.assert_called_once_with(Course)
-        mock_query.join.assert_called_once()
-        mock_query.join.return_value.filter.assert_called_once()
-
-    def test_get_available_courses_empty(self):
-        mock_db = MagicMock(spec=Session)
-        mock_user = MagicMock(spec=User)
-        mock_user.email = "student@test.com"
-
-        mock_query = mock_db.query.return_value
-        mock_query.join.return_value.filter.return_value.order_by.return_value.all.return_value = []
-
-        service = CourseService(mock_db)
-        result = service.get_available_courses(mock_user)
-
-        assert result == []
-
-    def test_get_all_courses_success(self):
-        mock_db = MagicMock(spec=Session)
-        expected_courses = [MagicMock(spec=Course), MagicMock(spec=Course)]
-        mock_db.query.return_value.all.return_value = expected_courses
-
-        service = CourseService(mock_db)
-        result = service.get_all_courses()
-
-        assert result == expected_courses
+        assert result == returned_value
         mock_db.query.assert_called_once_with(Course)
 
-    def test_get_all_courses_empty(self):
-        mock_db = MagicMock(spec=Session)
-        mock_db.query.return_value.all.return_value = []
+    @pytest.mark.parametrize(
+        "returned_value",
+        [
+            [MagicMock(spec=Course), MagicMock(spec=Course)],
+            [],
+        ],
+    )
+    def test_get_all_courses(self, service, mock_db, returned_value):
+        mock_db.query.return_value.all.return_value = returned_value
 
-        service = CourseService(mock_db)
         result = service.get_all_courses()
 
-        assert result == []
+        assert result == returned_value
+        mock_db.query.assert_called_once_with(Course)
 
+    @pytest.mark.parametrize(
+        "organization",
+        [
+            "Test Org",
+            None,
+            "",
+        ],
+    )
     @patch.object(CourseService.logger, "info")
-    def test_create_course_with_organization(self, mock_logger):
-        mock_db = MagicMock(spec=Session)
+    def test_create_course(self, mock_logger, service, mock_db, organization):
         mock_user = MagicMock(spec=User)
         mock_user.email = "instructor@test.com"
 
-        service = CourseService(mock_db)
-        result = service.create_course("Test Course", "Test Org", mock_user)
+        result = service.create_course("Test Course", organization, mock_user)
 
         assert isinstance(result, Course)
         assert result.title == "Test Course"
-        assert result.organization == "Test Org"
+        assert result.organization == organization
         assert result.instructor == mock_user.email
 
         mock_db.add.assert_called_once()
         mock_db.flush.assert_called_once()
         mock_logger.assert_called_once()
 
-    @patch.object(CourseService.logger, "info")
-    def test_create_course_without_organization(self, mock_logger):
-        mock_db = MagicMock(spec=Session)
+    def test_create_course_empty_title(self, service):
         mock_user = MagicMock(spec=User)
-        mock_user.email = "instructor@test.com"
-
-        service = CourseService(mock_db)
-        result = service.create_course("Test Course", None, mock_user)
-
-        assert isinstance(result, Course)
-        assert result.title == "Test Course"
-        assert result.organization is None
-        assert result.instructor == mock_user.email
-
-        mock_db.add.assert_called_once()
-        mock_db.flush.assert_called_once()
-        mock_logger.assert_called_once()
-
-    @patch.object(CourseService.logger, "info")
-    def test_create_course_empty_organization_string(self, mock_logger):
-        mock_db = MagicMock(spec=Session)
-        mock_user = MagicMock(spec=User)
-        mock_user.email = "instructor@test.com"
-
-        service = CourseService(mock_db)
-        result = service.create_course("Test Course", "", mock_user)
-
-        assert isinstance(result, Course)
-        assert result.title == "Test Course"
-        assert result.organization == ""
-        assert result.instructor == mock_user.email
-
-    def test_create_course_empty_title(self):
-        mock_db = MagicMock(spec=Session)
-        mock_user = MagicMock(spec=User)
-
-        service = CourseService(mock_db)
         result = service.create_course("", None, mock_user)
-
         assert result.title == ""
 
     @patch.object(CourseService.logger, "info")
-    def test_delete_course_success(self, mock_logger):
-        mock_db = MagicMock(spec=Session)
+    def test_delete_course(self, mock_logger, service, mock_db):
         mock_course = MagicMock(spec=Course)
-        mock_course.course_id = 1
 
-        service = CourseService(mock_db)
         service.delete_course(mock_course)
 
         mock_db.delete.assert_called_once_with(mock_course)

@@ -1,5 +1,5 @@
+import pytest
 from unittest.mock import MagicMock, patch
-
 from sqlalchemy.orm import Session
 
 from src.repo import Course, ParentAt, User
@@ -8,17 +8,34 @@ from src.services import ParentService
 
 class TestParentService:
 
-    @patch.object(ParentService.logger, "info")
-    def test_invite_parent_success(self, mock_logger):
-        mock_db = MagicMock(spec=Session)
-        mock_parent = MagicMock(spec=User)
-        mock_parent.email = "parent@test.com"
-        mock_student = MagicMock(spec=User)
-        mock_student.email = "student@test.com"
-        mock_course = MagicMock(spec=Course)
-        mock_course.course_id = 1
+    @pytest.fixture
+    def mock_db(self):
+        return MagicMock(spec=Session)
 
-        service = ParentService(mock_db)
+    @pytest.fixture
+    def service(self, mock_db):
+        return ParentService(mock_db)
+
+    @pytest.fixture
+    def mock_parent(self):
+        parent = MagicMock(spec=User)
+        parent.email = "parent@test.com"
+        return parent
+
+    @pytest.fixture
+    def mock_student(self):
+        student = MagicMock(spec=User)
+        student.email = "student@test.com"
+        return student
+
+    @pytest.fixture
+    def mock_course(self):
+        course = MagicMock(spec=Course)
+        course.course_id = 1
+        return course
+
+    @patch.object(ParentService.logger, "info")
+    def test_invite_parent(self, mock_logger, service, mock_db, mock_parent, mock_student, mock_course):
         service.invite_parent(mock_parent, mock_student, mock_course)
 
         mock_db.add.assert_called_once()
@@ -29,164 +46,104 @@ class TestParentService:
         assert added_parent_at.course_id == mock_course.course_id
         mock_logger.assert_called_once()
 
+    @pytest.mark.parametrize(
+        "existing, should_delete",
+        [
+            (MagicMock(spec=ParentAt), True),
+            (None, False),
+        ],
+    )
     @patch.object(ParentService.logger, "info")
-    def test_remove_parent_student_success(self, mock_logger):
-        mock_db = MagicMock(spec=Session)
-        mock_parent = MagicMock(spec=User)
-        mock_parent.email = "parent@test.com"
-        mock_student = MagicMock(spec=User)
-        mock_student.email = "student@test.com"
-        mock_course = MagicMock(spec=Course)
-        mock_course.course_id = 1
-
-        mock_parent_at = MagicMock(spec=ParentAt)
+    def test_remove_parent_student(
+        self,
+        mock_logger,
+        service,
+        mock_db,
+        mock_parent,
+        mock_student,
+        mock_course,
+        existing,
+        should_delete,
+    ):
         mock_query = mock_db.query.return_value
-        mock_filter = mock_query.filter.return_value
-        mock_filter.first.return_value = mock_parent_at
-
-        service = ParentService(mock_db)
-        service.remove_parent_student(mock_parent, mock_student, mock_course)
-
-        mock_db.query.assert_called_once_with(ParentAt)
-        mock_query.filter.assert_called_once()
-        mock_db.delete.assert_called_once_with(mock_parent_at)
-        mock_db.flush.assert_called_once()
-        mock_logger.assert_called_once()
-
-    @patch.object(ParentService.logger, "info")
-    def test_remove_parent_student_not_found_does_nothing(self, mock_logger):
-        mock_db = MagicMock(spec=Session)
-        mock_parent = MagicMock(spec=User)
-        mock_parent.email = "parent@test.com"
-        mock_student = MagicMock(spec=User)
-        mock_student.email = "student@test.com"
-        mock_course = MagicMock(spec=Course)
-        mock_course.course_id = 1
-
-        mock_query = mock_db.query.return_value
-        mock_filter = mock_query.filter.return_value
-        mock_filter.first.return_value = None
-
-        service = ParentService(mock_db)
+        mock_query.filter.return_value.first.return_value = existing
 
         service.remove_parent_student(mock_parent, mock_student, mock_course)
 
         mock_db.query.assert_called_once_with(ParentAt)
         mock_query.filter.assert_called_once()
-        mock_db.delete.assert_not_called()
-        mock_db.flush.assert_not_called()
+        
+        if should_delete:
+            mock_db.delete.assert_called_once_with(existing)
+            mock_db.flush.assert_called_once()
+            mock_logger.assert_called_once()
+        else:
+            mock_db.delete.assert_not_called()
+            mock_db.flush.assert_not_called()
+            mock_logger.assert_not_called()
 
+    @pytest.mark.parametrize(
+        "existing, should_delete",
+        [
+            (MagicMock(spec=ParentAt), True),
+            (None, False),
+        ],
+    )
     @patch.object(ParentService.logger, "info")
-    def test_remove_parent_success(self, mock_logger):
-        mock_db = MagicMock(spec=Session)
-        mock_parent = MagicMock(spec=User)
-        mock_parent.email = "parent@test.com"
-        mock_course = MagicMock(spec=Course)
-        mock_course.course_id = 1
-
-        mock_parent_at = MagicMock(spec=ParentAt)
+    def test_remove_parent(
+        self,
+        mock_logger,
+        service,
+        mock_db,
+        mock_parent,
+        mock_course,
+        existing,
+        should_delete,
+    ):
         mock_query = mock_db.query.return_value
-        mock_filter = mock_query.filter.return_value
-        mock_filter.first.return_value = mock_parent_at
-
-        service = ParentService(mock_db)
-        service.remove_parent(mock_parent, mock_course)
-
-        mock_db.query.assert_called_once_with(ParentAt)
-        mock_query.filter.assert_called_once()
-        mock_db.delete.assert_called_once_with(mock_parent_at)
-        mock_logger.assert_called_once()
-
-    @patch.object(ParentService.logger, "info")
-    def test_remove_parent_not_found_does_nothing(self, mock_logger):
-        mock_db = MagicMock(spec=Session)
-        mock_parent = MagicMock(spec=User)
-        mock_parent.email = "parent@test.com"
-        mock_course = MagicMock(spec=Course)
-        mock_course.course_id = 1
-
-        mock_query = mock_db.query.return_value
-        mock_filter = mock_query.filter.return_value
-        mock_filter.first.return_value = None
-
-        service = ParentService(mock_db)
+        mock_query.filter.return_value.first.return_value = existing
 
         service.remove_parent(mock_parent, mock_course)
 
         mock_db.query.assert_called_once_with(ParentAt)
         mock_query.filter.assert_called_once()
-        mock_db.delete.assert_not_called()
+        if should_delete:
+            mock_db.delete.assert_called_once_with(existing)
+            mock_db.flush.assert_called_once()
+            mock_logger.assert_called_once()
+        else:
+            mock_db.delete.assert_not_called()
+            mock_db.flush.assert_not_called()
+            mock_logger.assert_not_called()
 
-    def test_get_students_parents_success(self):
-        mock_db = MagicMock(spec=Session)
-        mock_student = MagicMock(spec=User)
-        mock_student.email = "student@test.com"
-        mock_course = MagicMock(spec=Course)
-        mock_course.course_id = 1
-
-        expected_parents = [MagicMock(spec=User), MagicMock(spec=User)]
+    @pytest.mark.parametrize(
+        "returned_value, method_name",
+        [
+            ([MagicMock(spec=User), MagicMock(spec=User)], "get_students_parents"),
+            ([], "get_students_parents"),
+            ([MagicMock(spec=User), MagicMock(spec=User)], "get_parents_children"),
+            ([], "get_parents_children"),
+        ],
+    )
+    def test_relationship_queries(
+        self,
+        service,
+        mock_db,
+        mock_parent,
+        mock_student,
+        mock_course,
+        returned_value,
+        method_name,
+    ):
         mock_query = mock_db.query.return_value
         mock_join = mock_query.join.return_value
-        mock_filter = mock_join.filter.return_value
-        mock_filter.all.return_value = expected_parents
+        mock_join.filter.return_value.all.return_value = returned_value
 
-        service = ParentService(mock_db)
-        result = service.get_students_parents(mock_student, mock_course)
+        if method_name == "get_students_parents":
+            result = service.get_students_parents(mock_student, mock_course)
+        else:
+            result = service.get_parents_children(mock_parent, mock_course)
 
-        assert result == expected_parents
+        assert result == returned_value
         mock_db.query.assert_called_once_with(User)
         mock_query.join.assert_called_once()
-
-    def test_get_students_parents_empty(self):
-        mock_db = MagicMock(spec=Session)
-        mock_student = MagicMock(spec=User)
-        mock_student.email = "student@test.com"
-        mock_course = MagicMock(spec=Course)
-        mock_course.course_id = 1
-
-        mock_query = mock_db.query.return_value
-        mock_join = mock_query.join.return_value
-        mock_filter = mock_join.filter.return_value
-        mock_filter.all.return_value = []
-
-        service = ParentService(mock_db)
-        result = service.get_students_parents(mock_student, mock_course)
-
-        assert result == []
-
-    def test_get_parents_children_success(self):
-        mock_db = MagicMock(spec=Session)
-        mock_parent = MagicMock(spec=User)
-        mock_parent.email = "parent@test.com"
-        mock_course = MagicMock(spec=Course)
-        mock_course.course_id = 1
-
-        expected_children = [MagicMock(spec=User), MagicMock(spec=User)]
-        mock_query = mock_db.query.return_value
-        mock_join = mock_query.join.return_value
-        mock_filter = mock_join.filter.return_value
-        mock_filter.all.return_value = expected_children
-
-        service = ParentService(mock_db)
-        result = service.get_parents_children(mock_parent, mock_course)
-
-        assert result == expected_children
-        mock_db.query.assert_called_once_with(User)
-        mock_query.join.assert_called_once()
-
-    def test_get_parents_children_empty(self):
-        mock_db = MagicMock(spec=Session)
-        mock_parent = MagicMock(spec=User)
-        mock_parent.email = "parent@test.com"
-        mock_course = MagicMock(spec=Course)
-        mock_course.course_id = 1
-
-        mock_query = mock_db.query.return_value
-        mock_join = mock_query.join.return_value
-        mock_filter = mock_join.filter.return_value
-        mock_filter.all.return_value = []
-
-        service = ParentService(mock_db)
-        result = service.get_parents_children(mock_parent, mock_course)
-
-        assert result == []

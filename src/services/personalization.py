@@ -41,9 +41,6 @@ class PersonalizationService:
 
     def remove_course_participant(self, course: Course, user: User) -> None:
         """Remove the course personal info about the user when they leaves the course."""
-        self.logger.info(
-            f"Removing course participant {user.email} from course {course.course_id}",
-        )
         personal_info = (
             self.db.query(PersonalCourseInfo)
             .filter(
@@ -57,6 +54,9 @@ class PersonalizationService:
                 f"User {user.email} is not a participant in course {course.course_id}",
             )
             raise course_errors.ParticipantRoleRequiredError(user.email, course.course_id)
+        self.logger.info(
+            f"Removing course participant {user.email} from course {course.course_id}",
+        )
         self.db.delete(personal_info)
 
     def get_course_emoji(self, course: Course, user: User) -> int | None:

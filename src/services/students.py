@@ -40,9 +40,6 @@ class StudentService:
 
     def remove_student(self, student: User, course: Course) -> None:
         """Remove the provided student from the provided course."""
-        self.logger.info(
-            f"Removing student {student.email} from course {course.course_id}",
-        )
         student_at = (
             self.db.query(StudentAt)
             .filter(
@@ -52,5 +49,8 @@ class StudentService:
             .first()
         )
         if student_at:
+            self.logger.info(
+                f"Removing student {student.email} from course {course.course_id}",
+            )
             self.db.delete(student_at)
             self.db.flush()

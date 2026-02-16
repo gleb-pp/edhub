@@ -49,12 +49,11 @@ class TeacherService:
         self, instructor: User, teacher: User, course: Course,
     ) -> None:
         """Change the instructor to some teacher within the provided course."""
-        old_instructor_email = course.instructor
         course.instructor = teacher.email
         self.remove_teacher(teacher, course)
-        if old_instructor_email != teacher.email:
+        if instructor.email != teacher.email:
             self.invite_teacher(instructor, course)
         self.db.flush()
         self.logger.info(
-            f"Changed instructor of course {course.course_id} from {old_instructor_email} to {teacher.email}",
+            f"Changed instructor of course {course.course_id} from {instructor.email} to {teacher.email}",
         )
