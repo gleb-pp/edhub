@@ -1,131 +1,132 @@
 from unittest.mock import MagicMock
-
 import pytest
-
 from src.exceptions.teachers import (
     InstructorRoleRequiredError,
     TeacherRoleConflictError,
     TeacherRoleRequiredError,
 )
-from src.policies.teachers import TeacherPolicy
+from src.policies import TeacherPolicy
 from src.repo.courses import Course
 from src.repo.users import User
 
-
 class TestTeacherPolicy:
+    @pytest.fixture
+    def mock_db(self):
+        return MagicMock()
 
-    def test_assert_instructor_access_success(self):
-        mock_user = MagicMock(spec=User)
-        mock_user.email = "instructor@test.com"
-        mock_course = MagicMock(spec=Course)
-        mock_course.instructor = "instructor@test.com"
-        mock_db = MagicMock()
+    @pytest.fixture
+    def mock_instructor(self):
+        user = MagicMock(spec=User)
+        user.email = "instructor@test.com"
+        return user
 
-        TeacherPolicy.assert_instructor_access(mock_user, mock_course, mock_db)
+    @pytest.fixture
+    def mock_teacher(self):
+        user = MagicMock(spec=User)
+        user.email = "teacher@test.com"
+        return user
 
-    def test_assert_instructor_access_fail(self):
-        mock_user = MagicMock(spec=User)
-        mock_user.email = "user@test.com"
-        mock_course = MagicMock(spec=Course)
-        mock_course.instructor = "instructor@test.com"
-        mock_course.title = "Course Title"
-        mock_db = MagicMock()
+    @pytest.fixture
+    def mock_user(self):
+        user = MagicMock(spec=User)
+        user.email = "user@test.com"
+        return user
 
-        with pytest.raises(InstructorRoleRequiredError):
-            TeacherPolicy.assert_instructor_access(mock_user, mock_course, mock_db)
+    @pytest.fixture
+    def mock_course(self):
+        course = MagicMock(spec=Course)
+        course.instructor = "instructor@test.com"
+        course.course_id = 1
+        course.title = "Test Course"
+        return course
 
-    def test_assert_teacher_access_success_as_instructor(self):
-        mock_user = MagicMock(spec=User)
-        mock_user.email = "instructor@test.com"
-        mock_course = MagicMock(spec=Course)
-        mock_course.instructor = "instructor@test.com"
-        mock_db = MagicMock()
+    @pytest.mark.parametrize(
+        "method_name,user_fixture,teacher_exists,expected_exception",
+        [
+            ("assert_instructor_access", "mock_instructor", None, None),
+            ("assert_instructor_access", "mock_teacher", None, InstructorRoleRequiredError),
+            ("assert_instructor_access", "mock_user", None, InstructorRoleRequiredError),
+            ("assert_teacher_access", "mock_instructor", None, None),
+            ("assert_teacher_access", "mock_teacher", True, None),
+            ("assert_teacher_access", "mock_teacher", False, TeacherRoleRequiredError),
+            ("assert_teacher_access", "mock_user", False, TeacherRoleRequiredError),
+            ("assert_not_teacher", "mock_user", False, None),
+            ("assert_not_teacher", "mock_instructor", None, TeacherRoleConflictError),
+            ("assert_not_teacher", "mock_teacher", True, TeacherRoleConflictError),
+            ("assert_not_teacher", "mock_teacher", False, None),
+        ],
+        ids=[
+            "assert_instructor_success",
+            "assert_instructor_fail_teacher",
+            "assert_instructor_fail_user",
+            "assert_teacher_success_instructor",
+            "assert_teacher_success_teacher",
+            "assert_teacher_fail_teacher_not_found",
+            "assert_teacher_fail_user",
+            "assert_not_teacher_success_user",
+            "assert_not_teacher_conflict_instructor",
+            "assert_not_teacher_conflict_teacher",
+            "assert_not_teacher_success_teacher_not_found",
+        ]
+    )
+    def test_teacher_assertions(
+        self,
+        request,
+        mock_db,
+        mock_course,
+        method_name,
+        user_fixture,
+        teacher_exists,
+        expected_exception,
+    ):
+        user = request.getfixturevalue(user_fixture)
+        if teacher_exists is not None:
+            mock_db.query.return_value.scalar.return_value = teacher_exists
 
-        TeacherPolicy.assert_teacher_access(mock_user, mock_course, mock_db)
+        method = getattr(TeacherPolicy, method_name)
 
-    def test_assert_teacher_access_success_as_teacher(self):
-        mock_user = MagicMock(spec=User)
-        mock_user.email = "teacher@test.com"
-        mock_course = MagicMock(spec=Course)
-        mock_course.instructor = "instructor@test.com"
-        mock_db = MagicMock()
-        mock_db.query().scalar.return_value = True
+        if expected_exception:
+            with pytest.raises(expected_exception):
+                method(user, mock_course, mock_db)
+        else:
+            method(user, mock_course, mock_db)
 
-        TeacherPolicy.assert_teacher_access(mock_user, mock_course, mock_db)
+        if teacher_exists is not None and method_name in ["assert_teacher_access", "assert_not_teacher"]:
+            mock_db.query.assert_called_once()
+            mock_db.query.return_value.scalar.assert_called_once()
 
-    def test_assert_teacher_access_fail(self):
-        mock_user = MagicMock(spec=User)
-        mock_user.email = "user@test.com"
-        mock_course = MagicMock(spec=Course)
-        mock_course.instructor = "instructor@test.com"
-        mock_course.title = "Course Title"
-        mock_db = MagicMock()
-        mock_db.query().scalar.return_value = False
+    @pytest.mark.parametrize(
+        "user_fixture,teacher_exists,expected_result",
+        [
+            ("mock_instructor", None, True),
+            ("mock_teacher", True, True),
+            ("mock_teacher", False, False),
+            ("mock_user", False, False),
+        ],
+        ids=[
+            "instructor_true",
+            "teacher_exists_true",
+            "teacher_not_found_false",
+            "user_false",
+        ]
+    )
+    def test_check_teacher_access(
+        self,
+        request,
+        mock_db,
+        mock_course,
+        user_fixture,
+        teacher_exists,
+        expected_result,
+    ):
+        user = request.getfixturevalue(user_fixture)
+        if teacher_exists is not None:
+            mock_db.query.return_value.scalar.return_value = teacher_exists
 
-        with pytest.raises(TeacherRoleRequiredError):
-            TeacherPolicy.assert_teacher_access(mock_user, mock_course, mock_db)
+        result = TeacherPolicy.check_teacher_access(user, mock_course, mock_db)
 
-    def test_assert_not_teacher_success(self):
-        mock_user = MagicMock(spec=User)
-        mock_user.email = "user@test.com"
-        mock_course = MagicMock(spec=Course)
-        mock_course.instructor = "instructor@test.com"
-        mock_db = MagicMock()
-        mock_db.query().scalar.return_value = False
+        assert result is expected_result
 
-        TeacherPolicy.assert_not_teacher(mock_user, mock_course, mock_db)
-
-    def test_assert_not_teacher_conflict_as_instructor(self):
-        mock_user = MagicMock(spec=User)
-        mock_user.email = "instructor@test.com"
-        mock_course = MagicMock(spec=Course)
-        mock_course.instructor = "instructor@test.com"
-        mock_course.course_id = 1
-        mock_db = MagicMock()
-
-        with pytest.raises(TeacherRoleConflictError):
-            TeacherPolicy.assert_not_teacher(mock_user, mock_course, mock_db)
-
-    def test_assert_not_teacher_conflict_as_teacher(self):
-        mock_user = MagicMock(spec=User)
-        mock_user.email = "teacher@test.com"
-        mock_course = MagicMock(spec=Course)
-        mock_course.instructor = "instructor@test.com"
-        mock_course.course_id = 1
-        mock_db = MagicMock()
-        mock_db.query().scalar.return_value = True
-
-        with pytest.raises(TeacherRoleConflictError):
-            TeacherPolicy.assert_not_teacher(mock_user, mock_course, mock_db)
-
-    def test_check_teacher_access_instructor_true(self):
-        mock_user = MagicMock(spec=User)
-        mock_user.email = "instructor@test.com"
-        mock_course = MagicMock(spec=Course)
-        mock_course.instructor = "instructor@test.com"
-        mock_db = MagicMock()
-
-        result = TeacherPolicy.check_teacher_access(mock_user, mock_course, mock_db)
-        assert result is True
-
-    def test_check_teacher_access_teacher_true(self):
-        mock_user = MagicMock(spec=User)
-        mock_user.email = "teacher@test.com"
-        mock_course = MagicMock(spec=Course)
-        mock_course.instructor = "instructor@test.com"
-        mock_db = MagicMock()
-        mock_db.query().scalar.return_value = True
-
-        result = TeacherPolicy.check_teacher_access(mock_user, mock_course, mock_db)
-        assert result is True
-
-    def test_check_teacher_access_false(self):
-        mock_user = MagicMock(spec=User)
-        mock_user.email = "user@test.com"
-        mock_course = MagicMock(spec=Course)
-        mock_course.instructor = "instructor@test.com"
-        mock_db = MagicMock()
-        mock_db.query().scalar.return_value = False
-
-        result = TeacherPolicy.check_teacher_access(mock_user, mock_course, mock_db)
-        assert result is False
+        if teacher_exists is not None and user_fixture != "mock_instructor":
+            mock_db.query.assert_called_once()
+            mock_db.query.return_value.scalar.assert_called_once()
