@@ -44,11 +44,36 @@ class TestTeacherPolicy:
         return course
 
     @pytest.mark.parametrize(
+        "user_fixture,expected_exception",
+        [
+            ("mock_instructor", None),
+            ("mock_teacher", InstructorRoleRequiredError),
+            ("mock_user", InstructorRoleRequiredError),
+        ],
+        ids=[
+            "assert_instructor_success",
+            "assert_instructor_fail_teacher",
+            "assert_instructor_fail_user",
+        ],
+    )
+    def test_assert_instructor_access(
+        self,
+        request,
+        mock_course,
+        user_fixture,
+        expected_exception,
+    ) -> None:
+        user = request.getfixturevalue(user_fixture)
+
+        if expected_exception:
+            with pytest.raises(expected_exception):
+                TeacherPolicy.assert_instructor_access(user, mock_course)
+        else:
+            TeacherPolicy.assert_instructor_access(user, mock_course)
+
+    @pytest.mark.parametrize(
         "method_name,user_fixture,teacher_exists,expected_exception",
         [
-            ("assert_instructor_access", "mock_instructor", None, None),
-            ("assert_instructor_access", "mock_teacher", None, InstructorRoleRequiredError),
-            ("assert_instructor_access", "mock_user", None, InstructorRoleRequiredError),
             ("assert_teacher_access", "mock_instructor", None, None),
             ("assert_teacher_access", "mock_teacher", True, None),
             ("assert_teacher_access", "mock_teacher", False, TeacherRoleRequiredError),
@@ -59,9 +84,6 @@ class TestTeacherPolicy:
             ("assert_not_teacher", "mock_teacher", False, None),
         ],
         ids=[
-            "assert_instructor_success",
-            "assert_instructor_fail_teacher",
-            "assert_instructor_fail_user",
             "assert_teacher_success_instructor",
             "assert_teacher_success_teacher",
             "assert_teacher_fail_teacher_not_found",
@@ -72,7 +94,7 @@ class TestTeacherPolicy:
             "assert_not_teacher_success_teacher_not_found",
         ],
     )
-    def test_teacher_assertions(
+    def test_teacher_assertions_with_db(
         self,
         request,
         mock_db,
@@ -94,7 +116,7 @@ class TestTeacherPolicy:
         else:
             method(user, mock_course, mock_db)
 
-        if teacher_exists is not None and method_name in ["assert_teacher_access", "assert_not_teacher"]:
+        if teacher_exists is not None:
             mock_db.query.assert_called_once()
             mock_db.query.return_value.scalar.assert_called_once()
 

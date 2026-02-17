@@ -11,7 +11,7 @@ class TeacherPolicy:
     """Policy class for handling teacher-related assertions."""
 
     @staticmethod
-    def check_instructor_access(user: User, course: Course, db: Session) -> bool:
+    def check_instructor_access(user: User, course: Course) -> bool:
         """Check whether the provided user has an instructor role in the provided course."""
         return course.instructor == user.email
 
@@ -28,9 +28,9 @@ class TeacherPolicy:
         ).scalar()
 
     @staticmethod
-    def assert_instructor_access(user: User, course: Course, db: Session) -> None:
+    def assert_instructor_access(user: User, course: Course) -> None:
         """Assert that the provided user has an instructor role in the provided course."""
-        if not TeacherPolicy.check_instructor_access(user, course, db):
+        if not TeacherPolicy.check_instructor_access(user, course):
             raise teacher_errors.InstructorRoleRequiredError(user.email, course.title)
 
     @staticmethod

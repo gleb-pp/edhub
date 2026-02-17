@@ -4,6 +4,7 @@ import pytest
 from fastapi import HTTPException
 
 from src.exceptions import courses as course_errors
+from src.exceptions import parents as parent_errors
 from src.exceptions import students as student_errors
 from src.exceptions import teachers as teacher_errors
 from src.exceptions import users as user_errors
@@ -218,14 +219,14 @@ class TestStudentsRouter:
             ("student_not_found", [MagicMock(), user_errors.UserNotFoundError("student@test.com")], 404, True),
             ("course_not_found", course_errors.CourseNotFoundError("course-123"), 400, True),
             ("teacher_role_required", teacher_errors.TeacherRoleRequiredError("student@test.com", "course-123"), 403, True),
-            ("conflict", student_errors.StudentRoleConflictError("student@test.com", "course-123"), 409, True),
+            ("student_conflict", student_errors.StudentRoleConflictError("student@test.com", "course-123"), 409, True),
         ],
         ids=[
             "teacher_not_found",
             "student_not_found",
             "course_not_found",
             "teacher_role_required",
-            "conflict",
+            "student_conflict",
         ],
     )
     async def test_invite_student_errors(
@@ -247,7 +248,7 @@ class TestStudentsRouter:
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 
-        if error_scenario == "teacher_not_found" or error_scenario == "student_not_found":
+        if error_scenario in ("teacher_not_found", "student_not_found"):
             mock_user_service.get_user.side_effect = side_effect
         else:
             mock_user_service.get_user.side_effect = [mock_teacher, mock_student]
@@ -260,13 +261,11 @@ class TestStudentsRouter:
         with (
             patch("src.routers.students.TeacherPolicy.assert_teacher_access") as mock_assert_teacher,
             patch("src.routers.students.StudentPolicy.assert_not_student") as mock_assert_not_student,
-            patch("src.routers.students.TeacherPolicy.assert_not_teacher") as mock_assert_not_teacher,
-            patch("src.routers.students.ParentPolicy.assert_not_parent") as mock_assert_not_parent,
         ):
             with pytest.raises(HTTPException) as exc_info:
                 if error_scenario == "teacher_role_required":
                     mock_assert_teacher.side_effect = side_effect
-                elif error_scenario == "conflict":
+                elif error_scenario == "student_conflict":
                     mock_assert_not_student.side_effect = side_effect
 
                 await invite_student(
@@ -274,6 +273,75 @@ class TestStudentsRouter:
                 )
 
             assert exc_info.value.status_code == expected_status
+
+        mock_student_service.invite_student.assert_not_called()
+        mock_personalization_service.add_course_participant.assert_not_called()
+        mock_db.commit.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "error_scenario,side_effect,expected_status,policy_module,policy_name",
+        [
+            ("student_conflict", student_errors.StudentRoleConflictError("student@test.com", "course-123"), 409, "StudentPolicy", "assert_not_student"),
+            ("teacher_conflict", teacher_errors.TeacherRoleConflictError("teacher@test.com", "course-123"), 409, "TeacherPolicy", "assert_not_teacher"),
+            ("parent_conflict", parent_errors.ParentRoleConflictError("parent@test.com", "course-123"), 409, "ParentPolicy", "assert_not_parent"),
+        ],
+    )
+    async def test_invite_student_role_conflicts(
+        self,
+        mock_db,
+        mock_user_service,
+        mock_course_service,
+        mock_student_service,
+        mock_personalization_service,
+        mock_get_current_user,
+        mock_teacher,
+        mock_student,
+        mock_course,
+        error_scenario,
+        side_effect,
+        expected_status,
+        policy_module,
+        policy_name,
+    ) -> None:
+        mock_get_current_user.return_value = "teacher@test.com"
+        mock_teacher.isadmin = False
+        mock_user_service.get_user.side_effect = [mock_teacher, mock_student]
+        mock_course_service.get_course.return_value = mock_course
+
+        with (
+            patch("src.routers.students.TeacherPolicy.assert_teacher_access") as mock_assert_teacher,
+            patch("src.routers.students.StudentPolicy.assert_not_student") as mock_assert_not_student,
+            patch("src.routers.students.TeacherPolicy.assert_not_teacher") as mock_assert_not_teacher,
+            patch("src.routers.students.ParentPolicy.assert_not_parent") as mock_assert_not_parent,
+        ):
+            if policy_module == "StudentPolicy" and policy_name == "assert_not_student":
+                mock_assert_not_student.side_effect = side_effect
+            elif policy_module == "TeacherPolicy" and policy_name == "assert_not_teacher":
+                mock_assert_not_teacher.side_effect = side_effect
+            elif policy_module == "ParentPolicy" and policy_name == "assert_not_parent":
+                mock_assert_not_parent.side_effect = side_effect
+
+            with pytest.raises(HTTPException) as exc_info:
+                await invite_student(
+                    mock_course.course_id, mock_student.email, mock_db, "teacher@test.com",
+                )
+
+            assert exc_info.value.status_code == expected_status
+
+            mock_assert_teacher.assert_called_once()
+
+            if error_scenario == "student_conflict":
+                mock_assert_not_student.assert_called_once()
+                mock_assert_not_teacher.assert_not_called()
+                mock_assert_not_parent.assert_not_called()
+            elif error_scenario == "teacher_conflict":
+                mock_assert_not_student.assert_called_once()
+                mock_assert_not_teacher.assert_called_once()
+                mock_assert_not_parent.assert_not_called()
+            elif error_scenario == "parent_conflict":
+                mock_assert_not_student.assert_called_once()
+                mock_assert_not_teacher.assert_called_once()
+                mock_assert_not_parent.assert_called_once()
 
         mock_student_service.invite_student.assert_not_called()
         mock_personalization_service.add_course_participant.assert_not_called()
@@ -351,7 +419,7 @@ class TestStudentsRouter:
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 
-        if error_scenario == "teacher_not_found" or error_scenario == "student_not_found":
+        if error_scenario in ("teacher_not_found", "student_not_found"):
             mock_user_service.get_user.side_effect = side_effect
         else:
             mock_user_service.get_user.side_effect = [mock_teacher, mock_student]

@@ -108,7 +108,7 @@ async def delete_course(
         user = user_service.get_user(user_email)
         course = course_service.get_course(course_id)
         if not user.isadmin:
-            TeacherPolicy.assert_instructor_access(user, course, db)
+            TeacherPolicy.assert_instructor_access(user, course)
         course_service.delete_course(course)
         db.commit()
         return Success(success=True)
@@ -182,7 +182,7 @@ async def leave_course(
             parent_service.remove_parent(user, course)
             db.commit()
             return Success(success=True)
-        if TeacherPolicy.check_instructor_access(user, course, db):
+        if TeacherPolicy.check_instructor_access(user, course):
             raise teacher_errors.DeleteInstructorError(user.email, course.course_id)
         raise course_errors.ParticipantRoleRequiredError(user.email, course_id)
     except user_errors.UserNotFoundError as e:

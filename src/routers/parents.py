@@ -150,6 +150,7 @@ async def remove_parent(
     except (
         course_errors.CourseNotFoundError,
         parent_errors.ParentOfStudentRoleRequiredError,
+        student_errors.StudentRoleRequiredError,
     ) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except teacher_errors.TeacherRoleRequiredError as e:

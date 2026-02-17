@@ -267,9 +267,11 @@ class TestAssignmentsRouter:
         if error_scenario == "assignment_not_found":
             mock_assignment_service.get_assignment.side_effect = side_effect
 
-        with patch("src.routers.assignments.TeacherPolicy.assert_teacher_access") as mock_assert_teacher:
-            with pytest.raises(HTTPException) as exc_info:
-                await remove_assignment(mock_course.course_id, 999, mock_db, "teacher@test.com")
+        with (
+            patch("src.routers.assignments.TeacherPolicy.assert_teacher_access") as mock_assert_teacher,
+            pytest.raises(HTTPException) as exc_info,
+        ):
+            await remove_assignment(mock_course.course_id, 999, mock_db, "teacher@test.com")
 
         assert exc_info.value.status_code == expected_status
         if error_scenario == "assignment_not_found":

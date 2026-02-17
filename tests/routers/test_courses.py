@@ -259,7 +259,7 @@ class TestCoursesRouter:
         if should_check_instructor:
             with patch("src.routers.courses.TeacherPolicy.assert_instructor_access") as mock_assert_instructor:
                 result = await delete_course(mock_course.course_id, mock_db, user_email)
-                mock_assert_instructor.assert_called_once_with(mock_user, mock_course, mock_db)
+                mock_assert_instructor.assert_called_once_with(mock_user, mock_course)
         else:
             with patch("src.routers.courses.TeacherPolicy.assert_instructor_access") as mock_assert_instructor:
                 result = await delete_course(mock_course.course_id, mock_db, user_email)

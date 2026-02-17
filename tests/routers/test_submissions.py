@@ -455,7 +455,7 @@ class TestSubmissionsRouter:
     ) -> None:
         mock_get_current_user.return_value = "user@test.com"
 
-        if error_scenario == "user_not_found" or error_scenario == "student_not_found":
+        if error_scenario in ("user_not_found", "student_not_found"):
             mock_user_service.get_user.side_effect = side_effect
         else:
             mock_user_service.get_user.side_effect = [mock_user, mock_student]

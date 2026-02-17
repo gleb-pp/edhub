@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -236,11 +236,11 @@ class TestSectionsRouter:
 
         mock_section_service.get_course_sections.return_value = [mock_section, mock_section2]
 
-        def get_section_materials_side_effect(section):
+        def get_section_materials_side_effect(section) -> list[MagicMock]:
             return [mock_material1, mock_material2] if section.section_id == 1 else []
         mock_material_service.get_section_materials.side_effect = get_section_materials_side_effect
 
-        def get_section_assignments_side_effect(section):
+        def get_section_assignments_side_effect(section) -> list[MagicMock]:
             return [mock_assignment1] if section.section_id == 1 else []
         mock_assignment_service.get_section_assignments.side_effect = get_section_assignments_side_effect
 
@@ -283,21 +283,21 @@ class TestSectionsRouter:
         mock_material1.course_id = "course-123"
         mock_material1.section_id = 1
         mock_material1.title = "Material 3"
-        mock_material1.creation_time = datetime(2024, 1, 3)
+        mock_material1.creation_time = datetime(2024, 1, 3, tzinfo=UTC)
         mock_material1.author = "teacher@test.com"
         mock_material2 = MagicMock()
         mock_material2.material_id = 102
         mock_material2.course_id = "course-123"
         mock_material2.section_id = 1
         mock_material2.title = "Material 1"
-        mock_material2.creation_time = datetime(2024, 1, 1)
+        mock_material2.creation_time = datetime(2024, 1, 1, tzinfo=UTC)
         mock_material2.author = "teacher@test.com"
         mock_assignment1 = MagicMock()
         mock_assignment1.assignment_id = 201
         mock_assignment1.course_id = "course-123"
         mock_assignment1.section_id = 1
         mock_assignment1.title = "Assignment 1"
-        mock_assignment1.creation_time = datetime(2024, 1, 2)
+        mock_assignment1.creation_time = datetime(2024, 1, 2, tzinfo=UTC)
         mock_assignment1.author = "teacher@test.com"
 
         mock_section_service.get_course_sections.return_value = [mock_section]
@@ -312,7 +312,11 @@ class TestSectionsRouter:
             result = await get_course_feed(mock_course.course_id, mock_db, "user@test.com")
 
         feed_dates = [post.creation_time for post in result[0].feed]
-        assert feed_dates == [datetime(2024, 1, 1), datetime(2024, 1, 2), datetime(2024, 1, 3)]
+        assert feed_dates == [
+            datetime(2024, 1, 1, tzinfo=UTC),
+            datetime(2024, 1, 2, tzinfo=UTC),
+            datetime(2024, 1, 3, tzinfo=UTC),
+        ]
 
     @pytest.mark.parametrize(
         "error_scenario,side_effect,expected_status,should_check_policy",

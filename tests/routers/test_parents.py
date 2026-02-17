@@ -163,7 +163,7 @@ class TestParentsRouter:
     ) -> None:
         mock_get_current_user.return_value = "user@test.com"
 
-        if error_scenario == "user_not_found" or error_scenario == "student_not_found":
+        if error_scenario in ("user_not_found", "student_not_found"):
             mock_user_service.get_user.side_effect = side_effect
         else:
             mock_user_service.get_user.side_effect = [mock_user, mock_student]
@@ -400,6 +400,7 @@ class TestParentsRouter:
             ("student_not_found", [MagicMock(), user_errors.UserNotFoundError("student@test.com")], 400, True),
             ("parent_not_found", [MagicMock(), MagicMock(), user_errors.UserNotFoundError("parent@test.com")], 400, True),
             ("course_not_found", course_errors.CourseNotFoundError("course-123"), 400, False),
+            ("student_role_required", student_errors.StudentRoleRequiredError("student@test.com", "course-123"), 400, True),
             ("parent_role_required", parent_errors.ParentOfStudentRoleRequiredError("parent@test.com", "student@test.com", "course-123"), 400, True),
             ("teacher_role_required", teacher_errors.TeacherRoleRequiredError("student@test.com", "course-123"), 403, True),
         ],
@@ -408,6 +409,7 @@ class TestParentsRouter:
             "student_not_found",
             "parent_not_found",
             "course_not_found",
+            "student_role_required",
             "parent_role_required",
             "teacher_role_required",
         ],
@@ -432,7 +434,7 @@ class TestParentsRouter:
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 
-        if error_scenario == "teacher_not_found" or error_scenario == "student_not_found" or error_scenario == "parent_not_found":
+        if error_scenario in ("teacher_not_found", "student_not_found", "parent_not_found"):
             mock_user_service.get_user.side_effect = side_effect
         else:
             mock_user_service.get_user.side_effect = [mock_teacher, mock_student, mock_parent]
@@ -451,6 +453,8 @@ class TestParentsRouter:
             with pytest.raises(HTTPException) as exc_info:
                 if error_scenario == "teacher_role_required":
                     mock_assert_teacher.side_effect = side_effect
+                elif error_scenario == "student_role_required":
+                    mock_assert_student.side_effect = side_effect
                 elif error_scenario == "parent_role_required":
                     mock_assert_parent.side_effect = side_effect
 
@@ -531,7 +535,7 @@ class TestParentsRouter:
     ) -> None:
         mock_get_current_user.return_value = "user@test.com"
 
-        if error_scenario == "user_not_found" or error_scenario == "parent_not_found":
+        if error_scenario in ("user_not_found", "parent_not_found"):
             mock_user_service.get_user.side_effect = side_effect
         else:
             mock_user_service.get_user.side_effect = [mock_user, mock_parent]

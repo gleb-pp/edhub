@@ -75,7 +75,7 @@ async def invite_teacher(
         teacher = user_service.get_user(teacher_email)
         course = course_service.get_course(course_id)
         if not teacher.isadmin:
-            TeacherPolicy.assert_instructor_access(teacher, course, db)
+            TeacherPolicy.assert_instructor_access(teacher, course)
         new_teacher = user_service.get_user(new_teacher_email)
         TeacherPolicy.assert_not_teacher(new_teacher, course, db)
         StudentPolicy.assert_not_student(new_teacher, course, db)
@@ -122,7 +122,7 @@ async def remove_teacher(
         if instructor.isadmin:
             instructor = user_service.get_user(course.instructor)
         else:
-            TeacherPolicy.assert_instructor_access(instructor, course, db)
+            TeacherPolicy.assert_instructor_access(instructor, course)
         teacher = user_service.get_user(teacher_email)
         TeacherPolicy.assert_teacher_access(teacher, course, db)
         teacher_service.remove_teacher(teacher, course)
@@ -159,7 +159,7 @@ async def change_course_instructor(
     try:
         instructor = user_service.get_user(instructor_email)
         course = course_service.get_course(course_id)
-        TeacherPolicy.assert_instructor_access(instructor, course, db)
+        TeacherPolicy.assert_instructor_access(instructor, course)
         teacher = user_service.get_user(teacher_email)
         TeacherPolicy.assert_teacher_access(teacher, course, db)
         teacher_service.change_course_instructor(instructor, teacher, course)

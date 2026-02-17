@@ -133,9 +133,11 @@ class TestAdminRouter:
             mock_user_service.get_user.side_effect = side_effect
 
         if isinstance(side_effect, admin_errors.AdminRoleRequiredError):
-            with patch.object(AdminPolicy, "assert_user_is_admin", side_effect=side_effect):
-                with pytest.raises(HTTPException) as exc:
-                    await give_admin_permissions(target_user, mock_db, current_user)
+            with (
+                patch.object(AdminPolicy, "assert_user_is_admin", side_effect=side_effect),
+                pytest.raises(HTTPException) as exc,
+            ):
+                await give_admin_permissions(target_user, mock_db, current_user)
         else:
             with pytest.raises(HTTPException) as exc:
                 await give_admin_permissions(target_user, mock_db, current_user)

@@ -46,7 +46,7 @@ async def get_my_role(
         user = user_service.get_user(user_email)
         course = course_service.get_course(course_id)
         return CourseRole(
-            is_instructor=TeacherPolicy.check_instructor_access(user, course, db),
+            is_instructor=TeacherPolicy.check_instructor_access(user, course),
             is_teacher=TeacherPolicy.check_teacher_access(user, course, db),
             is_student=StudentPolicy.check_student_access(user, course, db),
             is_parent=ParentPolicy.check_parent_access(user, course, db),
