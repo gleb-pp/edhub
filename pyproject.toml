@@ -54,6 +54,7 @@ ignore = [
 "test_*.py" = [
     "S101",     # use of assert
     "PLR2004",  # unused function arguments
+    "ARG002",   # unused method arguments
     "S105"      # hardcoded password
 ]
 
@@ -66,10 +67,10 @@ exclude = "venv/"
 
 [dependency-groups]
 dev = [
-    "pytest>=8.0,<9.0",
-    "pytest-asyncio>=0.23,<1.0",
-    "mypy>=1.10,<2.0",
-    "ruff>=0.4,<1.0",
-    "types-python-jose>=3.5,<4.0",
-    "types-regex>=2026.1.15,<2027.0",
+    "pytest>=9.0,<9.1",
+    "pytest-asyncio>=1.3,<1.4",
+    "mypy>=1.19,<1.20",
+    "ruff>=0.15,<0.16",
+    "types-python-jose>=3.5,<3.6",
+    "types-regex>=2026.1.15,<2026.2",
 ]
