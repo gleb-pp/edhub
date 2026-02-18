@@ -1,3 +1,9 @@
+<div align="center">
+
+You can access the application on https://edhub.space/api/docs.
+
+</div>
+
 # 🎓 What is EdHub?
 
 EdHub is a Learning Management System designed to facilitate interaction among teachers, students, and parents. It enhances the educational process by simplifying communication between stakeholders and increasing student engagement in learning.

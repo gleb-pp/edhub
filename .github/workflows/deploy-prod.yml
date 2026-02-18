@@ -1,21 +1,15 @@
 name: Deploy to production server
 
 on:
-  push:
-    branches:
-      - pytest
   pull_request:
     types:
       - closed
     branches:
-      - dev
+      - main
 
 jobs:
   deploy:
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/pytest') ||
-      (github.event_name == 'pull_request' && github.event.pull_request.merged == true) ||
-      github.event_name == 'workflow_dispatch'
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     name: Deploy to production server
     runs-on: edhub-prod
     steps:
