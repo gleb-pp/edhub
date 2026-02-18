@@ -13,6 +13,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - edhub-network
 
   backend:
     build:
@@ -27,6 +29,12 @@ services:
     depends_on:
       system_db:
         condition: service_healthy
+    networks:
+      - edhub-network
 
 volumes:
   edhub_system_storage:
+
+networks:
+  edhub-network:
+    name: edhub-network
