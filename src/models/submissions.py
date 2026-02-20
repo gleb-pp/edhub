@@ -4,6 +4,8 @@ from pydantic import BaseModel, ConfigDict
 
 
 class Submission(BaseModel):
+    """Pydantic model for representing a student's submission for a course assignment."""
+
     course_id: str
     assignment_id: int
     email: str
@@ -14,6 +16,8 @@ class Submission(BaseModel):
 
 
 class SubmissionAttachmentMetadata(BaseModel):
+    """Pydantic model for metadata of files attached to course assignment submissions."""
+
     course_id: str
     assignment_id: int
     student_email: str

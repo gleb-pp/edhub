@@ -6,6 +6,8 @@ from src.settings.course import course_settings
 
 
 class PersonalCourseInfo(Base):
+    """SQLAlchemy model for storing personalized information about courses for each user."""
+
     __tablename__ = "personal_course_info"
 
     course_id: Mapped[str] = mapped_column(

@@ -15,6 +15,8 @@ from src.settings.materials import material_settings
 
 
 class CourseMaterial(Base):
+    """SQLAlchemy model for course materials."""
+
     __tablename__ = "course_materials"
 
     course_id: Mapped[str] = mapped_column(

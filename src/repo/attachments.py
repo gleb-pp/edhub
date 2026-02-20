@@ -15,6 +15,8 @@ from src.settings.course import course_settings
 
 
 class MaterialFile(Base):
+    """SQLAlchemy model for files attached to course materials."""
+
     __tablename__ = "material_files"
 
     course_id: Mapped[str] = mapped_column(Uuid, primary_key=True)
@@ -36,6 +38,8 @@ class MaterialFile(Base):
 
 
 class AssignmentFile(Base):
+    """SQLAlchemy model for files attached to course assignments."""
+
     __tablename__ = "assignment_files"
 
     course_id: Mapped[str] = mapped_column(Uuid, primary_key=True)
@@ -57,6 +61,8 @@ class AssignmentFile(Base):
 
 
 class SubmissionFile(Base):
+    """SQLAlchemy model for files attached to student submissions."""
+
     __tablename__ = "submission_files"
 
     course_id: Mapped[str] = mapped_column(Uuid, primary_key=True)

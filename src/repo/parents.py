@@ -5,6 +5,8 @@ from src.repo.base import Base
 
 
 class ParentAt(Base):
+    """SQLAlchemy model for the association between parents and students in courses."""
+
     __tablename__ = "parent_at"
 
     parent_email: Mapped[str] = mapped_column(

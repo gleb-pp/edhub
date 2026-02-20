@@ -15,6 +15,8 @@ from src.settings.assignments import assignment_settings
 
 
 class CourseAssignment(Base):
+    """SQLAlchemy model for course assignments."""
+
     __tablename__ = "course_assignments"
 
     course_id: Mapped[str] = mapped_column(

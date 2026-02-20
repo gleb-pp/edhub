@@ -4,6 +4,8 @@ from pydantic import BaseModel, ConfigDict
 
 
 class MaterialID(BaseModel):
+    """Pydantic model for basic identification of a course material."""
+
     course_id: str
     material_id: int
     section_id: int
@@ -11,6 +13,8 @@ class MaterialID(BaseModel):
 
 
 class Material(MaterialID):
+    """Pydantic model for course materials full information."""
+
     creation_time: datetime
     title: str
     description: str
@@ -18,6 +22,8 @@ class Material(MaterialID):
 
 
 class MaterialAttachmentMetadata(BaseModel):
+    """Pydantic model for metadata of files attached to course materials."""
+
     course_id: str
     material_id: int
     file_id: str

@@ -5,6 +5,8 @@ from src.repo.base import Base
 
 
 class Teaches(Base):
+    """SQLAlchemy model for the association between teachers and courses."""
+
     __tablename__ = "teaches"
 
     email: Mapped[str] = mapped_column(

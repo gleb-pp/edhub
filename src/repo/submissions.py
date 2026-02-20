@@ -15,6 +15,8 @@ from src.settings.submissions import submission_settings
 
 
 class AssignmentSubmission(Base):
+    """SQLAlchemy model for student submissions to course assignments."""
+
     __tablename__ = "course_assignments_submissions"
 
     course_id: Mapped[str] = mapped_column(

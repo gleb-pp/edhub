@@ -4,6 +4,8 @@ from pydantic import BaseModel, ConfigDict
 
 
 class AssignmentGrade(BaseModel):
+    """Pydantic model for representing a grade for a course assignment."""
+
     course_id: str
     assignment_id: str
     student_email: str
