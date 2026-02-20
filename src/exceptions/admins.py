@@ -16,5 +16,5 @@ class DeleteLastAdminError(AdminError):
 
     def __init__(self) -> None:
         super().__init__(
-            "Cannot remove user the only administrator.",
+            "Cannot remove the only administrator.",
         )

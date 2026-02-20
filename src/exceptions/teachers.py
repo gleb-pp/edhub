@@ -33,7 +33,7 @@ class TeacherRoleConflictError(TeacherError, RoleConflictError):
 
 
 class DeleteInstructorError(TeacherError):
-    """Exception raised when trying to delete the course instuctor."""
+    """Exception raised when trying to delete the course instructor."""
 
     def __init__(self, email: str, course_id: str) -> None:
         super().__init__(

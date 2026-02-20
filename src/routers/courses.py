@@ -167,19 +167,24 @@ async def leave_course(
     student_service = StudentService(db)
     teacher_service = TeacherService(db)
     parent_service = ParentService(db)
+    personalization_service = PersonalizationService(db)
     try:
         user = user_service.get_user(user_email)
         course = course_service.get_course(course_id)
         if StudentPolicy.check_student_access(user, course, db):
             student_service.remove_student(user, course)
+            personalization_service.remove_course_participant(course, user)
             db.commit()
             return Success(success=True)
         if TeacherPolicy.check_teacher_access(user, course, db):
             teacher_service.remove_teacher(user, course)
+            personalization_service.remove_course_participant(course, user)
             db.commit()
             return Success(success=True)
         if ParentPolicy.check_parent_access(user, course, db):
             parent_service.remove_parent(user, course)
+            if not ParentPolicy.check_parent_access(user, course, db):
+                personalization_service.remove_course_participant(course, user)
             db.commit()
             return Success(success=True)
         if TeacherPolicy.check_instructor_access(user, course):

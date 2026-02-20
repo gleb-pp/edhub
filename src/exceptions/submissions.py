@@ -16,7 +16,7 @@ class SubmissionGradedError(SubmissionError):
 
     def __init__(self, course_id: str, assignment_id: int, student_email: str) -> None:
         super().__init__(
-            f"Submission of student {student_email} to the assignment {assignment_id} withing the course {course_id} is already graded.",
+            f"Submission of student {student_email} to the assignment {assignment_id} within the course {course_id} is already graded.",
         )
 
 
@@ -25,5 +25,5 @@ class GradeNotFoundError(SubmissionError):
 
     def __init__(self, course_id: str, assignment_id: int, student_email: str) -> None:
         super().__init__(
-            f"Submission of student {student_email} to the assignment {assignment_id} withing the course {course_id} is not graded.",
+            f"Submission of student {student_email} to the assignment {assignment_id} within the course {course_id} is not graded.",
         )
