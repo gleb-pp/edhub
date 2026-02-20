@@ -82,7 +82,7 @@ def mock_get_current_user() -> Generator[MagicMock, None, None]:
 def mock_user() -> MagicMock:
     """Fixture for creating a mock user."""
     user = MagicMock()
-    user.isadmin = False
+    user.is_admin = False
     user.email = "user@test.com"
     return user
 
@@ -91,7 +91,7 @@ def mock_user() -> MagicMock:
 def mock_teacher() -> MagicMock:
     """Fixture for creating a mock teacher."""
     teacher = MagicMock()
-    teacher.isadmin = False
+    teacher.is_admin = False
     teacher.email = "teacher@test.com"
     return teacher
 
@@ -129,7 +129,7 @@ class TestSectionsRouter:
     ) -> None:
         """Test successful retrieval of course sections."""
         mock_get_current_user.return_value = "user@test.com"
-        mock_user.isadmin = False
+        mock_user.is_admin = False
         mock_user_service.get_user.return_value = mock_user
         mock_course_service.get_course.return_value = mock_course
 
@@ -217,7 +217,7 @@ class TestSectionsRouter:
     ) -> None:
         """Test successful retrieval of course feed."""
         mock_get_current_user.return_value = "user@test.com"
-        mock_user.isadmin = False
+        mock_user.is_admin = False
         mock_user_service.get_user.return_value = mock_user
         mock_course_service.get_course.return_value = mock_course
 
@@ -290,7 +290,7 @@ class TestSectionsRouter:
     ) -> None:
         """Test that course feed items are sorted by creation time."""
         mock_get_current_user.return_value = "user@test.com"
-        mock_user.isadmin = False
+        mock_user.is_admin = False
         mock_user_service.get_user.return_value = mock_user
         mock_course_service.get_course.return_value = mock_course
 
@@ -407,7 +407,7 @@ class TestSectionsRouter:
     ) -> None:
         """Test successful creation of a new section."""
         mock_get_current_user.return_value = user_email
-        mock_teacher.isadmin = is_admin
+        mock_teacher.is_admin = is_admin
         mock_teacher.email = user_email
 
         mock_user_service.get_user.return_value = mock_teacher
@@ -464,7 +464,7 @@ class TestSectionsRouter:
     ) -> None:
         """Test error scenarios for creating a new section."""
         mock_get_current_user.return_value = "teacher@test.com"
-        mock_teacher.isadmin = False
+        mock_teacher.is_admin = False
 
         if error_scenario == "user_not_found":
             mock_user_service.get_user.side_effect = side_effect
@@ -515,7 +515,7 @@ class TestSectionsRouter:
     ) -> None:
         """Test successful change of section order."""
         mock_get_current_user.return_value = user_email
-        mock_teacher.isadmin = is_admin
+        mock_teacher.is_admin = is_admin
         mock_teacher.email = user_email
 
         mock_user_service.get_user.return_value = mock_teacher
@@ -568,7 +568,7 @@ class TestSectionsRouter:
     ) -> None:
         """Test error scenarios for changing section order."""
         mock_get_current_user.return_value = "teacher@test.com"
-        mock_teacher.isadmin = False
+        mock_teacher.is_admin = False
 
         if error_scenario == "user_not_found":
             mock_user_service.get_user.side_effect = side_effect
@@ -622,7 +622,7 @@ class TestSectionsRouter:
     ) -> None:
         """Test successful removal of a section."""
         mock_get_current_user.return_value = user_email
-        mock_teacher.isadmin = is_admin
+        mock_teacher.is_admin = is_admin
         mock_teacher.email = user_email
 
         mock_user_service.get_user.return_value = mock_teacher
@@ -676,7 +676,7 @@ class TestSectionsRouter:
     ) -> None:
         """Test error scenarios for removing a section."""
         mock_get_current_user.return_value = "teacher@test.com"
-        mock_teacher.isadmin = False
+        mock_teacher.is_admin = False
 
         if error_scenario == "user_not_found":
             mock_user_service.get_user.side_effect = side_effect

@@ -99,7 +99,7 @@ def mock_get_current_user() -> Generator[MagicMock, None, None]:
 def mock_user() -> MagicMock:
     """Mock for a user object."""
     user = MagicMock()
-    user.isadmin = False
+    user.is_admin = False
     user.email = "user@test.com"
     return user
 
@@ -268,7 +268,7 @@ class TestCoursesRouter:
     ) -> None:
         """Test the successful deletion of a course by an instructor or admin."""
         mock_get_current_user.return_value = user_email
-        mock_user.isadmin = is_admin
+        mock_user.is_admin = is_admin
         mock_user.email = user_email
 
         mock_user_service.get_user.return_value = mock_user
@@ -312,7 +312,7 @@ class TestCoursesRouter:
     ) -> None:
         """Test errors for the delete_course endpoint."""
         mock_get_current_user.return_value = "user@test.com"
-        mock_user.isadmin = False
+        mock_user.is_admin = False
 
         if error_scenario == "user_not_found":
             mock_user_service.get_user.side_effect = side_effect
@@ -353,7 +353,7 @@ class TestCoursesRouter:
     ) -> None:
         """Test the successful retrieval of course information for a student."""
         mock_get_current_user.return_value = "student@test.com"
-        mock_user.isadmin = False
+        mock_user.is_admin = False
         mock_user_service.get_user.return_value = mock_user
         mock_course_service.get_course.return_value = mock_course
 
@@ -393,7 +393,7 @@ class TestCoursesRouter:
     ) -> None:
         """Test errors for the get_course_info endpoint."""
         mock_get_current_user.return_value = "user@test.com"
-        mock_user.isadmin = False
+        mock_user.is_admin = False
 
         if error_scenario == "user_not_found":
             mock_user_service.get_user.side_effect = side_effect

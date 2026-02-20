@@ -29,7 +29,7 @@ class TestUserService:
         user = MagicMock(spec=User)
         user.email = "user@test.com"
         user.password_hash = "hashed_pwd"
-        user.isadmin = False
+        user.is_admin = False
         return user
 
     def test_validate_user_email_success(self, service: UserService) -> None:
@@ -332,7 +332,7 @@ class TestUserService:
     ) -> None:
         """Test that admin permissions are granted successfully to a user."""
         service.give_admin_permissions(mock_user)
-        assert mock_user.isadmin is True
+        assert mock_user.is_admin is True
         mock_db.flush.assert_called_once()
         mock_logger.assert_called_once()
 

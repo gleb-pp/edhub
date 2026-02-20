@@ -72,7 +72,7 @@ def mock_get_current_user() -> Generator[MagicMock, None, None]:
 def mock_user() -> MagicMock:
     """Fixture for a mock user object."""
     user = MagicMock()
-    user.isadmin = False
+    user.is_admin = False
     user.email = "user@test.com"
     return user
 
@@ -81,7 +81,7 @@ def mock_user() -> MagicMock:
 def mock_instructor() -> MagicMock:
     """Fixture for a mock instructor user object."""
     instructor = MagicMock()
-    instructor.isadmin = False
+    instructor.is_admin = False
     instructor.email = "instructor@test.com"
     return instructor
 
@@ -90,7 +90,7 @@ def mock_instructor() -> MagicMock:
 def mock_teacher() -> MagicMock:
     """Fixture for a mock teacher user object."""
     teacher = MagicMock()
-    teacher.isadmin = False
+    teacher.is_admin = False
     teacher.email = "teacher@test.com"
     return teacher
 
@@ -119,7 +119,7 @@ class TestTeachersRouter:
     ) -> None:
         """Test the successful retrieval of course teachers."""
         mock_get_current_user.return_value = "user@test.com"
-        mock_user.isadmin = False
+        mock_user.is_admin = False
         mock_user_service.get_user.return_value = mock_user
         mock_course_service.get_course.return_value = mock_course
 
@@ -206,7 +206,7 @@ class TestTeachersRouter:
     ) -> None:
         """Test the successful invitation of a teacher to a course."""
         mock_get_current_user.return_value = "instructor@test.com"
-        mock_instructor.isadmin = False
+        mock_instructor.is_admin = False
 
         mock_user_service.get_user.side_effect = [mock_instructor, mock_teacher]
         mock_course_service.get_course.return_value = mock_course
@@ -260,7 +260,7 @@ class TestTeachersRouter:
     ) -> None:
         """Test role conflict scenarios when inviting a teacher to a course."""
         mock_get_current_user.return_value = "instructor@test.com"
-        mock_instructor.isadmin = False
+        mock_instructor.is_admin = False
         mock_user_service.get_user.side_effect = [mock_instructor, mock_teacher]
         mock_course_service.get_course.return_value = mock_course
 
@@ -328,11 +328,11 @@ class TestTeachersRouter:
     ) -> None:
         """Test the successful removal of a teacher from a course."""
         mock_get_current_user.return_value = user_email
-        mock_instructor.isadmin = is_admin
+        mock_instructor.is_admin = is_admin
 
         if is_admin:
             mock_admin = MagicMock()
-            mock_admin.isadmin = True
+            mock_admin.is_admin = True
             mock_admin.email = user_email
             mock_course.instructor = mock_instructor.email
             mock_user_service.get_user.side_effect = [mock_admin, mock_instructor, mock_teacher]
@@ -397,7 +397,7 @@ class TestTeachersRouter:
     ) -> None:
         """Test error scenarios for removing a teacher from a course."""
         mock_get_current_user.return_value = "instructor@test.com"
-        mock_instructor.isadmin = False
+        mock_instructor.is_admin = False
 
         if error_scenario in ("instructor_not_found", "teacher_not_found"):
             mock_user_service.get_user.side_effect = side_effect
@@ -441,7 +441,7 @@ class TestTeachersRouter:
     ) -> None:
         """Test the successful change of a course instructor."""
         mock_get_current_user.return_value = "instructor@test.com"
-        mock_instructor.isadmin = False
+        mock_instructor.is_admin = False
 
         mock_user_service.get_user.side_effect = [mock_instructor, mock_teacher]
         mock_course_service.get_course.return_value = mock_course
@@ -497,7 +497,7 @@ class TestTeachersRouter:
     ) -> None:
         """Test error scenarios for changing a course instructor."""
         mock_get_current_user.return_value = "instructor@test.com"
-        mock_instructor.isadmin = False
+        mock_instructor.is_admin = False
 
         if error_scenario in ("instructor_not_found", "new_instructor_not_found"):
             mock_user_service.get_user.side_effect = side_effect

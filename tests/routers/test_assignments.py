@@ -73,7 +73,7 @@ def mock_get_current_user() -> Generator[MagicMock, None, None]:
 def mock_user() -> MagicMock:
     """Mock user object with default properties."""
     user = MagicMock()
-    user.isadmin = False
+    user.is_admin = False
     user.email = "user@test.com"
     return user
 
@@ -136,7 +136,7 @@ class TestAssignmentsRouter:
     ) -> None:
         """Test the successful creation of an assignment by both a teacher and an admin."""
         mock_get_current_user.return_value = user_email
-        mock_user.isadmin = is_admin
+        mock_user.is_admin = is_admin
         mock_user.email = user_email
 
         mock_user_service.get_user.return_value = mock_user
@@ -209,7 +209,7 @@ class TestAssignmentsRouter:
     ) -> None:
         """Test error scenarios for creating an assignment."""
         mock_get_current_user.return_value = "teacher@test.com"
-        mock_user.isadmin = False
+        mock_user.is_admin = False
         mock_user.email = "teacher@test.com"
 
         if error_scenario == "user_not_found":
@@ -275,7 +275,7 @@ class TestAssignmentsRouter:
     ) -> None:
         """Test error scenarios for removing an assignment."""
         mock_get_current_user.return_value = "teacher@test.com"
-        mock_user.isadmin = False
+        mock_user.is_admin = False
         mock_user.email = "teacher@test.com"
 
         if error_scenario == "user_not_found":
@@ -315,7 +315,7 @@ class TestAssignmentsRouter:
     ) -> None:
         """Test the successful removal of an assignment."""
         mock_get_current_user.return_value = "teacher@test.com"
-        mock_user.isadmin = False
+        mock_user.is_admin = False
         mock_user.email = "teacher@test.com"
 
         mock_user_service.get_user.return_value = mock_user
@@ -359,7 +359,7 @@ class TestAssignmentsRouter:
     ) -> None:
         """Test error scenarios for getting an assignment."""
         mock_get_current_user.return_value = "user@test.com"
-        mock_user.isadmin = False
+        mock_user.is_admin = False
         mock_user.email = "user@test.com"
 
         if error_scenario == "user_not_found":
@@ -409,7 +409,7 @@ class TestAssignmentsRouter:
     ) -> None:
         """Test the successful retrieval of an assignment."""
         mock_get_current_user.return_value = "user@test.com"
-        mock_user.isadmin = False
+        mock_user.is_admin = False
         mock_user.email = "user@test.com"
 
         mock_user_service.get_user.return_value = mock_user
@@ -458,7 +458,7 @@ class TestAssignmentsRouter:
     ) -> None:
         """Test the successful retrieval of course assignments for both cases when there are assignments and when there are none."""
         mock_get_current_user.return_value = "student@test.com"
-        mock_user.isadmin = False
+        mock_user.is_admin = False
         mock_user.email = "student@test.com"
 
         mock_user_service.get_user.return_value = mock_user
@@ -501,7 +501,7 @@ class TestAssignmentsRouter:
     ) -> None:
         """Test error scenarios for getting course assignments."""
         mock_get_current_user.return_value = "user@test.com"
-        mock_user.isadmin = False
+        mock_user.is_admin = False
         mock_user.email = "user@test.com"
 
         if error_scenario == "user_not_found":

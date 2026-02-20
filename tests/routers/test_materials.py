@@ -68,7 +68,7 @@ def mock_get_current_user() -> Generator[MagicMock, None, None]:
 def mock_teacher() -> MagicMock:
     """Mock for a teacher user."""
     teacher = MagicMock()
-    teacher.isadmin = False
+    teacher.is_admin = False
     teacher.email = "teacher@test.com"
     return teacher
 
@@ -77,7 +77,7 @@ def mock_teacher() -> MagicMock:
 def mock_user() -> MagicMock:
     """Mock for a regular user."""
     user = MagicMock()
-    user.isadmin = False
+    user.is_admin = False
     user.email = "user@test.com"
     return user
 
@@ -138,7 +138,7 @@ class TestMaterialsRouter:
     ) -> None:
         """Test successful creation of a material."""
         mock_get_current_user.return_value = user_email
-        mock_teacher.isadmin = is_admin
+        mock_teacher.is_admin = is_admin
         mock_teacher.email = user_email
 
         mock_user_service.get_user.return_value = mock_teacher
@@ -214,7 +214,7 @@ class TestMaterialsRouter:
     ) -> None:
         """Test error scenarios for creating a material."""
         mock_get_current_user.return_value = "teacher@test.com"
-        mock_teacher.isadmin = False
+        mock_teacher.is_admin = False
 
         if error_scenario == "user_not_found":
             mock_user_service.get_user.side_effect = side_effect
@@ -282,7 +282,7 @@ class TestMaterialsRouter:
     ) -> None:
         """Test error scenarios for removing a material."""
         mock_get_current_user.return_value = "teacher@test.com"
-        mock_teacher.isadmin = False
+        mock_teacher.is_admin = False
 
         if error_scenario == "user_not_found":
             mock_user_service.get_user.side_effect = side_effect
@@ -329,7 +329,7 @@ class TestMaterialsRouter:
     ) -> None:
         """Test successful removal of a material."""
         mock_get_current_user.return_value = "teacher@test.com"
-        mock_teacher.isadmin = False
+        mock_teacher.is_admin = False
 
         mock_user_service.get_user.return_value = mock_teacher
         mock_course_service.get_course.return_value = mock_course
@@ -360,7 +360,7 @@ class TestMaterialsRouter:
     ) -> None:
         """Test successful retrieval of a material."""
         mock_get_current_user.return_value = "user@test.com"
-        mock_user.isadmin = False
+        mock_user.is_admin = False
 
         mock_user_service.get_user.return_value = mock_user
         mock_course_service.get_course.return_value = mock_course
@@ -412,7 +412,7 @@ class TestMaterialsRouter:
     ) -> None:
         """Test error scenarios for retrieving a material."""
         mock_get_current_user.return_value = "user@test.com"
-        mock_user.isadmin = False
+        mock_user.is_admin = False
 
         if error_scenario == "user_not_found":
             mock_user_service.get_user.side_effect = side_effect

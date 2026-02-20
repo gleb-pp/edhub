@@ -27,7 +27,7 @@ class TestParentPolicy:
         """Fixture for a mock parent user."""
         parent = MagicMock(spec=User)
         parent.email = "parent@test.com"
-        parent.isadmin = False
+        parent.is_admin = False
         return parent
 
     @pytest.fixture
@@ -129,11 +129,11 @@ class TestParentPolicy:
         """Test the assert_access_to_parent method with various scenarios."""
         if scenario == "allowed_same_user":
             mock_user = mock_parent
-            mock_user.isadmin = is_admin
+            mock_user.is_admin = is_admin
         else:
             mock_user = MagicMock(spec=User)
             mock_user.email = user_email
-            mock_user.isadmin = is_admin
+            mock_user.is_admin = is_admin
 
         mock_teacher_check.return_value = teacher_check
         mock_db.query.return_value.scalar.return_value = parent_exists

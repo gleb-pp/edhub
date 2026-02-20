@@ -72,7 +72,7 @@ def mock_get_current_user() -> Generator[MagicMock, None, None]:
 def mock_user() -> MagicMock:
     """Fixture for a mock user object."""
     user = MagicMock()
-    user.isadmin = False
+    user.is_admin = False
     user.email = "user@test.com"
     return user
 
@@ -81,7 +81,7 @@ def mock_user() -> MagicMock:
 def mock_teacher() -> MagicMock:
     """Fixture for a mock teacher object."""
     teacher = MagicMock()
-    teacher.isadmin = False
+    teacher.is_admin = False
     teacher.email = "teacher@test.com"
     return teacher
 
@@ -286,7 +286,7 @@ class TestSubmissionsRouter:
     ) -> None:
         """Test successful retrieval of assignment submissions."""
         mock_get_current_user.return_value = user_email
-        mock_teacher.isadmin = is_admin
+        mock_teacher.is_admin = is_admin
         mock_teacher.email = user_email
 
         mock_user_service.get_user.return_value = mock_teacher
@@ -344,7 +344,7 @@ class TestSubmissionsRouter:
     ) -> None:
         """Test error scenarios when retrieving assignment submissions."""
         mock_get_current_user.return_value = "teacher@test.com"
-        mock_teacher.isadmin = False
+        mock_teacher.is_admin = False
 
         if error_scenario == "user_not_found":
             mock_user_service.get_user.side_effect = side_effect

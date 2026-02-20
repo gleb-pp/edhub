@@ -78,7 +78,7 @@ def mock_get_current_user() -> Generator[MagicMock, None, None]:
 def mock_teacher() -> MagicMock:
     """Mock for a teacher user object."""
     teacher = MagicMock()
-    teacher.isadmin = False
+    teacher.is_admin = False
     teacher.email = "teacher@test.com"
     return teacher
 

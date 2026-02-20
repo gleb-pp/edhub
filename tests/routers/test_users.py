@@ -55,7 +55,7 @@ def mock_get_current_user() -> Generator[MagicMock, None, None]:
 def mock_user() -> MagicMock:
     """Fixture for creating a mock user object."""
     user = MagicMock()
-    user.isadmin = False
+    user.is_admin = False
     user.email = "user@test.com"
     user.name = "Test User"
     return user
@@ -127,7 +127,7 @@ class TestUsersRouter:
     ) -> None:
         """Test the successful retrieval of the user's role in a course."""
         mock_get_current_user.return_value = mock_user.email
-        mock_user.isadmin = False
+        mock_user.is_admin = False
         mock_user_service.get_user.return_value = mock_user
         mock_course_service.get_course.return_value = mock_course
 

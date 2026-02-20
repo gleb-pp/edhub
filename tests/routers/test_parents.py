@@ -72,7 +72,7 @@ def mock_get_current_user() -> Generator[MagicMock, None, None]:
 def mock_user() -> MagicMock:
     """Fixture for a mock user object."""
     user = MagicMock()
-    user.isadmin = False
+    user.is_admin = False
     user.email = "user@test.com"
     return user
 
@@ -81,7 +81,7 @@ def mock_user() -> MagicMock:
 def mock_teacher() -> MagicMock:
     """Fixture for a mock teacher object."""
     teacher = MagicMock()
-    teacher.isadmin = False
+    teacher.is_admin = False
     teacher.email = "teacher@test.com"
     return teacher
 
@@ -227,7 +227,7 @@ class TestParentsRouter:
     ) -> None:
         """Test successful invitation of a parent to a course."""
         mock_get_current_user.return_value = "teacher@test.com"
-        mock_teacher.isadmin = False
+        mock_teacher.is_admin = False
 
         mock_user_service.get_user.side_effect = [mock_teacher, mock_student, mock_parent]
         mock_course_service.get_course.return_value = mock_course
@@ -311,7 +311,7 @@ class TestParentsRouter:
     ) -> None:
         """Test error scenarios for inviting a parent to a course."""
         mock_get_current_user.return_value = "teacher@test.com"
-        mock_teacher.isadmin = False
+        mock_teacher.is_admin = False
 
         if error_scenario in ["teacher_not_found", "student_not_found", "parent_not_found"]:
             mock_user_service.get_user.side_effect = side_effect
@@ -377,7 +377,7 @@ class TestParentsRouter:
     ) -> None:
         """Test successful removal of a parent from a course."""
         mock_get_current_user.return_value = "teacher@test.com"
-        mock_teacher.isadmin = False
+        mock_teacher.is_admin = False
 
         mock_user_service.get_user.side_effect = [mock_teacher, mock_student, mock_parent]
         mock_course_service.get_course.return_value = mock_course
@@ -449,7 +449,7 @@ class TestParentsRouter:
     ) -> None:
         """Test error scenarios for removing a parent from a course."""
         mock_get_current_user.return_value = "teacher@test.com"
-        mock_teacher.isadmin = False
+        mock_teacher.is_admin = False
 
         if error_scenario in ("teacher_not_found", "student_not_found", "parent_not_found"):
             mock_user_service.get_user.side_effect = side_effect

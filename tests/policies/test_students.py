@@ -25,7 +25,7 @@ class TestStudentPolicy:
         """Fixture for a mock regular user."""
         user = MagicMock(spec=User)
         user.email = "user@test.com"
-        user.isadmin = False
+        user.is_admin = False
         return user
 
     @pytest.fixture
@@ -122,11 +122,11 @@ class TestStudentPolicy:
         """Test the assert_access_to_student method with various scenarios."""
         if scenario == "allowed_self":
             mock_user = mock_student
-            mock_user.isadmin = is_admin
+            mock_user.is_admin = is_admin
         else:
             mock_user = MagicMock(spec=User)
             mock_user.email = user_email
-            mock_user.isadmin = is_admin
+            mock_user.is_admin = is_admin
 
         mock_teacher_check.return_value = teacher_check
         mock_parent_check.return_value = parent_check
