@@ -15,12 +15,16 @@ from src.repo.users import User
 
 
 class TestParentPolicy:
+    """Tests for the ParentPolicy class."""
+
     @pytest.fixture
     def mock_db(self) -> MagicMock:
+        """Fixture for a mock database session."""
         return MagicMock()
 
     @pytest.fixture
     def mock_parent(self) -> MagicMock:
+        """Fixture for a mock parent user."""
         parent = MagicMock(spec=User)
         parent.email = "parent@test.com"
         parent.isadmin = False
@@ -28,18 +32,20 @@ class TestParentPolicy:
 
     @pytest.fixture
     def mock_student(self) -> MagicMock:
+        """Fixture for a mock student user."""
         student = MagicMock(spec=User)
         student.email = "student@test.com"
         return student
 
     @pytest.fixture
     def mock_course(self) -> MagicMock:
+        """Fixture for a mock course."""
         course = MagicMock(spec=Course)
         course.course_id = 1
         return course
 
     @pytest.mark.parametrize(
-        "method_name,args,check_exists,expected_exception",
+        ("method_name", "args", "check_exists" ,"expected_exception"),
         [
             ("assert_parent_access", ["mock_parent", "mock_course"], True, None),
             ("assert_parent_access", ["mock_parent", "mock_course"], False, ParentRoleRequiredError),
@@ -63,16 +69,17 @@ class TestParentPolicy:
     )
     def test_parent_assertions(
         self,
-        request,
-        mock_db,
-        mock_parent,
-        mock_student,
-        mock_course,
-        method_name,
-        args,
-        check_exists,
-        expected_exception,
+        request: pytest.FixtureRequest,
+        mock_db: MagicMock,
+        mock_parent: MagicMock,
+        mock_student: MagicMock,
+        mock_course: MagicMock,
+        method_name: str,
+        args: list,
+        check_exists: bool,
+        expected_exception: type[Exception] | None,
     ) -> None:
+        """Test the parent assertion methods with various scenarios."""
         mock_db.query.return_value.scalar.return_value = check_exists
         resolved_args = [request.getfixturevalue(arg) if isinstance(arg, str) else arg for arg in args]
         method = getattr(ParentPolicy, method_name)
@@ -87,7 +94,7 @@ class TestParentPolicy:
         mock_db.query.return_value.scalar.assert_called_once()
 
     @pytest.mark.parametrize(
-        "scenario,user_email,is_admin,teacher_check,parent_exists,expected_exception",
+        ("scenario", "user_email", "is_admin", "teacher_check", "parent_exists", "expected_exception"),
         [
             ("denied_other_user", "other@test.com", False, False, True, NoAccessToParentInfoError),
             ("allowed_same_user", "parent@test.com", False, False, True, None),
@@ -107,18 +114,19 @@ class TestParentPolicy:
     @patch("src.policies.parents.TeacherPolicy.check_teacher_access")
     def test_assert_access_to_parent(
         self,
-        mock_teacher_check,
-        mock_course_assert,
-        mock_db,
-        mock_parent,
-        mock_course,
-        scenario,
-        user_email,
-        is_admin,
-        teacher_check,
-        parent_exists,
-        expected_exception,
+        mock_teacher_check: MagicMock,
+        mock_course_assert: MagicMock,
+        mock_db: MagicMock,
+        mock_parent: MagicMock,
+        mock_course: MagicMock,
+        scenario: str,
+        user_email: str,
+        is_admin: bool,
+        teacher_check: bool,
+        parent_exists: bool,
+        expected_exception: type[Exception] | None,
     ) -> None:
+        """Test the assert_access_to_parent method with various scenarios."""
         if scenario == "allowed_same_user":
             mock_user = mock_parent
             mock_user.isadmin = is_admin

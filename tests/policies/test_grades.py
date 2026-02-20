@@ -8,8 +8,10 @@ from src.repo.submissions import AssignmentSubmission
 
 
 class TestGradePolicy:
+    """Tests for the GradePolicy class."""
 
     def test_assert_not_graded_success(self) -> None:
+        """Test that assert_not_graded does not raise an error for a submission that has not been graded."""
         mock_submission = MagicMock(spec=AssignmentSubmission)
         mock_submission.course_id = 1
         mock_submission.assignment_id = 2
@@ -21,6 +23,7 @@ class TestGradePolicy:
         GradePolicy.assert_not_graded(mock_submission, mock_db)
 
     def test_assert_not_graded_fail(self) -> None:
+        """Test that assert_not_graded raises a SubmissionGradedError for a submission that has already been graded."""
         mock_submission = MagicMock(spec=AssignmentSubmission)
         mock_submission.course_id = 1
         mock_submission.assignment_id = 2

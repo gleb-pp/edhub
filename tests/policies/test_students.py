@@ -13,12 +13,16 @@ from src.repo.users import User
 
 
 class TestStudentPolicy:
+    """Tests for the StudentPolicy class."""
+
     @pytest.fixture
     def mock_db(self) -> MagicMock:
+        """Fixture for a mock database session."""
         return MagicMock()
 
     @pytest.fixture
     def mock_user(self) -> MagicMock:
+        """Fixture for a mock regular user."""
         user = MagicMock(spec=User)
         user.email = "user@test.com"
         user.isadmin = False
@@ -26,12 +30,14 @@ class TestStudentPolicy:
 
     @pytest.fixture
     def mock_student(self) -> MagicMock:
+        """Fixture for a mock student user."""
         student = MagicMock(spec=User)
         student.email = "student@test.com"
         return student
 
     @pytest.fixture
     def mock_course(self) -> MagicMock:
+        """Fixture for a mock course."""
         course = MagicMock(spec=Course)
         course.course_id = 1
         course.id = 1
@@ -39,7 +45,7 @@ class TestStudentPolicy:
         return course
 
     @pytest.mark.parametrize(
-        "method_name,check_exists,expected_exception",
+        ("method_name", "check_exists", "expected_exception"),
         [
             ("assert_student_access", True, None),
             ("assert_student_access", False, StudentRoleRequiredError),
@@ -55,13 +61,14 @@ class TestStudentPolicy:
     )
     def test_student_assertions(
         self,
-        mock_db,
-        mock_user,
-        mock_course,
-        method_name,
-        check_exists,
-        expected_exception,
+        mock_db: MagicMock,
+        mock_user: MagicMock,
+        mock_course: MagicMock,
+        method_name: str,
+        check_exists: bool,
+        expected_exception: type[Exception] | None,
     ) -> None:
+        """Test the student access assertion methods."""
         mock_db.query.return_value.scalar.return_value = check_exists
         method = getattr(StudentPolicy, method_name)
 
@@ -75,7 +82,7 @@ class TestStudentPolicy:
         mock_db.query.return_value.scalar.assert_called_once()
 
     @pytest.mark.parametrize(
-        "scenario,user_email,is_admin,teacher_check,parent_check,student_exists,expected_exception",
+        ("scenario", "user_email", "is_admin", "teacher_check", "parent_check", "student_exists", "expected_exception"),
         [
             ("denied_other_user", "other@test.com", False, False, False, True, NoAccessToStudentInfoError),
             ("allowed_self", "student@test.com", False, False, False, True, None),
@@ -98,20 +105,21 @@ class TestStudentPolicy:
     @patch("src.policies.students.ParentPolicy.check_parent_of_student")
     def test_assert_access_to_student(
         self,
-        mock_parent_check,
-        mock_teacher_check,
-        mock_course_assert,
-        mock_db,
-        mock_student,
-        mock_course,
-        scenario,
-        user_email,
-        is_admin,
-        teacher_check,
-        parent_check,
-        student_exists,
-        expected_exception,
+        mock_parent_check: MagicMock,
+        mock_teacher_check: MagicMock,
+        mock_course_assert: MagicMock,
+        mock_db: MagicMock,
+        mock_student: MagicMock,
+        mock_course: MagicMock,
+        scenario: str,
+        user_email: str,
+        is_admin: bool,
+        teacher_check: bool,
+        parent_check: bool,
+        student_exists: bool,
+        expected_exception: type[Exception] | None,
     ) -> None:
+        """Test the assert_access_to_student method with various scenarios."""
         if scenario == "allowed_self":
             mock_user = mock_student
             mock_user.isadmin = is_admin
