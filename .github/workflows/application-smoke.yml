@@ -7,13 +7,22 @@ on:
 jobs:
   application-launch:
     runs-on: ubuntu-latest
-    name: Test the application launch
+    name: Test docker compose
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+      
+      - name: Validate docker-compose configuration
+        run: |
+          docker compose config
+          if [ $? -ne 0 ]; then
+            echo "docker-compose.yml is invalid"
+            exit 1
+          fi
+          echo "docker-compose.yml is valid"
 
       - name: Docker compose up
         run: |
