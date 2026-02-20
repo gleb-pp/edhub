@@ -17,7 +17,7 @@ class CourseService:
         self.db = db
 
     def get_course(self, course_id: str) -> Course:
-        """Check whether a user with provided email exists in the system."""
+        """Get the course by the provided course_id."""
         course = self.db.query(Course).filter(Course.course_id == course_id).first()
         if not course:
             self.logger.warning(f"Attempt to access non-existing course {course_id}")
