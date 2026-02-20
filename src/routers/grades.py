@@ -38,9 +38,9 @@ async def grade_submission(
     db: Annotated[Session, Depends(get_db)],
     teacher_email: Annotated[str, Depends(get_current_user)],
     comment: Annotated[str | None, Query(
-        min_length=submission_settings.grade_comment_min_lenght,
-        max_length=submission_settings.grade_comment_max_lenght,
-        description=f"Comment must contain {submission_settings.grade_comment_min_lenght}-{submission_settings.grade_comment_max_lenght} symbols",
+        min_length=submission_settings.grade_comment_min_length,
+        max_length=submission_settings.grade_comment_max_length,
+        description=f"Comment must contain {submission_settings.grade_comment_min_length}-{submission_settings.grade_comment_max_length} symbols",
     )] = None,
 ) -> Success:
     """
@@ -60,7 +60,7 @@ async def grade_submission(
     try:
         teacher = user_service.get_user(teacher_email)
         course = course_service.get_course(course_id)
-        if not teacher.isadmin:
+        if not teacher.is_admin:
             TeacherPolicy.assert_teacher_access(teacher, course, db)
         student = user_service.get_user(student_email)
         StudentPolicy.assert_student_access(student, course, db)

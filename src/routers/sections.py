@@ -48,7 +48,7 @@ async def get_course_sections(
     try:
         user = user_service.get_user(user_email)
         course = course_service.get_course(course_id)
-        if not user.isadmin:
+        if not user.is_admin:
             CoursePolicy.assert_course_access(user, course, db)
         sections = section_service.get_course_sections(course)
         return [Section.model_validate(sec) for sec in sections]
@@ -85,7 +85,7 @@ async def get_course_feed(
     try:
         user = user_service.get_user(user_email)
         course = course_service.get_course(course_id)
-        if not user.isadmin:
+        if not user.is_admin:
             CoursePolicy.assert_course_access(user, course, db)
         sections = section_service.get_course_sections(course)
         course_feed = []
@@ -163,7 +163,7 @@ async def create_section(
     try:
         teacher = user_service.get_user(teacher_email)
         course = course_service.get_course(course_id)
-        if not teacher.isadmin:
+        if not teacher.is_admin:
             TeacherPolicy.assert_teacher_access(teacher, course, db)
         section = section_service.create_section(title, course)
         db.commit()
@@ -196,7 +196,7 @@ async def change_section_order(
     try:
         teacher = user_service.get_user(teacher_email)
         course = course_service.get_course(course_id)
-        if not teacher.isadmin:
+        if not teacher.is_admin:
             TeacherPolicy.assert_teacher_access(teacher, course, db)
         section_service.change_section_order(course, new_order)
         db.commit()
@@ -235,7 +235,7 @@ async def remove_section(
     try:
         teacher = user_service.get_user(teacher_email)
         course = course_service.get_course(course_id)
-        if not teacher.isadmin:
+        if not teacher.is_admin:
             TeacherPolicy.assert_teacher_access(teacher, course, db)
         section = section_service.get_section(course, section_id)
         section_service.remove_section(section)

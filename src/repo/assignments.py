@@ -42,9 +42,9 @@ class CourseAssignment(Base):
             ondelete="CASCADE",
         ),
         CheckConstraint(
-            f"length(title) BETWEEN {assignment_settings.name_min_lenght} AND {assignment_settings.name_max_lenght}",
+            f"length(title) BETWEEN {assignment_settings.name_min_length} AND {assignment_settings.name_max_length}",
         ),
         CheckConstraint(
-            f"length(description) BETWEEN {assignment_settings.description_min_lenght} AND {assignment_settings.description_max_lenght}",
+            f"length(description) BETWEEN {assignment_settings.description_min_length} AND {assignment_settings.description_max_length}",
         ),
     )

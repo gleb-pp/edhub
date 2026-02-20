@@ -124,7 +124,7 @@ class UserService:
 
     def give_admin_permissions(self, user: User) -> None:
         """Change the user password to a new one."""
-        user.isadmin = True
+        user.is_admin = True
         self.db.flush()
         self.logger.info(f"Granting admin permissions to user with email: {user.email}")
 
@@ -134,4 +134,4 @@ class UserService:
 
     def get_admins(self) -> list[User]:
         """Get the list of all administrators."""
-        return self.db.query(User).filter(User.isadmin).all()
+        return self.db.query(User).filter(User.is_admin).all()

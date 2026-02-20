@@ -43,7 +43,7 @@ async def get_course_teachers(
     try:
         user = user_service.get_user(user_email)
         course = course_service.get_course(course_id)
-        if not user.isadmin:
+        if not user.is_admin:
             CoursePolicy.assert_course_access(user, course, db)
         teachers = teacher_service.get_course_teachers(course)
         return [User.model_validate(tchr) for tchr in teachers]
@@ -74,7 +74,7 @@ async def invite_teacher(
         personalization_service = PersonalizationService(db)
         teacher = user_service.get_user(teacher_email)
         course = course_service.get_course(course_id)
-        if not teacher.isadmin:
+        if not teacher.is_admin:
             TeacherPolicy.assert_instructor_access(teacher, course)
         new_teacher = user_service.get_user(new_teacher_email)
         TeacherPolicy.assert_not_teacher(new_teacher, course, db)
@@ -101,7 +101,7 @@ async def invite_teacher(
 @router.delete("/teachers/{removing_teacher_email}")
 async def remove_teacher(
     course_id: str,
-    teacher_email: str,
+    removing_teacher_email: str,
     db: Annotated[Session, Depends(get_db)],
     instructor_email: Annotated[str, Depends(get_current_user)],
 ) -> Success:
@@ -119,11 +119,11 @@ async def remove_teacher(
     try:
         instructor = user_service.get_user(instructor_email)
         course = course_service.get_course(course_id)
-        if instructor.isadmin:
+        if instructor.is_admin:
             instructor = user_service.get_user(course.instructor)
         else:
             TeacherPolicy.assert_instructor_access(instructor, course)
-        teacher = user_service.get_user(teacher_email)
+        teacher = user_service.get_user(removing_teacher_email)
         TeacherPolicy.assert_teacher_access(teacher, course, db)
         teacher_service.remove_teacher(teacher, course)
         personalization_service.remove_course_participant(course, teacher)

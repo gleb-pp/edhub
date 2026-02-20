@@ -83,7 +83,7 @@ async def invite_parent(
     try:
         teacher = user_service.get_user(teacher_email)
         course = course_service.get_course(course_id)
-        if not teacher.isadmin:
+        if not teacher.is_admin:
             TeacherPolicy.assert_teacher_access(teacher, course, db)
         student = user_service.get_user(student_email)
         StudentPolicy.assert_student_access(student, course, db)
@@ -132,7 +132,7 @@ async def remove_parent(
     try:
         teacher = user_service.get_user(teacher_email)
         course = course_service.get_course(course_id)
-        if not teacher.isadmin:
+        if not teacher.is_admin:
             TeacherPolicy.assert_teacher_access(teacher, course, db)
         student = user_service.get_user(student_email)
         StudentPolicy.assert_student_access(student, course, db)

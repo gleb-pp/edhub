@@ -29,16 +29,16 @@ async def create_assignment(
     db: Annotated[Session, Depends(get_db)],
     title: Annotated[str, Query(
         ...,
-        min_length=assignment_settings.name_min_lenght,
-        max_length=assignment_settings.name_max_lenght,
+        min_length=assignment_settings.name_min_length,
+        max_length=assignment_settings.name_max_length,
         pattern=r"^[\p{L}0-9_ ]+$",
-        description=f"Title can contain only letters, digits, spaces, and underscores, {assignment_settings.name_min_lenght}-{assignment_settings.name_max_lenght} symbols",
+        description=f"Title can contain only letters, digits, spaces, and underscores, {assignment_settings.name_min_length}-{assignment_settings.name_max_length} symbols",
     )],
     description: Annotated[str, Query(
         ...,
-        min_length=assignment_settings.description_min_lenght,
-        max_length=assignment_settings.description_max_lenght,
-        description=f"Description must contain {assignment_settings.description_min_lenght}-{assignment_settings.description_max_lenght} symbols",
+        min_length=assignment_settings.description_min_length,
+        max_length=assignment_settings.description_max_length,
+        description=f"Description must contain {assignment_settings.description_min_length}-{assignment_settings.description_max_length} symbols",
     )],
     teacher_email: Annotated[str, Depends(get_current_user)],
 ) -> AssignmentID:
@@ -62,7 +62,7 @@ async def create_assignment(
     try:
         teacher = user_service.get_user(teacher_email)
         course = course_service.get_course(course_id)
-        if not teacher.isadmin:
+        if not teacher.is_admin:
             TeacherPolicy.assert_teacher_access(teacher, course, db)
         section = section_service.get_section(course, section_id)
         assignment = assignment_service.create_assignment(
@@ -99,7 +99,7 @@ async def remove_assignment(
     try:
         teacher = user_service.get_user(teacher_email)
         course = course_service.get_course(course_id)
-        if not teacher.isadmin:
+        if not teacher.is_admin:
             TeacherPolicy.assert_teacher_access(teacher, course, db)
         assignment = assignment_service.get_assignment(course, assignment_id)
         assignment_service.delete_assignment(assignment)
@@ -140,7 +140,7 @@ async def get_assignment(
     try:
         user = user_service.get_user(user_email)
         course = course_service.get_course(course_id)
-        if not user.isadmin:
+        if not user.is_admin:
             CoursePolicy.assert_course_access(user, course, db)
         assignment = assignment_service.get_assignment(course, assignment_id)
         return Assignment.model_validate(assignment)
@@ -179,7 +179,7 @@ async def get_course_assignments(
     try:
         user = user_service.get_user(user_email)
         course = course_service.get_course(course_id)
-        if not user.isadmin:
+        if not user.is_admin:
             CoursePolicy.assert_course_access(user, course, db)
         assignments = assignment_service.get_course_assignments(course)
         return [Assignment.model_validate(ass) for ass in assignments]

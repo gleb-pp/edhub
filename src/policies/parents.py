@@ -78,7 +78,7 @@ class ParentPolicy:
         if not (
             TeacherPolicy.check_teacher_access(user, course, db)
             or user.email == parent.email
-            or user.isadmin
+            or user.is_admin
         ):
             raise parent_errors.NoAccessToParentInfoError(
                 parent.email, user.email, course.course_id,

@@ -46,6 +46,6 @@ class Grade(Base):
             ondelete="CASCADE",
         ),
         CheckConstraint(
-            f"comment IS NULL OR length(comment) BETWEEN {submission_settings.grade_comment_min_lenght} AND {submission_settings.grade_comment_max_lenght}",
+            f"comment IS NULL OR length(comment) BETWEEN {submission_settings.grade_comment_min_length} AND {submission_settings.grade_comment_max_length}",
         ),
     )

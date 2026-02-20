@@ -47,8 +47,8 @@ class StudentPolicy:
             TeacherPolicy.check_teacher_access(user, course, db)
             or user.email == student.email
             or ParentPolicy.check_parent_of_student(user, student, course, db)
-            or user.isadmin
+            or user.is_admin
         ):
             raise student_errors.NoAccessToStudentInfoError(
-                student.email, user.email, course.id,
+                student.email, user.email, course.course_id,
             )

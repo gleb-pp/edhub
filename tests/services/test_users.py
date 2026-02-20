@@ -372,7 +372,7 @@ class TestUserService:
         result = service.get_admins()
         assert result == expected_admins
         mock_db.query.assert_called_once_with(User)
-        mock_db.query.return_value.filter.assert_called_once_with(User.isadmin)
+        mock_db.query.return_value.filter.assert_called_once_with(User.is_admin)
 
     def test_get_admins_empty(
         self,

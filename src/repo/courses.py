@@ -25,9 +25,9 @@ class Course(Base):
 
     __table_args__ = (
         CheckConstraint(
-            f"length(title) BETWEEN {course_settings.name_min_lenght} AND {course_settings.name_max_lenght}",
+            f"length(title) BETWEEN {course_settings.name_min_length} AND {course_settings.name_max_length}",
         ),
         CheckConstraint(
-            f"organization IS NULL OR length(organization) BETWEEN {course_settings.organization_min_lenght} AND {course_settings.organization_max_lenght}",
+            f"organization IS NULL OR length(organization) BETWEEN {course_settings.organization_min_length} AND {course_settings.organization_max_length}",
         ),
     )

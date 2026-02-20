@@ -29,16 +29,16 @@ async def create_material(
     db: Annotated[Session, Depends(get_db)],
     title: Annotated[str, Query(
         ...,
-        min_length=material_settings.name_min_lenght,
-        max_length=material_settings.name_max_lenght,
+        min_length=material_settings.name_min_length,
+        max_length=material_settings.name_max_length,
         pattern=r"^[\p{L}0-9_ ]+$",
-        description=f"Title can contain only letters, digits, spaces, and underscores, {material_settings.name_min_lenght}-{material_settings.name_max_lenght} symbols",
+        description=f"Title can contain only letters, digits, spaces, and underscores, {material_settings.name_min_length}-{material_settings.name_max_length} symbols",
     )],
     description: Annotated[str, Query(
         ...,
-        min_length=material_settings.description_min_lenght,
-        max_length=material_settings.description_max_lenght,
-        description=f"Description must contain {material_settings.description_min_lenght}-{material_settings.description_max_lenght} symbols",
+        min_length=material_settings.description_min_length,
+        max_length=material_settings.description_max_length,
+        description=f"Description must contain {material_settings.description_min_length}-{material_settings.description_max_length} symbols",
     )],
     teacher_email: Annotated[str, Depends(get_current_user)],
 ) -> MaterialID:
@@ -62,7 +62,7 @@ async def create_material(
     try:
         teacher = user_service.get_user(teacher_email)
         course = course_service.get_course(course_id)
-        if not teacher.isadmin:
+        if not teacher.is_admin:
             TeacherPolicy.assert_teacher_access(teacher, course, db)
         section = section_service.get_section(course, section_id)
         material = material_service.create_material(
@@ -99,7 +99,7 @@ async def remove_material(
     try:
         teacher = user_service.get_user(teacher_email)
         course = course_service.get_course(course_id)
-        if not teacher.isadmin:
+        if not teacher.is_admin:
             TeacherPolicy.assert_teacher_access(teacher, course, db)
         material = material_service.get_material(course, material_id)
         material_service.delete_material(material)
@@ -116,7 +116,7 @@ async def remove_material(
         raise HTTPException(status_code=403, detail=str(e)) from e
 
 
-@router.get("/material/{material_id}")
+@router.get("/materials/{material_id}")
 async def get_material(
     course_id: str,
     material_id: int,
@@ -140,7 +140,7 @@ async def get_material(
     try:
         user = user_service.get_user(user_email)
         course = course_service.get_course(course_id)
-        if not user.isadmin:
+        if not user.is_admin:
             CoursePolicy.assert_course_access(user, course, db)
         material = material_service.get_material(course, material_id)
         return Material.model_validate(material)

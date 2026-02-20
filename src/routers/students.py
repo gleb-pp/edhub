@@ -46,7 +46,7 @@ async def get_enrolled_students(
     try:
         user = user_service.get_user(user_email)
         course = course_service.get_course(course_id)
-        if not user.isadmin:
+        if not user.is_admin:
             CoursePolicy.assert_course_access(user, course, db)
         students = student_service.get_enrolled_students(course)
         return [User.model_validate(st) for st in students]
@@ -77,7 +77,7 @@ async def invite_student(
     try:
         teacher = user_service.get_user(teacher_email)
         course = course_service.get_course(course_id)
-        if not teacher.isadmin:
+        if not teacher.is_admin:
             TeacherPolicy.assert_teacher_access(teacher, course, db)
         student = user_service.get_user(student_email)
         StudentPolicy.assert_not_student(student, course, db)
@@ -122,7 +122,7 @@ async def remove_student(
     try:
         teacher = user_service.get_user(teacher_email)
         course = course_service.get_course(course_id)
-        if not teacher.isadmin:
+        if not teacher.is_admin:
             TeacherPolicy.assert_teacher_access(teacher, course, db)
         student = user_service.get_user(student_email)
         StudentPolicy.assert_student_access(student, course, db)

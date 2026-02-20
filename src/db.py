@@ -37,7 +37,7 @@ def create_default_admin_account() -> None:
             email=admin_settings.default_account_email,
             name=admin_settings.default_account_name,
             password_hash=hashed_password,
-            isadmin=True,
+            is_admin=True,
         )
         db.add(user)
         db.commit()

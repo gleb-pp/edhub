@@ -50,7 +50,7 @@ async def get_my_role(
             is_teacher=TeacherPolicy.check_teacher_access(user, course, db),
             is_student=StudentPolicy.check_student_access(user, course, db),
             is_parent=ParentPolicy.check_parent_access(user, course, db),
-            is_admin=user.isadmin,
+            is_admin=user.is_admin,
         )
     except user_errors.UserNotFoundError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e

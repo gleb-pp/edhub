@@ -103,7 +103,7 @@ async def get_assignment_submissions(
     try:
         teacher = user_service.get_user(teacher_email)
         course = course_service.get_course(course_id)
-        if not teacher.isadmin:
+        if not teacher.is_admin:
             TeacherPolicy.assert_teacher_access(teacher, course, db)
         assignment = assignment_service.get_assignment(course, assignment_id)
         submissions = submission_service.get_assignment_submissions(assignment)

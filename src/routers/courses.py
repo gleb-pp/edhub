@@ -53,16 +53,16 @@ async def create_course(
     user_email: Annotated[str, Depends(get_current_user)],
     title: Annotated[str, Query(
         ...,
-        min_length=course_settings.name_min_lenght,
-        max_length=course_settings.name_max_lenght,
+        min_length=course_settings.name_min_length,
+        max_length=course_settings.name_max_length,
         pattern=r"^[\p{L}0-9_ ]+$",
-        description=f"Title can contain only letters, digits, spaces, and underscores, {course_settings.name_min_lenght}-{course_settings.name_max_lenght} symbols",
+        description=f"Title can contain only letters, digits, spaces, and underscores, {course_settings.name_min_length}-{course_settings.name_max_length} symbols",
     )],
     organization: Annotated[str | None, Query(
-        min_length=course_settings.organization_min_lenght,
-        max_length=course_settings.organization_max_lenght,
+        min_length=course_settings.organization_min_length,
+        max_length=course_settings.organization_max_length,
         pattern=r"^[\p{L}0-9_ ]+$",
-        description=f"Organization can contain only letters, digits, spaces, and underscores, {course_settings.organization_min_lenght}-{course_settings.organization_max_lenght} symbols",
+        description=f"Organization can contain only letters, digits, spaces, and underscores, {course_settings.organization_min_length}-{course_settings.organization_max_length} symbols",
     )] = None,
 ) -> CourseID:
     """
@@ -107,7 +107,7 @@ async def delete_course(
     try:
         user = user_service.get_user(user_email)
         course = course_service.get_course(course_id)
-        if not user.isadmin:
+        if not user.is_admin:
             TeacherPolicy.assert_instructor_access(user, course)
         course_service.delete_course(course)
         db.commit()
@@ -138,7 +138,7 @@ async def get_course_info(
     try:
         user = user_service.get_user(user_email)
         course = course_service.get_course(course_id)
-        if not user.isadmin:
+        if not user.is_admin:
             CoursePolicy.assert_course_access(user, course, db)
         return Course.model_validate(course)
     except user_errors.UserNotFoundError as e:

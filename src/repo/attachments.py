@@ -28,7 +28,7 @@ class MaterialFile(Base):
     )
 
     __table_args__ = (
-        CheckConstraint(f"length(filename) <= {course_settings.filename_max_lenght}"),
+        CheckConstraint(f"length(filename) <= {course_settings.filename_max_length}"),
         ForeignKeyConstraint(
             ["course_id", "material_id"],
             ["course_materials.course_id", "course_materials.material_id"],
@@ -51,7 +51,7 @@ class AssignmentFile(Base):
     )
 
     __table_args__ = (
-        CheckConstraint(f"length(filename) <= {course_settings.filename_max_lenght}"),
+        CheckConstraint(f"length(filename) <= {course_settings.filename_max_length}"),
         ForeignKeyConstraint(
             ["course_id", "assignment_id"],
             ["course_assignments.course_id", "course_assignments.assignment_id"],
@@ -75,7 +75,7 @@ class SubmissionFile(Base):
     )
 
     __table_args__ = (
-        CheckConstraint(f"length(filename) <= {course_settings.filename_max_lenght}"),
+        CheckConstraint(f"length(filename) <= {course_settings.filename_max_length}"),
         ForeignKeyConstraint(
             ["course_id", "assignment_id", "email"],
             [
