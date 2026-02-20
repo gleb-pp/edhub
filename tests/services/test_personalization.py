@@ -11,31 +11,47 @@ from src.settings.course import course_settings
 
 
 class TestPersonalizationService:
+    """Unit tests for PersonalizationService methods."""
 
     @pytest.fixture
     def mock_db(self) -> MagicMock:
+        """Fixture for a mocked database session."""
         return MagicMock(spec=Session)
 
     @pytest.fixture
-    def service(self, mock_db) -> PersonalizationService:
+    def service(self, mock_db: MagicMock) -> PersonalizationService:
+        """Fixture for the PersonalizationService instance with a mocked database."""
         return PersonalizationService(mock_db)
 
     @pytest.fixture
     def mock_user(self) -> MagicMock:
+        """Fixture for a mocked User instance representing a course participant."""
         user = MagicMock(spec=User)
         user.email = "user@test.com"
         return user
 
     @pytest.fixture
-    def mock_course(self):
+    def mock_course(self) -> MagicMock:
+        """Fixture for a mocked Course instance."""
         course = MagicMock(spec=Course)
         course.course_id = 1
         return course
 
-    @pytest.mark.parametrize("max_order, expected_order", [(3, 4), (None, 1)])
+    @pytest.mark.parametrize(("max_order", "expected_order"), [(3, 4), (None, 1)])
     @patch.object(PersonalizationService.logger, "info")
     @patch("src.services.personalization.randbelow")
-    def test_add_course_participant(self, mock_randbelow, mock_logger, service, mock_db, mock_course, mock_user, max_order, expected_order) -> None:
+    def test_add_course_participant(
+        self,
+        mock_randbelow: MagicMock,
+        mock_logger: MagicMock,
+        service: PersonalizationService,
+        mock_db: MagicMock,
+        mock_course: MagicMock,
+        mock_user: MagicMock,
+        max_order: int | None,
+        expected_order: int,
+    ) -> None:
+        """Test that a course participant is added successfully."""
         mock_randbelow.return_value = 5
         mock_query = mock_db.query.return_value
         mock_query.filter.return_value.scalar.return_value = max_order
@@ -52,10 +68,21 @@ class TestPersonalizationService:
         mock_randbelow.assert_called_once_with(course_settings.emoji_count)
         mock_logger.assert_called_once()
 
-    @pytest.mark.parametrize("exists, should_raise", [(True, False), (False, True)])
+    @pytest.mark.parametrize(("exists", "should_raise"), [(True, False), (False, True)])
     @patch.object(PersonalizationService.logger, "info")
     @patch.object(PersonalizationService.logger, "warning")
-    def test_remove_course_participant(self, mock_warning, mock_info, service, mock_db, mock_course, mock_user, exists, should_raise) -> None:
+    def test_remove_course_participant(
+        self,
+        mock_warning: MagicMock,
+        mock_info: MagicMock,
+        service: PersonalizationService,
+        mock_db: MagicMock,
+        mock_course: MagicMock,
+        mock_user: MagicMock,
+        exists: bool,
+        should_raise: bool,
+    ) -> None:
+        """Test that a course participant is removed successfully."""
         mock_personal_info = MagicMock(spec=PersonalCourseInfo) if exists else None
         mock_query = mock_db.query.return_value
         mock_query.filter.return_value.first.return_value = mock_personal_info
@@ -74,9 +101,19 @@ class TestPersonalizationService:
             mock_info.assert_called_once()
             mock_warning.assert_not_called()
 
-    @pytest.mark.parametrize("exists, expected_emoji", [(True, 7), (False, None)])
+    @pytest.mark.parametrize(("exists", "expected_emoji"), [(True, 7), (False, None)])
     @patch.object(PersonalizationService.logger, "warning")
-    def test_get_course_emoji(self, mock_warning, service, mock_db, mock_course, mock_user, exists, expected_emoji) -> None:
+    def test_get_course_emoji(
+        self,
+        mock_warning: MagicMock,
+        service: PersonalizationService,
+        mock_db: MagicMock,
+        mock_course: MagicMock,
+        mock_user: MagicMock,
+        exists: bool,
+        expected_emoji: int | None,
+    ) -> None:
+        """Test that the course emoji is retrieved successfully."""
         mock_personal_info = MagicMock(spec=PersonalCourseInfo) if exists else None
         if exists:
             mock_personal_info.emoji_id = 7
@@ -92,14 +129,24 @@ class TestPersonalizationService:
                 service.get_course_emoji(mock_course, mock_user)
             mock_warning.assert_called_once()
 
-    @pytest.mark.parametrize("new_order, should_raise", [
+    @pytest.mark.parametrize(("new_order", "should_raise"), [
         (["course-2", "course-1"], False),
         (["course-1"], True),
         (["course-1", "course-3"], True),
     ])
     @patch.object(PersonalizationService.logger, "info")
     @patch.object(PersonalizationService.logger, "warning")
-    def test_change_courses_order(self, mock_warning, mock_info, service, mock_db, mock_user, new_order, should_raise) -> None:
+    def test_change_courses_order(
+        self,
+        mock_warning: MagicMock,
+        mock_info: MagicMock,
+        service: PersonalizationService,
+        mock_db: MagicMock,
+        mock_user: MagicMock,
+        new_order: list[str],
+        should_raise: bool,
+    ) -> None:
+        """Test that the courses order is changed successfully."""
         mock_course1 = MagicMock(spec=PersonalCourseInfo)
         mock_course1.course_id = "course-1"
         mock_course2 = MagicMock(spec=PersonalCourseInfo)
@@ -120,10 +167,21 @@ class TestPersonalizationService:
             mock_info.assert_called_once()
             mock_warning.assert_not_called()
 
-    @pytest.mark.parametrize("emoji_input, expected_value", [(5, 5), (None, None)])
+    @pytest.mark.parametrize(("emoji_input", "expected_value"), [(5, 5), (None, None)])
     @patch.object(PersonalizationService.logger, "info")
     @patch.object(PersonalizationService.logger, "warning")
-    def test_set_course_emoji(self, mock_warning, mock_info, service, mock_db, mock_course, mock_user, emoji_input, expected_value) -> None:
+    def test_set_course_emoji(
+        self,
+        mock_warning: MagicMock,
+        mock_info: MagicMock,
+        service: PersonalizationService,
+        mock_db: MagicMock,
+        mock_course: MagicMock,
+        mock_user: MagicMock,
+        emoji_input: int | None,
+        expected_value: int | None,
+    ) -> None:
+        """Test that the course emoji is set successfully."""
         mock_personal_info = MagicMock(spec=PersonalCourseInfo)
         mock_personal_info.emoji_id = 3
         mock_query = mock_db.query.return_value
@@ -137,7 +195,16 @@ class TestPersonalizationService:
 
     @patch.object(PersonalizationService.logger, "info")
     @patch.object(PersonalizationService.logger, "warning")
-    def test_set_course_emoji_not_found(self, mock_warning, mock_info, service, mock_db, mock_course, mock_user) -> None:
+    def test_set_course_emoji_not_found(
+        self,
+        mock_warning: MagicMock,
+        mock_info: MagicMock,
+        service: PersonalizationService,
+        mock_db: MagicMock,
+        mock_course: MagicMock,
+        mock_user: MagicMock,
+    ) -> None:
+        """Test that a warning is logged when trying to set the course emoji for a participant whose personalization info is not found."""
         mock_query = mock_db.query.return_value
         mock_filter = mock_query.filter.return_value
         mock_filter.first.return_value = None

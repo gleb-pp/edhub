@@ -55,7 +55,9 @@ ignore = [
     "S101",     # use of assert
     "PLR2004",  # unused function arguments
     "ARG002",   # unused method arguments
-    "S105"      # hardcoded password
+    "S105",     # hardcoded password
+    "PLR0913",  # too many arguments
+    "FBT001",   # boolean positional argument used in function definition
 ]
 
 [tool.mypy]

@@ -8,35 +8,50 @@ from src.services import ParentService
 
 
 class TestParentService:
+    """Unit tests for ParentService methods."""
 
     @pytest.fixture
     def mock_db(self) -> MagicMock:
+        """Fixture for a mocked database session."""
         return MagicMock(spec=Session)
 
     @pytest.fixture
-    def service(self, mock_db) -> ParentService:
+    def service(self, mock_db: MagicMock) -> ParentService:
+        """Fixture for the ParentService instance with a mocked database."""
         return ParentService(mock_db)
 
     @pytest.fixture
     def mock_parent(self) -> MagicMock:
+        """Fixture for a mocked User instance representing a parent."""
         parent = MagicMock(spec=User)
         parent.email = "parent@test.com"
         return parent
 
     @pytest.fixture
     def mock_student(self) -> MagicMock:
+        """Fixture for a mocked User instance representing a student."""
         student = MagicMock(spec=User)
         student.email = "student@test.com"
         return student
 
     @pytest.fixture
     def mock_course(self) -> MagicMock:
+        """Fixture for a mocked Course instance."""
         course = MagicMock(spec=Course)
         course.course_id = 1
         return course
 
     @patch.object(ParentService.logger, "info")
-    def test_invite_parent(self, mock_logger, service, mock_db, mock_parent, mock_student, mock_course) -> None:
+    def test_invite_parent(
+        self,
+        mock_logger: MagicMock,
+        service: ParentService,
+        mock_db: MagicMock,
+        mock_parent: MagicMock,
+        mock_student: MagicMock,
+        mock_course: MagicMock,
+    ) -> None:
+        """Test that a parent is invited successfully, and that the ParentAt relationship is created correctly."""
         service.invite_parent(mock_parent, mock_student, mock_course)
 
         mock_db.add.assert_called_once()
@@ -48,7 +63,7 @@ class TestParentService:
         mock_logger.assert_called_once()
 
     @pytest.mark.parametrize(
-        "existing, should_delete",
+        ("existing", "should_delete"),
         [
             (MagicMock(spec=ParentAt), True),
             (None, False),
@@ -57,15 +72,16 @@ class TestParentService:
     @patch.object(ParentService.logger, "info")
     def test_remove_parent_student(
         self,
-        mock_logger,
-        service,
-        mock_db,
-        mock_parent,
-        mock_student,
-        mock_course,
-        existing,
-        should_delete,
+        mock_logger: MagicMock,
+        service: ParentService,
+        mock_db: MagicMock,
+        mock_parent: MagicMock,
+        mock_student: MagicMock,
+        mock_course: MagicMock,
+        existing: MagicMock | None,
+        should_delete: bool,
     ) -> None:
+        """Test that a parent-student relationship is removed successfully, and that a warning is logged when the relationship is not found."""
         mock_query = mock_db.query.return_value
         mock_query.filter.return_value.first.return_value = existing
 
@@ -84,7 +100,7 @@ class TestParentService:
             mock_logger.assert_not_called()
 
     @pytest.mark.parametrize(
-        "existing, should_delete",
+        ("existing", "should_delete"),
         [
             (MagicMock(spec=ParentAt), True),
             (None, False),
@@ -93,14 +109,15 @@ class TestParentService:
     @patch.object(ParentService.logger, "info")
     def test_remove_parent(
         self,
-        mock_logger,
-        service,
-        mock_db,
-        mock_parent,
-        mock_course,
-        existing,
-        should_delete,
+        mock_logger: MagicMock,
+        service: ParentService,
+        mock_db: MagicMock,
+        mock_parent: MagicMock,
+        mock_course: MagicMock,
+        existing: MagicMock | None,
+        should_delete: bool,
     ) -> None:
+        """Test that a parent is removed successfully, and that a warning is logged when the parent is not found."""
         mock_query = mock_db.query.return_value
         mock_query.filter.return_value.first.return_value = existing
 
@@ -118,7 +135,7 @@ class TestParentService:
             mock_logger.assert_not_called()
 
     @pytest.mark.parametrize(
-        "returned_value, method_name",
+        ("returned_value", "method_name"),
         [
             ([MagicMock(spec=User), MagicMock(spec=User)], "get_students_parents"),
             ([], "get_students_parents"),
@@ -128,14 +145,15 @@ class TestParentService:
     )
     def test_relationship_queries(
         self,
-        service,
-        mock_db,
-        mock_parent,
-        mock_student,
-        mock_course,
-        returned_value,
-        method_name,
+        service: ParentService,
+        mock_db: MagicMock,
+        mock_parent: MagicMock,
+        mock_student: MagicMock,
+        mock_course: MagicMock,
+        returned_value: list[MagicMock],
+        method_name: str,
     ) -> None:
+        """Test that the correct relationships are queried successfully for both get_students_parents and get_parents_children methods."""
         mock_query = mock_db.query.return_value
         mock_join = mock_query.join.return_value
         mock_join.filter.return_value.all.return_value = returned_value
