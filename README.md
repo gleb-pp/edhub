@@ -1,3 +1,9 @@
+<div align="center">
+
+You can access the application on https://edhub.space/api/docs.
+
+</div>
+
 # 🎓 What is EdHub?
 
 EdHub is a Learning Management System designed to facilitate interaction among teachers, students, and parents. It enhances the educational process by simplifying communication between stakeholders and increasing student engagement in learning.
@@ -35,25 +41,11 @@ The backend is structured into several layers to ensure maintainability and scal
 
 ### Built With
 
-#### Core Technologies
-
-[![Python][Python]][Python-url]
-[![FastAPI][FastAPI]][FastAPI-url]
-[![Pydantic][Pydantic]][Pydantic-url]
-[![SQLAlchemy][SQLAlchemy]][SQLAlchemy-url]
-
-#### Testing & Code Quality
-
-[![Pytest][Pytest]][Pytest-url]
-[![Black][Black]][Black-url]
-[![Ruff][Ruff]][Ruff-url]
-[![Mypy][Mypy]][Mypy-url]
-
-#### Infrastructure
-
-[![PostgreSQL][PostgreSQL]][PostgreSQL-url]
-[![NginX][NginX]][NginX-url]
-[![Docker][Docker]][Docker-url]
+| **Framework & API** | <img src="https://img.shields.io/badge/FastAPI-005571?logo=fastapi" alt="FastAPI" height="20"> <img src="https://img.shields.io/badge/Pydantic-176DC3?logo=pydantic&logoColor=white" alt="Pydantic" height="20"> <img src="https://img.shields.io/badge/Poetry-4F5D95?logo=poetry&logoColor=white" alt="Poetry" height="20"> |
+| :--- | :--- |
+| **Database** | <img src="https://img.shields.io/badge/PostgreSQL-4169e1?logo=postgresql&logoColor=white" alt="PostgreSQL" height="20"> <img src="https://img.shields.io/badge/SQLAlchemy-3673A5?logo=sqlalchemy&logoColor=white" alt="SQLAlchemy" height="20"> |
+| **Infrastructure** | <img src="https://img.shields.io/badge/Docker-257bd6?logo=docker&logoColor=white" alt="Docker" height="20"> <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?logo=githubactions&logoColor=white" alt="GitHub Actions" height="20"> |
+| **Code Quality** | <img src="https://img.shields.io/badge/Pytest-008080?logo=pytest&logoColor=white" alt="Pytest" height="20"> <img src="https://img.shields.io/badge/Ruff-000000?logo=ruff&logoColor=white" alt="Ruff" height="20"> <img src="https://img.shields.io/badge/Mypy-4B8BBE?logo=python&logoColor=white" alt="Mypy" height="20"> |
 
 # 🚀 Local Startup
 
@@ -115,22 +107,25 @@ or documentation, feel free to open an issue.
 [Python-url]: https://www.python.org/
 [FastAPI]: https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi
 [FastAPI-url]: https://fastapi.tiangolo.com/
-[Pytest]: https://img.shields.io/badge/pytest-008080?style=for-the-badge&logo=pytest&logoColor=white
-[Pytest-url]: https://docs.pytest.org/
 [Pydantic]: https://img.shields.io/badge/Pydantic-176DC3?style=for-the-badge&logo=pydantic&logoColor=white
 [Pydantic-url]: https://pydantic.dev/
-[Black]: https://img.shields.io/badge/Black-000000?style=for-the-badge&logo=black&logoColor=white
-[Black-url]: https://black.readthedocs.io/
-[Mypy]: https://img.shields.io/badge/mypy-4B8BBE?style=for-the-badge&logo=python&logoColor=white
-[Mypy-url]: https://mypy.readthedocs.io/
-[Ruff]: https://img.shields.io/badge/ruff-000000?style=for-the-badge&logo=ruff&logoColor=white
-[Ruff-url]: https://ruff.rs/
 [SQLAlchemy]: https://img.shields.io/badge/SQLAlchemy-3673A5?style=for-the-badge&logo=sqlalchemy&logoColor=white
 [SQLAlchemy-url]: https://www.sqlalchemy.org/
+[Poetry]: https://img.shields.io/badge/Poetry-4F5D95?style=for-the-badge&logo=poetry&logoColor=white
+[Poetry-url]: https://python-poetry.org/
+
+[Pytest]: https://img.shields.io/badge/pytest-008080?style=for-the-badge&logo=pytest&logoColor=white
+[Pytest-url]: https://docs.pytest.org/
+[Ruff]: https://img.shields.io/badge/ruff-000000?style=for-the-badge&logo=ruff&logoColor=white
+[Ruff-url]: https://ruff.rs/
+[Mypy]: https://img.shields.io/badge/mypy-4B8BBE?style=for-the-badge&logo=python&logoColor=white
+[Mypy-url]: https://mypy.readthedocs.io/
 
 [PostgreSQL]: https://img.shields.io/badge/postgresql-4169e1?style=for-the-badge&logo=postgresql&logoColor=white
 [PostgreSQL-url]: https://www.postgresql.org/
-[NginX]: https://img.shields.io/badge/Nginx-009639?logo=nginx&logoColor=white&style=for-the-badge
-[NginX-url]: https://nginx.org/
 [Docker]: https://img.shields.io/badge/docker-257bd6?style=for-the-badge&logo=docker&logoColor=white
 [Docker-url]: https://www.docker.com/
+[Docker Compose]: https://img.shields.io/badge/docker--compose-2496ed?style=for-the-badge&logo=docker&logoColor=white
+[Docker Compose-url]: https://docs.docker.com/compose/
+[GitHub Actions]: https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white
+[GitHub Actions-url]: https://docs.github.com/en/actions

@@ -13,31 +13,28 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - edhub-network
 
   backend:
-    build: ./backend
+    build:
+      context: .
+      target: prod
     restart: always
+    ports:
+      - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://postgres:12345678@system_db:5432/edhub
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     depends_on:
       system_db:
         condition: service_healthy
-
-  # frontend:
-  #   build: ./frontend
-  #   restart: always
-  #   depends_on:
-  #     - backend
-
-  nginx:
-    build: ./nginx
-    restart: always
-    ports:
-      - 80:80
-    depends_on:
-      # - frontend
-      - backend
+    networks:
+      - edhub-network
 
 volumes:
   edhub_system_storage:
+
+networks:
+  edhub-network:
+    name: edhub-network

@@ -1,0 +1,32 @@
+name: Code style tests
+
+on:
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  lint_code:
+    runs-on: ubuntu-latest
+    name: Check backend code style with linter
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install --no-cache-dir --upgrade pip
+          pip install --no-cache-dir poetry
+          poetry config virtualenvs.create false
+          poetry install --with dev --no-root --no-interaction --no-ansi
+
+      
+      - name: Check Python code style with ruff
+        run: ruff check src/
+      
+      - name: Type check with mypy
+        run: mypy src/

@@ -1,0 +1,28 @@
+# Python virtual environments
+venv/
+myenv/
+.env
+tempCodeRunnerFile.py
+.pylintrc
+
+# Byte-compiled / cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+
+# Docker artifacts
+*.log
+
+# Git
+.git
+.gitignore
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
