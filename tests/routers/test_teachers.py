@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -20,11 +21,13 @@ pytestmark = pytest.mark.asyncio
 
 @pytest.fixture
 def mock_db() -> MagicMock:
+    """Fixture for mocking the database session."""
     return MagicMock()
 
 
 @pytest.fixture
-def mock_user_service():
+def mock_user_service() -> Generator[MagicMock, None, None]:
+    """Fixture for mocking the UserService."""
     with patch("src.routers.teachers.UserService") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
@@ -32,7 +35,8 @@ def mock_user_service():
 
 
 @pytest.fixture
-def mock_course_service():
+def mock_course_service() -> Generator[MagicMock, None, None]:
+    """Fixture for mocking the CourseService."""
     with patch("src.routers.teachers.CourseService") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
@@ -40,7 +44,8 @@ def mock_course_service():
 
 
 @pytest.fixture
-def mock_teacher_service():
+def mock_teacher_service() -> Generator[MagicMock, None, None]:
+    """Fixture for mocking the TeacherService."""
     with patch("src.routers.teachers.TeacherService") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
@@ -48,7 +53,8 @@ def mock_teacher_service():
 
 
 @pytest.fixture
-def mock_personalization_service():
+def mock_personalization_service() -> Generator[MagicMock, None, None]:
+    """Fixture for mocking the PersonalizationService."""
     with patch("src.routers.teachers.PersonalizationService") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
@@ -56,13 +62,15 @@ def mock_personalization_service():
 
 
 @pytest.fixture
-def mock_get_current_user():
+def mock_get_current_user() -> Generator[MagicMock, None, None]:
+    """Fixture for mocking the get_current_user dependency."""
     with patch("src.routers.teachers.get_current_user") as mock_func:
         yield mock_func
 
 
 @pytest.fixture
 def mock_user() -> MagicMock:
+    """Fixture for a mock user object."""
     user = MagicMock()
     user.isadmin = False
     user.email = "user@test.com"
@@ -71,6 +79,7 @@ def mock_user() -> MagicMock:
 
 @pytest.fixture
 def mock_instructor() -> MagicMock:
+    """Fixture for a mock instructor user object."""
     instructor = MagicMock()
     instructor.isadmin = False
     instructor.email = "instructor@test.com"
@@ -79,6 +88,7 @@ def mock_instructor() -> MagicMock:
 
 @pytest.fixture
 def mock_teacher() -> MagicMock:
+    """Fixture for a mock teacher user object."""
     teacher = MagicMock()
     teacher.isadmin = False
     teacher.email = "teacher@test.com"
@@ -87,6 +97,7 @@ def mock_teacher() -> MagicMock:
 
 @pytest.fixture
 def mock_course() -> MagicMock:
+    """Fixture for a mock course object."""
     course = MagicMock()
     course.course_id = "course-123"
     course.instructor = "instructor@test.com"
@@ -94,17 +105,19 @@ def mock_course() -> MagicMock:
 
 
 class TestTeachersRouter:
+    """Test suite for the teachers router."""
 
     async def test_get_course_teachers_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_teacher_service,
-        mock_get_current_user,
-        mock_user,
-        mock_course,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_teacher_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_user: MagicMock,
+        mock_course: MagicMock,
     ) -> None:
+        """Test the successful retrieval of course teachers."""
         mock_get_current_user.return_value = "user@test.com"
         mock_user.isadmin = False
         mock_user_service.get_user.return_value = mock_user
@@ -128,7 +141,7 @@ class TestTeachersRouter:
         assert mock_validate.call_count == 2
 
     @pytest.mark.parametrize(
-        "error_scenario,side_effect,expected_status,should_check_policy",
+        ("error_scenario", "side_effect", "expected_status", "should_check_policy"),
         [
             ("user_not_found", user_errors.UserNotFoundError("user@test.com"), 401, False),
             ("course_not_found", course_errors.CourseNotFoundError("course-123"), 400, False),
@@ -138,18 +151,19 @@ class TestTeachersRouter:
     )
     async def test_get_course_teachers_errors(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_teacher_service,
-        mock_get_current_user,
-        mock_user,
-        mock_course,
-        error_scenario,
-        side_effect,
-        expected_status,
-        should_check_policy,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_teacher_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_user: MagicMock,
+        mock_course: MagicMock,
+        error_scenario: str,
+        side_effect: Exception,
+        expected_status: int,
+        should_check_policy: bool,
     ) -> None:
+        """Test error scenarios for retrieving course teachers."""
         mock_get_current_user.return_value = "user@test.com"
 
         if error_scenario == "user_not_found":
@@ -163,10 +177,9 @@ class TestTeachersRouter:
             mock_course_service.get_course.return_value = mock_course
 
         with patch("src.routers.teachers.CoursePolicy.assert_course_access") as mock_assert_access:
+            if error_scenario == "participant_role_required":
+                mock_assert_access.side_effect = side_effect
             with pytest.raises(HTTPException) as exc_info:
-                if error_scenario == "participant_role_required":
-                    mock_assert_access.side_effect = side_effect
-
                 await get_course_teachers(mock_course.course_id, mock_db, "user@test.com")
 
             assert exc_info.value.status_code == expected_status
@@ -181,16 +194,17 @@ class TestTeachersRouter:
 
     async def test_invite_teacher_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_teacher_service,
-        mock_personalization_service,
-        mock_get_current_user,
-        mock_instructor,
-        mock_teacher,
-        mock_course,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_teacher_service: MagicMock,
+        mock_personalization_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_instructor: MagicMock,
+        mock_teacher: MagicMock,
+        mock_course: MagicMock,
     ) -> None:
+        """Test the successful invitation of a teacher to a course."""
         mock_get_current_user.return_value = "instructor@test.com"
         mock_instructor.isadmin = False
 
@@ -220,7 +234,7 @@ class TestTeachersRouter:
         mock_db.commit.assert_called_once()
 
     @pytest.mark.parametrize(
-        "error_scenario,side_effect,expected_status,policy_module,policy_name",
+        ("error_scenario", "side_effect", "expected_status", "policy_module", "policy_name"),
         [
             ("teacher_conflict", teacher_errors.TeacherRoleConflictError("teacher@test.com", "course-123"), 409, "TeacherPolicy", "assert_not_teacher"),
             ("student_conflict", student_errors.StudentRoleConflictError("student@test.com", "course-123"), 409, "StudentPolicy", "assert_not_student"),
@@ -229,21 +243,22 @@ class TestTeachersRouter:
     )
     async def test_invite_teacher_role_conflicts(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_teacher_service,
-        mock_personalization_service,
-        mock_get_current_user,
-        mock_instructor,
-        mock_teacher,
-        mock_course,
-        error_scenario,
-        side_effect,
-        expected_status,
-        policy_module,
-        policy_name,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_teacher_service: MagicMock,
+        mock_personalization_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_instructor: MagicMock,
+        mock_teacher: MagicMock,
+        mock_course: MagicMock,
+        error_scenario: str,
+        side_effect: Exception,
+        expected_status: int,
+        policy_module: str,
+        policy_name: str,
     ) -> None:
+        """Test role conflict scenarios when inviting a teacher to a course."""
         mock_get_current_user.return_value = "instructor@test.com"
         mock_instructor.isadmin = False
         mock_user_service.get_user.side_effect = [mock_instructor, mock_teacher]
@@ -289,7 +304,7 @@ class TestTeachersRouter:
         mock_db.commit.assert_not_called()
 
     @pytest.mark.parametrize(
-        "user_email,is_admin,expected_instructor_calls",
+        ("user_email", "is_admin", "expected_instructor_calls"),
         [
             ("instructor@test.com", False, 1),
             ("admin@test.com", True, 2),
@@ -298,19 +313,20 @@ class TestTeachersRouter:
     )
     async def test_remove_teacher_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_teacher_service,
-        mock_personalization_service,
-        mock_get_current_user,
-        mock_instructor,
-        mock_teacher,
-        mock_course,
-        user_email,
-        is_admin,
-        expected_instructor_calls,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_teacher_service: MagicMock,
+        mock_personalization_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_instructor: MagicMock,
+        mock_teacher: MagicMock,
+        mock_course: MagicMock,
+        user_email: str,
+        is_admin: bool,
+        expected_instructor_calls: int,
     ) -> None:
+        """Test the successful removal of a teacher from a course."""
         mock_get_current_user.return_value = user_email
         mock_instructor.isadmin = is_admin
 
@@ -347,7 +363,7 @@ class TestTeachersRouter:
         mock_db.commit.assert_called_once()
 
     @pytest.mark.parametrize(
-        "error_scenario,side_effect,expected_status,should_check_policies",
+        ("error_scenario", "side_effect", "expected_status", "should_check_policies"),
         [
             ("instructor_not_found", user_errors.UserNotFoundError("instructor@test.com"), 401, False),
             ("teacher_not_found", [MagicMock(), user_errors.UserNotFoundError("teacher@test.com")], 400, True),
@@ -365,20 +381,21 @@ class TestTeachersRouter:
     )
     async def test_remove_teacher_errors(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_teacher_service,
-        mock_personalization_service,
-        mock_get_current_user,
-        mock_instructor,
-        mock_teacher,
-        mock_course,
-        error_scenario,
-        side_effect,
-        expected_status,
-        should_check_policies,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_teacher_service: MagicMock,
+        mock_personalization_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_instructor: MagicMock,
+        mock_teacher: MagicMock,
+        mock_course: MagicMock,
+        error_scenario: str,
+        side_effect: Exception,
+        expected_status: int,
+        should_check_policies: bool,
     ) -> None:
+        """Test error scenarios for removing a teacher from a course."""
         mock_get_current_user.return_value = "instructor@test.com"
         mock_instructor.isadmin = False
 
@@ -396,12 +413,11 @@ class TestTeachersRouter:
             patch("src.routers.teachers.TeacherPolicy.assert_instructor_access") as mock_assert_instructor,
             patch("src.routers.teachers.TeacherPolicy.assert_teacher_access") as mock_assert_teacher,
         ):
+            if error_scenario == "instructor_role_required":
+                mock_assert_instructor.side_effect = side_effect
+            elif error_scenario == "teacher_role_required":
+                mock_assert_teacher.side_effect = side_effect
             with pytest.raises(HTTPException) as exc_info:
-                if error_scenario == "instructor_role_required":
-                    mock_assert_instructor.side_effect = side_effect
-                elif error_scenario == "teacher_role_required":
-                    mock_assert_teacher.side_effect = side_effect
-
                 await remove_teacher(
                     mock_course.course_id, mock_teacher.email, mock_db, "instructor@test.com",
                 )
@@ -414,15 +430,16 @@ class TestTeachersRouter:
 
     async def test_change_course_instructor_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_teacher_service,
-        mock_get_current_user,
-        mock_instructor,
-        mock_teacher,
-        mock_course,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_teacher_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_instructor: MagicMock,
+        mock_teacher: MagicMock,
+        mock_course: MagicMock,
     ) -> None:
+        """Test the successful change of a course instructor."""
         mock_get_current_user.return_value = "instructor@test.com"
         mock_instructor.isadmin = False
 
@@ -447,7 +464,7 @@ class TestTeachersRouter:
         mock_db.commit.assert_called_once()
 
     @pytest.mark.parametrize(
-        "error_scenario,side_effect,expected_status,should_check_policies",
+        ("error_scenario", "side_effect", "expected_status", "should_check_policies"),
         [
             ("instructor_not_found", user_errors.UserNotFoundError("instructor@test.com"), 401, False),
             ("new_instructor_not_found", [MagicMock(), user_errors.UserNotFoundError("teacher@test.com")], 404, True),
@@ -465,19 +482,20 @@ class TestTeachersRouter:
     )
     async def test_change_course_instructor_errors(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_teacher_service,
-        mock_get_current_user,
-        mock_instructor,
-        mock_teacher,
-        mock_course,
-        error_scenario,
-        side_effect,
-        expected_status,
-        should_check_policies,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_teacher_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_instructor: MagicMock,
+        mock_teacher: MagicMock,
+        mock_course: MagicMock,
+        error_scenario: str,
+        side_effect: Exception,
+        expected_status: int,
+        should_check_policies: bool,
     ) -> None:
+        """Test error scenarios for changing a course instructor."""
         mock_get_current_user.return_value = "instructor@test.com"
         mock_instructor.isadmin = False
 
@@ -495,15 +513,12 @@ class TestTeachersRouter:
             patch("src.routers.teachers.TeacherPolicy.assert_instructor_access") as mock_assert_instructor,
             patch("src.routers.teachers.TeacherPolicy.assert_teacher_access") as mock_assert_teacher,
         ):
+            if error_scenario == "instructor_role_required":
+                mock_assert_instructor.side_effect = side_effect
+            elif error_scenario == "teacher_role_required":
+                mock_assert_teacher.side_effect = side_effect
             with pytest.raises(HTTPException) as exc_info:
-                if error_scenario == "instructor_role_required":
-                    mock_assert_instructor.side_effect = side_effect
-                elif error_scenario == "teacher_role_required":
-                    mock_assert_teacher.side_effect = side_effect
-
-                await change_course_instructor(
-                    mock_course.course_id, mock_teacher.email, mock_db, "instructor@test.com",
-                )
+                await change_course_instructor(mock_course.course_id, mock_teacher.email, mock_db, "instructor@test.com")
 
             assert exc_info.value.status_code == expected_status
 

@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -19,12 +20,14 @@ pytestmark = pytest.mark.asyncio
 
 
 @pytest.fixture
-def mock_db():
+def mock_db() -> MagicMock:
+    """Fixture for mocking the database session."""
     return MagicMock()
 
 
 @pytest.fixture
-def mock_user_service():
+def mock_user_service() -> Generator[MagicMock, None, None]:
+    """Fixture for mocking the UserService."""
     with patch("src.routers.parents.UserService") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
@@ -32,7 +35,8 @@ def mock_user_service():
 
 
 @pytest.fixture
-def mock_course_service():
+def mock_course_service() -> Generator[MagicMock, None, None]:
+    """Fixture for mocking the CourseService."""
     with patch("src.routers.parents.CourseService") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
@@ -40,7 +44,8 @@ def mock_course_service():
 
 
 @pytest.fixture
-def mock_parent_service():
+def mock_parent_service() -> Generator[MagicMock, None, None]:
+    """Fixture for mocking the ParentService."""
     with patch("src.routers.parents.ParentService") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
@@ -48,7 +53,8 @@ def mock_parent_service():
 
 
 @pytest.fixture
-def mock_personalization_service():
+def mock_personalization_service() -> Generator[MagicMock, None, None]:
+    """Fixture for mocking the PersonalizationService."""
     with patch("src.routers.parents.PersonalizationService") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
@@ -56,13 +62,15 @@ def mock_personalization_service():
 
 
 @pytest.fixture
-def mock_get_current_user():
+def mock_get_current_user() -> Generator[MagicMock, None, None]:
+    """Fixture for mocking the get_current_user dependency."""
     with patch("src.routers.parents.get_current_user") as mock_func:
         yield mock_func
 
 
 @pytest.fixture
-def mock_user():
+def mock_user() -> MagicMock:
+    """Fixture for a mock user object."""
     user = MagicMock()
     user.isadmin = False
     user.email = "user@test.com"
@@ -70,7 +78,8 @@ def mock_user():
 
 
 @pytest.fixture
-def mock_teacher():
+def mock_teacher() -> MagicMock:
+    """Fixture for a mock teacher object."""
     teacher = MagicMock()
     teacher.isadmin = False
     teacher.email = "teacher@test.com"
@@ -78,39 +87,44 @@ def mock_teacher():
 
 
 @pytest.fixture
-def mock_student():
+def mock_student() -> MagicMock:
+    """Fixture for a mock student object."""
     student = MagicMock()
     student.email = "student@test.com"
     return student
 
 
 @pytest.fixture
-def mock_parent():
+def mock_parent() -> MagicMock:
+    """Fixture for a mock parent object."""
     parent = MagicMock()
     parent.email = "parent@test.com"
     return parent
 
 
 @pytest.fixture
-def mock_course():
+def mock_course() -> MagicMock:
+    """Fixture for a mock course object."""
     course = MagicMock()
     course.course_id = "course-123"
     return course
 
 
 class TestParentsRouter:
+    """Test suite for the parents router."""
 
     async def test_get_students_parents_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_parent_service,
-        mock_get_current_user,
-        mock_user,
-        mock_student,
-        mock_course,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_parent_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_user: MagicMock,
+        mock_student: MagicMock,
+        mock_course: MagicMock,
     ) -> None:
+        """Test successful retrieval of a student's parents."""
         mock_get_current_user.return_value = "user@test.com"
         mock_user_service.get_user.side_effect = [mock_user, mock_student]
         mock_course_service.get_course.return_value = mock_course
@@ -136,7 +150,7 @@ class TestParentsRouter:
         assert mock_validate.call_count == 2
 
     @pytest.mark.parametrize(
-        "error_scenario,side_effect,expected_status,should_check_access",
+        ("error_scenario", "side_effect", "expected_status", "should_check_access"),
         [
             ("user_not_found", user_errors.UserNotFoundError("user@test.com"), 401, False),
             ("student_not_found", [MagicMock(), user_errors.UserNotFoundError("student@test.com")], 400, False),
@@ -148,19 +162,20 @@ class TestParentsRouter:
     )
     async def test_get_students_parents_errors(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_parent_service,
-        mock_get_current_user,
-        mock_user,
-        mock_student,
-        mock_course,
-        error_scenario,
-        side_effect,
-        expected_status,
-        should_check_access,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_parent_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_user: MagicMock,
+        mock_student: MagicMock,
+        mock_course: MagicMock,
+        error_scenario: str,
+        side_effect: Exception,
+        expected_status: int,
+        should_check_access: bool,
     ) -> None:
+        """Test error scenarios for retrieving a student's parents."""
         mock_get_current_user.return_value = "user@test.com"
 
         if error_scenario in ("user_not_found", "student_not_found"):
@@ -174,10 +189,9 @@ class TestParentsRouter:
             mock_course_service.get_course.return_value = mock_course
 
         with patch("src.routers.parents.StudentPolicy.assert_access_to_student") as mock_assert_access:
+            if error_scenario in ["student_role_required", "access_denied"]:
+                mock_assert_access.side_effect = side_effect
             with pytest.raises(HTTPException) as exc_info:
-                if error_scenario in ["student_role_required", "access_denied"]:
-                    mock_assert_access.side_effect = side_effect
-
                 await get_students_parents(
                     mock_course.course_id, mock_student.email, mock_db, "user@test.com",
                 )
@@ -199,18 +213,19 @@ class TestParentsRouter:
     )
     async def test_invite_parent_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_parent_service,
-        mock_personalization_service,
-        mock_get_current_user,
-        mock_teacher,
-        mock_student,
-        mock_parent,
-        mock_course,
-        parent_already_in_course,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_parent_service: MagicMock,
+        mock_personalization_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_teacher: MagicMock,
+        mock_student: MagicMock,
+        mock_parent: MagicMock,
+        mock_course: MagicMock,
+        parent_already_in_course: bool,
     ) -> None:
+        """Test successful invitation of a parent to a course."""
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 
@@ -253,7 +268,7 @@ class TestParentsRouter:
         mock_db.commit.assert_called_once()
 
     @pytest.mark.parametrize(
-        "error_scenario,side_effect,expected_status,should_call_policies",
+        ("error_scenario", "side_effect", "expected_status", "should_call_policies"),
         [
             ("teacher_not_found", user_errors.UserNotFoundError("teacher@test.com"), 401, False),
             ("student_not_found", [MagicMock(), user_errors.UserNotFoundError("student@test.com")], 400, True),
@@ -279,21 +294,22 @@ class TestParentsRouter:
     )
     async def test_invite_parent_errors(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_parent_service,
-        mock_personalization_service,
-        mock_get_current_user,
-        mock_teacher,
-        mock_student,
-        mock_parent,
-        mock_course,
-        error_scenario,
-        side_effect,
-        expected_status,
-        should_call_policies,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_parent_service: MagicMock,
+        mock_personalization_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_teacher: MagicMock,
+        mock_student: MagicMock,
+        mock_parent: MagicMock,
+        mock_course: MagicMock,
+        error_scenario: str,
+        side_effect: Exception,
+        expected_status: int,
+        should_call_policies: bool,
     ) -> None:
+        """Test error scenarios for inviting a parent to a course."""
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 
@@ -315,18 +331,17 @@ class TestParentsRouter:
             patch("src.routers.parents.ParentPolicy.assert_not_parent_of_student") as mock_assert_not_parent,
             patch("src.routers.parents.ParentPolicy.check_parent_access", return_value=False),
         ):
+            if error_scenario == "teacher_role_required":
+                mock_assert_teacher.side_effect = side_effect
+            elif error_scenario == "student_role_required":
+                mock_assert_student.side_effect = side_effect
+            elif error_scenario == "teacher_conflict":
+                mock_assert_not_teacher.side_effect = side_effect
+            elif error_scenario == "student_conflict":
+                mock_assert_not_student.side_effect = side_effect
+            elif error_scenario == "parent_already_exists":
+                mock_assert_not_parent.side_effect = side_effect
             with pytest.raises(HTTPException) as exc_info:
-                if error_scenario == "teacher_role_required":
-                    mock_assert_teacher.side_effect = side_effect
-                elif error_scenario == "student_role_required":
-                    mock_assert_student.side_effect = side_effect
-                elif error_scenario == "teacher_conflict":
-                    mock_assert_not_teacher.side_effect = side_effect
-                elif error_scenario == "student_conflict":
-                    mock_assert_not_student.side_effect = side_effect
-                elif error_scenario == "parent_already_exists":
-                    mock_assert_not_parent.side_effect = side_effect
-
                 await invite_parent(
                     mock_course.course_id,
                     mock_student.email,
@@ -348,18 +363,19 @@ class TestParentsRouter:
     )
     async def test_remove_parent_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_parent_service,
-        mock_personalization_service,
-        mock_get_current_user,
-        mock_teacher,
-        mock_student,
-        mock_parent,
-        mock_course,
-        parent_still_in_course,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_parent_service: MagicMock,
+        mock_personalization_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_teacher: MagicMock,
+        mock_student: MagicMock,
+        mock_parent: MagicMock,
+        mock_course: MagicMock,
+        parent_still_in_course: bool,
     ) -> None:
+        """Test successful removal of a parent from a course."""
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 
@@ -394,7 +410,7 @@ class TestParentsRouter:
         mock_db.commit.assert_called_once()
 
     @pytest.mark.parametrize(
-        "error_scenario,side_effect,expected_status,should_check_policies",
+        ("error_scenario", "side_effect", "expected_status", "should_check_policies"),
         [
             ("teacher_not_found", user_errors.UserNotFoundError("teacher@test.com"), 401, False),
             ("student_not_found", [MagicMock(), user_errors.UserNotFoundError("student@test.com")], 400, True),
@@ -416,21 +432,22 @@ class TestParentsRouter:
     )
     async def test_remove_parent_errors(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_parent_service,
-        mock_personalization_service,
-        mock_get_current_user,
-        mock_teacher,
-        mock_student,
-        mock_parent,
-        mock_course,
-        error_scenario,
-        side_effect,
-        expected_status,
-        should_check_policies,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_parent_service: MagicMock,
+        mock_personalization_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_teacher: MagicMock,
+        mock_student: MagicMock,
+        mock_parent: MagicMock,
+        mock_course: MagicMock,
+        error_scenario: str,
+        side_effect: Exception,
+        expected_status: int,
+        should_check_policies: bool,
     ) -> None:
+        """Test error scenarios for removing a parent from a course."""
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 
@@ -450,14 +467,13 @@ class TestParentsRouter:
             patch("src.routers.parents.ParentPolicy.assert_parent_of_student") as mock_assert_parent,
             patch("src.routers.parents.ParentPolicy.check_parent_access", return_value=False),
         ):
+            if error_scenario == "teacher_role_required":
+                mock_assert_teacher.side_effect = side_effect
+            elif error_scenario == "student_role_required":
+                mock_assert_student.side_effect = side_effect
+            elif error_scenario == "parent_role_required":
+                mock_assert_parent.side_effect = side_effect
             with pytest.raises(HTTPException) as exc_info:
-                if error_scenario == "teacher_role_required":
-                    mock_assert_teacher.side_effect = side_effect
-                elif error_scenario == "student_role_required":
-                    mock_assert_student.side_effect = side_effect
-                elif error_scenario == "parent_role_required":
-                    mock_assert_parent.side_effect = side_effect
-
                 await remove_parent(
                     mock_course.course_id,
                     mock_student.email,
@@ -474,15 +490,16 @@ class TestParentsRouter:
 
     async def test_get_parents_children_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_parent_service,
-        mock_get_current_user,
-        mock_user,
-        mock_parent,
-        mock_course,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_parent_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_user: MagicMock,
+        mock_parent: MagicMock,
+        mock_course: MagicMock,
     ) -> None:
+        """Test successful retrieval of a parent's children."""
         mock_get_current_user.return_value = "user@test.com"
         mock_user_service.get_user.side_effect = [mock_user, mock_parent]
         mock_course_service.get_course.return_value = mock_course
@@ -508,7 +525,7 @@ class TestParentsRouter:
         assert mock_validate.call_count == 2
 
     @pytest.mark.parametrize(
-        "error_scenario,side_effect,expected_status,should_check_access",
+        ("error_scenario", "side_effect", "expected_status", "should_check_access"),
         [
             ("user_not_found", user_errors.UserNotFoundError("user@test.com"), 401, False),
             ("parent_not_found", [MagicMock(), user_errors.UserNotFoundError("parent@test.com")], 400, False),
@@ -520,19 +537,20 @@ class TestParentsRouter:
     )
     async def test_get_parents_children_errors(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_parent_service,
-        mock_get_current_user,
-        mock_user,
-        mock_parent,
-        mock_course,
-        error_scenario,
-        side_effect,
-        expected_status,
-        should_check_access,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_parent_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_user: MagicMock,
+        mock_parent: MagicMock,
+        mock_course: MagicMock,
+        error_scenario: str,
+        side_effect: Exception,
+        expected_status: int,
+        should_check_access: bool,
     ) -> None:
+        """Test error scenarios for retrieving a parent's children."""
         mock_get_current_user.return_value = "user@test.com"
 
         if error_scenario in ("user_not_found", "parent_not_found"):
@@ -546,10 +564,9 @@ class TestParentsRouter:
             mock_course_service.get_course.return_value = mock_course
 
         with patch("src.routers.parents.ParentPolicy.assert_access_to_parent") as mock_assert_access:
+            if error_scenario in ["parent_role_required", "access_denied"]:
+                mock_assert_access.side_effect = side_effect
             with pytest.raises(HTTPException) as exc_info:
-                if error_scenario in ["parent_role_required", "access_denied"]:
-                    mock_assert_access.side_effect = side_effect
-
                 await get_parents_children(
                     mock_course.course_id, mock_parent.email, mock_db, "user@test.com",
                 )

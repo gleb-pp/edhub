@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -17,25 +18,35 @@ from src.routers.admins import (
 pytestmark = pytest.mark.asyncio
 
 @pytest.fixture
-def mock_db():
+def mock_db() -> MagicMock:
+    """Mock for the database session."""
     return MagicMock()
 
 @pytest.fixture
-def mock_user_service():
+def mock_user_service() -> Generator[MagicMock, None, None]:
+    """Mock for the UserService class."""
     with patch("src.routers.admins.UserService") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
         yield mock_instance
 
 @pytest.fixture
-def mock_get_current_user():
+def mock_get_current_user() -> Generator[MagicMock, None, None]:
+    """Mock for the get_current_user dependency."""
     with patch("src.routers.admins.get_current_user") as mock_func:
         yield mock_func
 
 
 class TestAdminRouter:
+    """Test suite for the admin router endpoints."""
 
-    async def test_remove_user_success(self, mock_db, mock_user_service, mock_get_current_user) -> None:
+    async def test_remove_user_success(
+        self,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_get_current_user: MagicMock,
+    ) -> None:
+        """Test the successful removal of a user by an admin."""
         mock_get_current_user.return_value = "admin@test.com"
         mock_admin = MagicMock()
         mock_deleted_user = MagicMock()
@@ -50,7 +61,7 @@ class TestAdminRouter:
         mock_db.commit.assert_called_once()
 
     @pytest.mark.parametrize(
-        "current_user,target_user,side_effect,expected_status",
+        ("current_user", "target_user", "side_effect", "expected_status"),
         [
             ("admin@test.com", "user@test.com", user_errors.UserNotFoundError("admin@test.com"), 401),
             ("admin@test.com", "user@test.com", [MagicMock(), user_errors.UserNotFoundError("user@test.com")], 404),
@@ -58,7 +69,17 @@ class TestAdminRouter:
             ("admin@test.com", "admin@test.com", admin_errors.DeleteLastAdminError(), 403),
         ],
     )
-    async def test_remove_user_errors(self, mock_db, mock_user_service, mock_get_current_user, current_user, target_user, side_effect, expected_status) -> None:
+    async def test_remove_user_errors(
+        self,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        current_user: str,
+        target_user: str,
+        side_effect: Exception,
+        expected_status: int,
+    ) -> None:
+        """Test various error scenarios when attempting to remove a user."""
         mock_get_current_user.return_value = current_user
 
         if isinstance(side_effect, list):
@@ -100,7 +121,13 @@ class TestAdminRouter:
 
         mock_db.commit.assert_not_called()
 
-    async def test_give_admin_permissions_success(self, mock_db, mock_user_service, mock_get_current_user) -> None:
+    async def test_give_admin_permissions_success(
+        self,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_get_current_user: MagicMock,
+    ) -> None:
+        """Test the successful granting of admin permissions to a user."""
         mock_get_current_user.return_value = "admin@test.com"
         mock_admin = MagicMock()
         mock_new_admin = MagicMock()
@@ -115,14 +142,24 @@ class TestAdminRouter:
         mock_db.commit.assert_called_once()
 
     @pytest.mark.parametrize(
-        "current_user,target_user,side_effect,expected_status",
+        ("current_user", "target_user", "side_effect", "expected_status"),
         [
             ("admin@test.com", "new_admin@test.com", user_errors.UserNotFoundError("admin@test.com"), 401),
             ("admin@test.com", "new_admin@test.com", [MagicMock(), user_errors.UserNotFoundError("new_admin@test.com")], 404),
             ("non_admin@test.com", "new_admin@test.com", admin_errors.AdminRoleRequiredError("non_admin@test.com"), 403),
         ],
     )
-    async def test_give_admin_permissions_errors(self, mock_db, mock_user_service, mock_get_current_user, current_user, target_user, side_effect, expected_status) -> None:
+    async def test_give_admin_permissions_errors(
+        self,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        current_user: str,
+        target_user: str,
+        side_effect: Exception,
+        expected_status: int,
+    ) -> None:
+        """Test various error scenarios when attempting to grant admin permissions to a user."""
         mock_get_current_user.return_value = current_user
 
         if isinstance(side_effect, list):
@@ -146,7 +183,12 @@ class TestAdminRouter:
         mock_user_service.give_admin_permissions.assert_not_called()
         mock_db.commit.assert_not_called()
 
-    async def test_get_all_users_success(self, mock_db, mock_user_service) -> None:
+    async def test_get_all_users_success(
+        self,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+    ) -> None:
+        """Test the successful retrieval of all users by an admin."""
         mock_admin = MagicMock()
         mock_users = [MagicMock(), MagicMock()]
         mock_user_service.get_user.return_value = mock_admin
@@ -161,7 +203,12 @@ class TestAdminRouter:
         mock_user_service.get_all_users.assert_called_once()
         assert mock_validate.call_count == 2
 
-    async def test_get_admins_success(self, mock_db, mock_user_service) -> None:
+    async def test_get_admins_success(
+        self,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+    ) -> None:
+        """Test the successful retrieval of all admins."""
         mock_admins = [MagicMock(), MagicMock()]
         mock_user_service.get_admins.return_value = mock_admins
 
@@ -173,7 +220,12 @@ class TestAdminRouter:
         mock_user_service.get_admins.assert_called_once()
         assert mock_validate.call_count == 2
 
-    async def test_get_all_courses_success(self, mock_db, mock_user_service) -> None:
+    async def test_get_all_courses_success(
+        self,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+    ) -> None:
+        """Test the successful retrieval of all courses by an admin."""
         with patch("src.routers.admins.CourseService") as mock_course_service_class:
             mock_course_service = MagicMock()
             mock_course_service_class.return_value = mock_course_service

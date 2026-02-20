@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -15,12 +16,14 @@ pytestmark = pytest.mark.asyncio
 
 
 @pytest.fixture
-def mock_db():
+def mock_db() -> MagicMock:
+    """Mock for the database session."""
     return MagicMock()
 
 
 @pytest.fixture
-def mock_user_service():
+def mock_user_service() -> Generator[MagicMock, None, None]:
+    """Mock for the UserService class."""
     with patch("src.routers.materials.UserService") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
@@ -28,7 +31,8 @@ def mock_user_service():
 
 
 @pytest.fixture
-def mock_course_service():
+def mock_course_service() -> Generator[MagicMock, None, None]:
+    """Mock for the CourseService class."""
     with patch("src.routers.materials.CourseService") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
@@ -36,7 +40,8 @@ def mock_course_service():
 
 
 @pytest.fixture
-def mock_section_service():
+def mock_section_service() -> Generator[MagicMock, None, None]:
+    """Mock for the SectionService class."""
     with patch("src.routers.materials.SectionService") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
@@ -44,7 +49,8 @@ def mock_section_service():
 
 
 @pytest.fixture
-def mock_material_service():
+def mock_material_service() -> Generator[MagicMock, None, None]:
+    """Mock for the MaterialService class."""
     with patch("src.routers.materials.MaterialService") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
@@ -52,13 +58,15 @@ def mock_material_service():
 
 
 @pytest.fixture
-def mock_get_current_user():
+def mock_get_current_user() -> Generator[MagicMock, None, None]:
+    """Mock for the get_current_user dependency."""
     with patch("src.routers.materials.get_current_user") as mock_func:
         yield mock_func
 
 
 @pytest.fixture
-def mock_teacher():
+def mock_teacher() -> MagicMock:
+    """Mock for a teacher user."""
     teacher = MagicMock()
     teacher.isadmin = False
     teacher.email = "teacher@test.com"
@@ -66,7 +74,8 @@ def mock_teacher():
 
 
 @pytest.fixture
-def mock_user():
+def mock_user() -> MagicMock:
+    """Mock for a regular user."""
     user = MagicMock()
     user.isadmin = False
     user.email = "user@test.com"
@@ -74,21 +83,24 @@ def mock_user():
 
 
 @pytest.fixture
-def mock_course():
+def mock_course() -> MagicMock:
+    """Mock for a course object."""
     course = MagicMock()
     course.course_id = "course-123"
     return course
 
 
 @pytest.fixture
-def mock_section():
+def mock_section() -> MagicMock:
+    """Mock for a section object."""
     section = MagicMock()
     section.section_id = 1
     return section
 
 
 @pytest.fixture
-def mock_material():
+def mock_material() -> MagicMock:
+    """Mock for a material object."""
     material = MagicMock()
     material.course_id = "course-123"
     material.material_id = 42
@@ -98,9 +110,10 @@ def mock_material():
 
 
 class TestMaterialsRouter:
+    """Test suite for the materials router."""
 
     @pytest.mark.parametrize(
-        "user_email,is_admin,should_check_teacher",
+        ("user_email", "is_admin", "should_check_teacher"),
         [
             ("teacher@test.com", False, True),
             ("admin@test.com", True, False),
@@ -109,20 +122,21 @@ class TestMaterialsRouter:
     )
     async def test_create_material_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_section_service,
-        mock_material_service,
-        mock_get_current_user,
-        mock_teacher,
-        mock_course,
-        mock_section,
-        mock_material,
-        user_email,
-        is_admin,
-        should_check_teacher,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_section_service: MagicMock,
+        mock_material_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_teacher: MagicMock,
+        mock_course: MagicMock,
+        mock_section: MagicMock,
+        mock_material: MagicMock,
+        user_email: str,
+        is_admin: bool,
+        should_check_teacher: bool,
     ) -> None:
+        """Test successful creation of a material."""
         mock_get_current_user.return_value = user_email
         mock_teacher.isadmin = is_admin
         mock_teacher.email = user_email
@@ -175,7 +189,7 @@ class TestMaterialsRouter:
         mock_validate.assert_called_once_with(mock_material)
 
     @pytest.mark.parametrize(
-        "error_scenario,side_effect,expected_status",
+        ("error_scenario", "side_effect", "expected_status"),
         [
             ("user_not_found", user_errors.UserNotFoundError("teacher@test.com"), 401),
             ("course_not_found", course_errors.CourseNotFoundError("course-123"), 400),
@@ -186,18 +200,19 @@ class TestMaterialsRouter:
     )
     async def test_create_material_errors(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_section_service,
-        mock_material_service,
-        mock_get_current_user,
-        mock_teacher,
-        mock_course,
-        error_scenario,
-        side_effect,
-        expected_status,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_section_service: MagicMock,
+        mock_material_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_teacher: MagicMock,
+        mock_course: MagicMock,
+        error_scenario: str,
+        side_effect: Exception,
+        expected_status: int,
     ) -> None:
+        """Test error scenarios for creating a material."""
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 
@@ -216,19 +231,15 @@ class TestMaterialsRouter:
         else:
             mock_section_service.get_section.return_value = MagicMock()
 
-        with pytest.raises(HTTPException) as exc_info:
-            if error_scenario == "teacher_role_required":
-                with patch("src.routers.materials.TeacherPolicy.assert_teacher_access") as mock_assert:
-                    mock_assert.side_effect = side_effect
-                    await create_material(
-                        mock_course.course_id,
-                        1,
-                        mock_db,
-                        "Test Material",
-                        "Test Description",
-                        "teacher@test.com",
-                    )
-            else:
+        if error_scenario == "teacher_role_required":
+            patcher = patch("src.routers.materials.TeacherPolicy.assert_teacher_access")
+            mock_assert = patcher.start()
+            mock_assert.side_effect = side_effect
+        else:
+            patcher = None
+
+        try:
+            with pytest.raises(HTTPException) as exc_info:
                 await create_material(
                     mock_course.course_id,
                     1,
@@ -237,13 +248,16 @@ class TestMaterialsRouter:
                     "Test Description",
                     "teacher@test.com",
                 )
+        finally:
+            if patcher:
+                patcher.stop()
 
         assert exc_info.value.status_code == expected_status
         mock_material_service.create_material.assert_not_called()
         mock_db.commit.assert_not_called()
 
     @pytest.mark.parametrize(
-        "error_scenario,side_effect,expected_status,should_check_teacher",
+        ("error_scenario", "side_effect", "expected_status", "should_check_teacher"),
         [
             ("user_not_found", user_errors.UserNotFoundError("teacher@test.com"), 401, False),
             ("course_not_found", course_errors.CourseNotFoundError("course-123"), 400, False),
@@ -254,18 +268,19 @@ class TestMaterialsRouter:
     )
     async def test_remove_material_errors(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_material_service,
-        mock_get_current_user,
-        mock_teacher,
-        mock_course,
-        error_scenario,
-        side_effect,
-        expected_status,
-        should_check_teacher,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_material_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_teacher: MagicMock,
+        mock_course: MagicMock,
+        error_scenario: str,
+        side_effect: Exception,
+        expected_status: int,
+        should_check_teacher: bool,
     ) -> None:
+        """Test error scenarios for removing a material."""
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 
@@ -283,10 +298,9 @@ class TestMaterialsRouter:
             mock_material_service.get_material.side_effect = side_effect
 
         with patch("src.routers.materials.TeacherPolicy.assert_teacher_access") as mock_assert_teacher:
+            if error_scenario == "teacher_role_required":
+                mock_assert_teacher.side_effect = side_effect
             with pytest.raises(HTTPException) as exc_info:
-                if error_scenario == "teacher_role_required":
-                    mock_assert_teacher.side_effect = side_effect
-
                 await remove_material(mock_course.course_id, 999, mock_db, "teacher@test.com")
 
             assert exc_info.value.status_code == expected_status
@@ -304,15 +318,16 @@ class TestMaterialsRouter:
 
     async def test_remove_material_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_material_service,
-        mock_get_current_user,
-        mock_teacher,
-        mock_course,
-        mock_material,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_material_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_teacher: MagicMock,
+        mock_course: MagicMock,
+        mock_material: MagicMock,
     ) -> None:
+        """Test successful removal of a material."""
         mock_get_current_user.return_value = "teacher@test.com"
         mock_teacher.isadmin = False
 
@@ -334,15 +349,16 @@ class TestMaterialsRouter:
 
     async def test_get_material_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_material_service,
-        mock_get_current_user,
-        mock_user,
-        mock_course,
-        mock_material,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_material_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_user: MagicMock,
+        mock_course: MagicMock,
+        mock_material: MagicMock,
     ) -> None:
+        """Test successful retrieval of a material."""
         mock_get_current_user.return_value = "user@test.com"
         mock_user.isadmin = False
 
@@ -371,7 +387,7 @@ class TestMaterialsRouter:
         mock_validate.assert_called_once_with(mock_material)
 
     @pytest.mark.parametrize(
-        "error_scenario,side_effect,expected_status,should_check_access",
+        ("error_scenario", "side_effect", "expected_status", "should_check_access"),
         [
             ("user_not_found", user_errors.UserNotFoundError("user@test.com"), 401, False),
             ("course_not_found", course_errors.CourseNotFoundError("course-123"), 400, False),
@@ -382,18 +398,19 @@ class TestMaterialsRouter:
     )
     async def test_get_material_errors(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_material_service,
-        mock_get_current_user,
-        mock_user,
-        mock_course,
-        error_scenario,
-        side_effect,
-        expected_status,
-        should_check_access,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_material_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_user: MagicMock,
+        mock_course: MagicMock,
+        error_scenario: str,
+        side_effect: Exception,
+        expected_status: int,
+        should_check_access: bool,
     ) -> None:
+        """Test error scenarios for retrieving a material."""
         mock_get_current_user.return_value = "user@test.com"
         mock_user.isadmin = False
 
@@ -411,10 +428,9 @@ class TestMaterialsRouter:
             mock_material_service.get_material.side_effect = side_effect
 
         with patch("src.routers.materials.CoursePolicy.assert_course_access") as mock_assert_access:
+            if error_scenario == "participant_role_required":
+                mock_assert_access.side_effect = side_effect
             with pytest.raises(HTTPException) as exc_info:
-                if error_scenario == "participant_role_required":
-                    mock_assert_access.side_effect = side_effect
-
                 await get_material(mock_course.course_id, 999, mock_db, "user@test.com")
 
             assert exc_info.value.status_code == expected_status

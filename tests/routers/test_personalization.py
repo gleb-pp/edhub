@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -16,12 +17,14 @@ pytestmark = pytest.mark.asyncio
 
 
 @pytest.fixture
-def mock_db():
+def mock_db() -> MagicMock:
+    """Fixture to provide a mock database session."""
     return MagicMock()
 
 
 @pytest.fixture
-def mock_user_service():
+def mock_user_service() -> Generator[MagicMock, None, None]:
+    """Fixture to mock the UserService class."""
     with patch("src.routers.personalization.UserService") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
@@ -29,7 +32,8 @@ def mock_user_service():
 
 
 @pytest.fixture
-def mock_course_service():
+def mock_course_service() -> Generator[MagicMock, None, None]:
+    """Fixture to mock the CourseService class."""
     with patch("src.routers.personalization.CourseService") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
@@ -37,7 +41,8 @@ def mock_course_service():
 
 
 @pytest.fixture
-def mock_personalization_service():
+def mock_personalization_service() -> Generator[MagicMock, None, None]:
+    """Fixture to mock the PersonalizationService class."""
     with patch("src.routers.personalization.PersonalizationService") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
@@ -45,37 +50,42 @@ def mock_personalization_service():
 
 
 @pytest.fixture
-def mock_get_current_user():
+def mock_get_current_user() -> Generator[MagicMock, None, None]:
+    """Fixture to mock the get_current_user dependency."""
     with patch("src.routers.personalization.get_current_user") as mock_func:
         yield mock_func
 
 
 @pytest.fixture
-def mock_user():
+def mock_user() -> MagicMock:
+    """Fixture to provide a mock user object."""
     user = MagicMock()
     user.email = "user@test.com"
     return user
 
 
 @pytest.fixture
-def mock_course():
+def mock_course() -> MagicMock:
+    """Fixture to provide a mock course object."""
     course = MagicMock()
     course.course_id = "course-123"
     return course
 
 
 class TestPersonalizationRouter:
+    """Test suite for the Personalization router."""
 
     async def test_get_course_emoji_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_personalization_service,
-        mock_get_current_user,
-        mock_user,
-        mock_course,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_personalization_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_user: MagicMock,
+        mock_course: MagicMock,
     ) -> None:
+        """Test successful retrieval of course emoji."""
         mock_get_current_user.return_value = "user@test.com"
         mock_user_service.get_user.return_value = mock_user
         mock_course_service.get_course.return_value = mock_course
@@ -91,7 +101,7 @@ class TestPersonalizationRouter:
         mock_personalization_service.get_course_emoji.assert_called_once_with(mock_course, mock_user)
 
     @pytest.mark.parametrize(
-        "error_scenario,side_effect,expected_status,should_check_policy",
+        ("error_scenario", "side_effect", "expected_status", "should_check_policy"),
         [
             ("user_not_found", user_errors.UserNotFoundError("user@test.com"), 401, False),
             ("course_not_found", course_errors.CourseNotFoundError("course-123"), 400, False),
@@ -101,18 +111,19 @@ class TestPersonalizationRouter:
     )
     async def test_get_course_emoji_errors(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_personalization_service,
-        mock_get_current_user,
-        mock_user,
-        mock_course,
-        error_scenario,
-        side_effect,
-        expected_status,
-        should_check_policy,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_personalization_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_user: MagicMock,
+        mock_course: MagicMock,
+        error_scenario: str,
+        side_effect: Exception,
+        expected_status: int,
+        should_check_policy: bool,
     ) -> None:
+        """Test error scenarios for retrieving course emoji."""
         mock_get_current_user.return_value = "user@test.com"
 
         if error_scenario == "user_not_found":
@@ -126,10 +137,9 @@ class TestPersonalizationRouter:
             mock_course_service.get_course.return_value = mock_course
 
         with patch("src.routers.personalization.CoursePolicy.assert_course_access") as mock_assert_access:
+            if error_scenario == "participant_role_required":
+                mock_assert_access.side_effect = side_effect
             with pytest.raises(HTTPException) as exc_info:
-                if error_scenario == "participant_role_required":
-                    mock_assert_access.side_effect = side_effect
-
                 await get_course_emoji(mock_db, mock_course.course_id, "user@test.com")
 
             assert exc_info.value.status_code == expected_status
@@ -143,12 +153,13 @@ class TestPersonalizationRouter:
 
     async def test_change_courses_order_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_personalization_service,
-        mock_get_current_user,
-        mock_user,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_personalization_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_user: MagicMock,
     ) -> None:
+        """Test successful change of courses order."""
         mock_get_current_user.return_value = "user@test.com"
         mock_user_service.get_user.return_value = mock_user
 
@@ -161,7 +172,7 @@ class TestPersonalizationRouter:
         mock_db.commit.assert_called_once()
 
     @pytest.mark.parametrize(
-        "error_scenario,side_effect,expected_status",
+        ("error_scenario", "side_effect", "expected_status"),
         [
             ("user_not_found", user_errors.UserNotFoundError("user@test.com"), 401),
             ("incorrect_order", personalization_errors.IncorrectCoursesOrderError(), 400),
@@ -170,15 +181,16 @@ class TestPersonalizationRouter:
     )
     async def test_change_courses_order_errors(
         self,
-        mock_db,
-        mock_user_service,
-        mock_personalization_service,
-        mock_get_current_user,
-        mock_user,
-        error_scenario,
-        side_effect,
-        expected_status,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_personalization_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_user: MagicMock,
+        error_scenario: str,
+        side_effect: Exception,
+        expected_status: int,
     ) -> None:
+        """Test error scenarios for changing courses order."""
         mock_get_current_user.return_value = "user@test.com"
 
         if error_scenario == "user_not_found":
@@ -194,7 +206,7 @@ class TestPersonalizationRouter:
         mock_db.commit.assert_not_called()
 
     @pytest.mark.parametrize(
-        "emoji_id,expected_emoji",
+        ("emoji_id", "expected_emoji"),
         [
             (5, 5),
             (None, None),
@@ -203,16 +215,17 @@ class TestPersonalizationRouter:
     )
     async def test_set_course_emoji_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_personalization_service,
-        mock_get_current_user,
-        mock_user,
-        mock_course,
-        emoji_id,
-        expected_emoji,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_personalization_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_user: MagicMock,
+        mock_course: MagicMock,
+        emoji_id: int | None,
+        expected_emoji: int | None,
     ) -> None:
+        """Test successful setting of course emoji."""
         mock_get_current_user.return_value = "user@test.com"
         mock_user_service.get_user.return_value = mock_user
         mock_course_service.get_course.return_value = mock_course
@@ -232,7 +245,7 @@ class TestPersonalizationRouter:
         mock_db.commit.assert_called_once()
 
     @pytest.mark.parametrize(
-        "error_scenario,side_effect,expected_status,should_check_policy",
+        ("error_scenario", "side_effect", "expected_status", "should_check_policy"),
         [
             ("user_not_found", user_errors.UserNotFoundError("user@test.com"), 401, False),
             ("course_not_found", course_errors.CourseNotFoundError("course-123"), 400, False),
@@ -242,18 +255,19 @@ class TestPersonalizationRouter:
     )
     async def test_set_course_emoji_errors(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_personalization_service,
-        mock_get_current_user,
-        mock_user,
-        mock_course,
-        error_scenario,
-        side_effect,
-        expected_status,
-        should_check_policy,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_personalization_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_user: MagicMock,
+        mock_course: MagicMock,
+        error_scenario: str,
+        side_effect: Exception,
+        expected_status: int,
+        should_check_policy: bool,
     ) -> None:
+        """Test error scenarios for setting course emoji."""
         mock_get_current_user.return_value = "user@test.com"
 
         if error_scenario == "user_not_found":
@@ -267,10 +281,9 @@ class TestPersonalizationRouter:
             mock_course_service.get_course.return_value = mock_course
 
         with patch("src.routers.personalization.CoursePolicy.assert_course_access") as mock_assert_access:
+            if error_scenario == "participant_role_required":
+                mock_assert_access.side_effect = side_effect
             with pytest.raises(HTTPException) as exc_info:
-                if error_scenario == "participant_role_required":
-                    mock_assert_access.side_effect = side_effect
-
                 await set_course_emoji(mock_course.course_id, mock_db, "user@test.com", 5)
 
             assert exc_info.value.status_code == expected_status

@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -20,12 +21,14 @@ pytestmark = pytest.mark.asyncio
 
 
 @pytest.fixture
-def mock_db():
+def mock_db() -> MagicMock:
+    """Fixture for mocking the database session."""
     return MagicMock()
 
 
 @pytest.fixture
-def mock_user_service():
+def mock_user_service() -> Generator[MagicMock, None, None]:
+    """Fixture for mocking the UserService class."""
     with patch("src.routers.users.UserService") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
@@ -33,7 +36,8 @@ def mock_user_service():
 
 
 @pytest.fixture
-def mock_course_service():
+def mock_course_service() -> Generator[MagicMock, None, None]:
+    """Fixture for mocking the CourseService class."""
     with patch("src.routers.users.CourseService") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
@@ -41,13 +45,15 @@ def mock_course_service():
 
 
 @pytest.fixture
-def mock_get_current_user():
+def mock_get_current_user() -> Generator[MagicMock, None, None]:
+    """Fixture for mocking the get_current_user dependency."""
     with patch("src.routers.users.get_current_user") as mock_func:
         yield mock_func
 
 
 @pytest.fixture
-def mock_user():
+def mock_user() -> MagicMock:
+    """Fixture for creating a mock user object."""
     user = MagicMock()
     user.isadmin = False
     user.email = "user@test.com"
@@ -56,20 +62,23 @@ def mock_user():
 
 
 @pytest.fixture
-def mock_course():
+def mock_course() -> MagicMock:
+    """Fixture for creating a mock course object."""
     course = MagicMock()
     course.course_id = "course-123"
     return course
 
 
 class TestUsersRouter:
+    """Test suite for the users router."""
 
     async def test_get_user_info_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_user,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_user: MagicMock,
     ) -> None:
+        """Test the successful retrieval of user information."""
         mock_user_service.get_user.return_value = mock_user
 
         with patch("src.routers.users.User.model_validate") as mock_validate:
@@ -83,9 +92,10 @@ class TestUsersRouter:
 
     async def test_get_user_info_not_found(
         self,
-        mock_db,
-        mock_user_service,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
     ) -> None:
+        """Test the retrieval of user information when the user is not found."""
         mock_user_service.get_user.side_effect = user_errors.UserNotFoundError("user@test.com")
 
         with pytest.raises(HTTPException) as exc_info:
@@ -94,7 +104,7 @@ class TestUsersRouter:
         assert exc_info.value.status_code == 404
 
     @pytest.mark.parametrize(
-        "role_checks,expected_role",
+        ("role_checks", "expected_role"),
         [
             ((True, False, False, False), "instructor"),
             ((False, True, False, False), "teacher"),
@@ -106,15 +116,16 @@ class TestUsersRouter:
     )
     async def test_get_my_role_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_get_current_user,
-        mock_user,
-        mock_course,
-        role_checks,
-        expected_role,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_user: MagicMock,
+        mock_course: MagicMock,
+        role_checks: tuple[bool, bool, bool, bool],
+        expected_role: str,
     ) -> None:
+        """Test the successful retrieval of the user's role in a course."""
         mock_get_current_user.return_value = mock_user.email
         mock_user.isadmin = False
         mock_user_service.get_user.return_value = mock_user
@@ -139,7 +150,7 @@ class TestUsersRouter:
         mock_course_service.get_course.assert_called_once_with(mock_course.course_id)
 
     @pytest.mark.parametrize(
-        "error_scenario,side_effect,expected_status",
+        ("error_scenario", "side_effect", "expected_status"),
         [
             ("user_not_found", user_errors.UserNotFoundError("user@test.com"), 401),
             ("course_not_found", course_errors.CourseNotFoundError("course-123"), 400),
@@ -148,16 +159,17 @@ class TestUsersRouter:
     )
     async def test_get_my_role_errors(
         self,
-        mock_db,
-        mock_user_service,
-        mock_course_service,
-        mock_get_current_user,
-        mock_user,
-        mock_course,
-        error_scenario,
-        side_effect,
-        expected_status,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_course_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_user: MagicMock,
+        mock_course: MagicMock,
+        error_scenario: str,
+        side_effect: Exception,
+        expected_status: int,
     ) -> None:
+        """Test the retrieval of the user's role in a course when errors occur."""
         mock_get_current_user.return_value = "user@test.com"
 
         if error_scenario == "user_not_found":
@@ -173,10 +185,11 @@ class TestUsersRouter:
 
     async def test_create_user_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_user,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_user: MagicMock,
     ) -> None:
+        """Test the successful creation of a new user."""
         mock_user_service.create_user.return_value = mock_user
         mock_user_service.get_access_token.return_value = "jwt_token"
 
@@ -190,7 +203,7 @@ class TestUsersRouter:
         mock_user_service.get_access_token.assert_called_once_with(mock_user)
 
     @pytest.mark.parametrize(
-        "error_scenario,side_effect,expected_status",
+        ("error_scenario", "side_effect", "expected_status"),
         [
             ("validation_error", user_errors.EmailFormatError(), 422),
             ("user_exists", user_errors.UserExistsError("user@test.com"), 409),
@@ -199,12 +212,13 @@ class TestUsersRouter:
     )
     async def test_create_user_errors(
         self,
-        mock_db,
-        mock_user_service,
-        error_scenario,
-        side_effect,
-        expected_status,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        error_scenario: str,
+        side_effect: Exception,
+        expected_status: int,
     ) -> None:
+        """Test the creation of a new user when validation errors or user already exists errors occur."""
         if error_scenario == "validation_error":
             mock_user_service.validate_user_email.side_effect = side_effect
         else:
@@ -220,10 +234,11 @@ class TestUsersRouter:
 
     async def test_login_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_user,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_user: MagicMock,
     ) -> None:
+        """Test the successful login of a user."""
         mock_user_service.get_user.return_value = mock_user
         mock_user_service.get_access_token.return_value = "jwt_token"
 
@@ -235,7 +250,7 @@ class TestUsersRouter:
         mock_user_service.get_access_token.assert_called_once_with(mock_user)
 
     @pytest.mark.parametrize(
-        "error_scenario,side_effect",
+        ("error_scenario", "side_effect"),
         [
             ("user_not_found", user_errors.UserNotFoundError("user@test.com")),
             ("invalid_password", user_errors.InvalidPasswordError()),
@@ -244,12 +259,13 @@ class TestUsersRouter:
     )
     async def test_login_errors(
         self,
-        mock_db,
-        mock_user_service,
-        mock_user,
-        error_scenario,
-        side_effect,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_user: MagicMock,
+        error_scenario: str,
+        side_effect: Exception,
     ) -> None:
+        """Test the login of a user when the user is not found or the password is invalid."""
         if error_scenario == "user_not_found":
             mock_user_service.get_user.side_effect = side_effect
         else:
@@ -263,10 +279,11 @@ class TestUsersRouter:
 
     async def test_change_password_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_user,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_user: MagicMock,
     ) -> None:
+        """Test the successful change of a user's password."""
         mock_user_service.get_user.return_value = mock_user
 
         result = await change_password(mock_user.email, "old_pass", "new_pass123!@#", mock_db)
@@ -279,7 +296,7 @@ class TestUsersRouter:
         mock_db.commit.assert_called_once()
 
     @pytest.mark.parametrize(
-        "error_scenario,side_effect,expected_status",
+        ("error_scenario", "side_effect", "expected_status"),
         [
             ("user_not_found", user_errors.UserNotFoundError("user@test.com"), 401),
             ("weak_password", user_errors.WeakPasswordError(), 422),
@@ -288,13 +305,14 @@ class TestUsersRouter:
     )
     async def test_change_password_errors(
         self,
-        mock_db,
-        mock_user_service,
-        mock_user,
-        error_scenario,
-        side_effect,
-        expected_status,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_user: MagicMock,
+        error_scenario: str,
+        side_effect: Exception,
+        expected_status: int,
     ) -> None:
+        """Test the change of a user's password when the user is not found or the new password is weak."""
         if error_scenario == "user_not_found":
             mock_user_service.get_user.side_effect = side_effect
         else:
@@ -309,11 +327,12 @@ class TestUsersRouter:
 
     async def test_get_my_instructor_courses_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_get_current_user,
-        mock_user,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_user: MagicMock,
     ) -> None:
+        """Test the successful retrieval of the courses where the user is an instructor."""
         mock_get_current_user.return_value = mock_user.email
         mock_user_service.get_user.return_value = mock_user
 
@@ -331,10 +350,11 @@ class TestUsersRouter:
 
     async def test_get_my_instructor_courses_user_not_found(
         self,
-        mock_db,
-        mock_user_service,
-        mock_get_current_user,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_get_current_user: MagicMock,
     ) -> None:
+        """Test the retrieval of the courses where the user is an instructor when the user is not found."""
         mock_get_current_user.return_value = "user@test.com"
         mock_user_service.get_user.side_effect = user_errors.UserNotFoundError("user@test.com")
 
@@ -345,11 +365,12 @@ class TestUsersRouter:
 
     async def test_remove_user_success(
         self,
-        mock_db,
-        mock_user_service,
-        mock_get_current_user,
-        mock_user,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_user: MagicMock,
     ) -> None:
+        """Test the successful removal of a user."""
         mock_get_current_user.return_value = mock_user.email
         mock_user_service.get_user.return_value = mock_user
 
@@ -361,7 +382,7 @@ class TestUsersRouter:
         mock_db.commit.assert_called_once()
 
     @pytest.mark.parametrize(
-        "error_scenario,side_effect,expected_status",
+        ("error_scenario", "side_effect", "expected_status"),
         [
             ("user_not_found", user_errors.UserNotFoundError("user@test.com"), 401),
             ("last_admin", admin_errors.DeleteLastAdminError(), 403),
@@ -370,14 +391,15 @@ class TestUsersRouter:
     )
     async def test_remove_user_errors(
         self,
-        mock_db,
-        mock_user_service,
-        mock_get_current_user,
-        mock_user,
-        error_scenario,
-        side_effect,
-        expected_status,
+        mock_db: MagicMock,
+        mock_user_service: MagicMock,
+        mock_get_current_user: MagicMock,
+        mock_user: MagicMock,
+        error_scenario: str,
+        side_effect: Exception,
+        expected_status: int,
     ) -> None:
+        """Test the removal of a user when the user is not found or the user is the last admin."""
         mock_get_current_user.return_value = "user@test.com"
 
         if error_scenario == "user_not_found":
