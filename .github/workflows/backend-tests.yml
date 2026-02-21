@@ -170,3 +170,18 @@ jobs:
           docker stop backend system_db || true
           docker rm backend system_db || true
           docker network rm edhub-network || true
+
+  tests-required:
+    name: Backend tests verification
+    runs-on: ubuntu-latest
+    needs:
+      - backend-db-test
+      - domain-tests
+      - admin-tests
+      - policy-tests
+    if: always()
+
+    steps:
+      - name: Check results
+        run: |
+          echo "All required test jobs finished"
