@@ -115,7 +115,7 @@ class TestPersonalizationService:
     ) -> None:
         """Test that the course emoji is retrieved successfully."""
         mock_personal_info = MagicMock(spec=PersonalCourseInfo) if exists else None
-        if exists:
+        if exists and mock_personal_info is not None:
             mock_personal_info.emoji_id = 7
         mock_query = mock_db.query.return_value
         mock_query.filter.return_value.first.return_value = mock_personal_info
