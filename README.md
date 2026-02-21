@@ -1,57 +1,55 @@
-[![Contributors][contributors-shield]][contributors-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Forks][forks-shield]][forks-url]
-[![Unlicense License][license-shield]][license-url]
-[![Issues][prod-shield]][prod-url]
-[![Issues][issues-shield]][issues-url]
+<div align="center">
 
-You can use the public version of EdHub available at [www.edhub.space](https://edhub.space).
+You can access the application on https://edhub.space/api/docs.
 
-# What is EdHub?
+</div>
+
+# 🎓 What is EdHub?
 
 EdHub is a Learning Management System designed to facilitate interaction among teachers, students, and parents. It enhances the educational process by simplifying communication between stakeholders and increasing student engagement in learning.
 
-### Quick Start for Teachers
+When developing EdHub, we focused on the following priorities:
 
-Teachers can easily create a course by simply entering its title, invite students and their parents, upload learning materials, and create assignments.
+- **Quick Start for Teachers**: Teachers can easily create a course by simply entering its title, invite students and their parents, upload learning materials, and create assignments.
 
-<p align="center">
-<img src="https://raw.githubusercontent.com/gleb-pp/edhub-2.0/refs/heads/main/img/createcourse.gif" width="600"/>
-</p>
+- **Student Assignment Submissions**: Students can access course materials, submit their solutions to assignments, and receive grades from the teacher. Teachers can review submitted work, evaluate solutions, and provide grades.
 
-### Student Assignment Submissions
+- **Parental Access to Track Academic Progress**: Parents have a special role in EdHub. Once invited to a course, they can track their child's academic progress without having to ask for a student account or contact the teacher.
 
-Students can access course materials, submit their solutions to assignments, and receive grades from the teacher.
+# 🏗️ Implementation Details
 
-<p align="center">
-<img src="https://raw.githubusercontent.com/gleb-pp/edhub-2.0/refs/heads/main/img/studentsubmits.gif" width="600"/>
-</p>
+The project provides a fully functional REST API with a clean backend architecture,
+well-defined API design, and clear separation of business logic.
 
-Teachers can review submitted work, evaluate solutions, and provide grades.
+*Note:* This repository currently focuses on the **backend** part of the system. The frontend is not included and is expected to be developed separately.
 
-<p align="center">
-<img src="https://raw.githubusercontent.com/gleb-pp/edhub-2.0/refs/heads/main/img/teachergrades.gif" width="600"/>
-</p>
+### Project Goals
 
-### Parental Access to Track Academic Progress
+- Design a clean and maintainable architecture
+- Separate business logic, access control, and transport layer concerns
+- Build a backend suitable for real-world extension and scaling
+- Create a portfolio-quality backend project for future development
 
-Parents have a special role in EdHub. Once invited to a course, they can track their child's academic progress without having to ask for a student account or contact the teacher.
+### Architecture Layers
 
-<p align="center">
-<img src="https://raw.githubusercontent.com/gleb-pp/edhub-2.0/refs/heads/main/img/parents.png" width="600"/>
-</p>
+The backend is structured into several layers to ensure maintainability and scalability:
+
+- `repo`: SQLAlchemy ORM models representing database entities and relationships.
+- `services`: Stateless service classes encapsulating business logic through atomic operations.
+- `policies`: Authorization and access-control rules, separated from business logic.
+- `routers`: HTTP layer responsible for request validation, dependency injection, transaction boundaries, and exception-to-HTTP mapping.
 
 ### Built With
 
-[![FastAPI][FastAPI]][FastAPI-url]
-[![React][React]][React-url]
-[![PostgreSQL][PostgreSQL]][PostgreSQL-url]
-[![NginX][NginX]][NginX-url]
-[![Docker][Docker]][Docker-url]
+| **Framework & API** | <img src="https://img.shields.io/badge/FastAPI-005571?logo=fastapi" alt="FastAPI" height="20"> <img src="https://img.shields.io/badge/Pydantic-176DC3?logo=pydantic&logoColor=white" alt="Pydantic" height="20"> <img src="https://img.shields.io/badge/Poetry-4F5D95?logo=poetry&logoColor=white" alt="Poetry" height="20"> |
+| :--- | :--- |
+| **Database** | <img src="https://img.shields.io/badge/PostgreSQL-4169e1?logo=postgresql&logoColor=white" alt="PostgreSQL" height="20"> <img src="https://img.shields.io/badge/SQLAlchemy-3673A5?logo=sqlalchemy&logoColor=white" alt="SQLAlchemy" height="20"> |
+| **Infrastructure** | <img src="https://img.shields.io/badge/Docker-257bd6?logo=docker&logoColor=white" alt="Docker" height="20"> <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?logo=githubactions&logoColor=white" alt="GitHub Actions" height="20"> |
+| **Code Quality** | <img src="https://img.shields.io/badge/Pytest-008080?logo=pytest&logoColor=white" alt="Pytest" height="20"> <img src="https://img.shields.io/badge/Ruff-000000?logo=ruff&logoColor=white" alt="Ruff" height="20"> <img src="https://img.shields.io/badge/Mypy-4B8BBE?logo=python&logoColor=white" alt="Mypy" height="20"> |
 
-# Local Startup
+# 🚀 Local Startup
 
-These instructions will help you to download a copy of the project and run it on your local machine. All of your organization's data will be stored on your computer and will be inaccessible to external users.
+EdHub is an open-source project, and you can run it locally to test its features, make your own improvements, and contribute to its development. By running EdHub on your local machine, you can ensure that all your organization's data remains private and secure.
 
 ### Prerequisites
 - [Docker](https://docs.docker.com/get-docker/) (v20.10+)
@@ -60,7 +58,7 @@ These instructions will help you to download a copy of the project and run it on
 ### Quick Start
 ```bash
 # Clone repository
-git clone https://github.com/gleb-pp/edhub-2.0.git
+git clone https://github.com/gleb-pp/edhub.git
 cd edhub
 
 # Build and start containers
@@ -68,55 +66,66 @@ docker compose up --build
 
 # To run in detached mode:
 # docker compose up --build -d
-```
-Now you can go to http://localhost/ to access the application.
 
-### Services Overview
-| Service       | Port  | Description            |
-|---------------|-------|------------------------|
-| **Frontend**  | 3000  | React application      |
-| **Backend**   | 8000  | FastAPI application    |
-| **Database**  | 5432  | PostgreSQL container   |
-| **Nginx**     | 80    | Nginx reverse proxy    |
-
-### API Endpoints
-
-You can access the web version of API documentation at https://edhub.space/api/docs.
-
-### Maintenance Commands
-```bash
-# Stop all services
+# To stop containers:
 docker compose down
-
-# Stop and remove volumes
-docker compose down -v
-
-# View logs
-docker compose logs -f
-
-# Rebuild from scratch
-docker compose down -v && docker compose up --build
 ```
-[contributors-shield]: https://img.shields.io/github/contributors/gleb-pp/edhub-2.0.svg?style=for-the-badge
-[contributors-url]: https://github.com/gleb-pp/edhub-2.0/graphs/contributors
-[stars-shield]: https://img.shields.io/github/stars/gleb-pp/edhub-2.0.svg?style=for-the-badge
-[stars-url]: https://github.com/gleb-pp/edhub-2.0/stargazers
-[forks-shield]: https://img.shields.io/github/forks/gleb-pp/edhub-2.0.svg?style=for-the-badge
-[forks-url]: https://github.com/gleb-pp/edhub-2.0/network/members
-[issues-shield]: https://img.shields.io/github/issues/gleb-pp/edhub-2.0.svg?style=for-the-badge
-[issues-url]: https://github.com/gleb-pp/edhub-2.0/issues
-[license-shield]: https://img.shields.io/github/license/gleb-pp/edhub-2.0.svg?style=for-the-badge
-[license-url]: https://github.com/gleb-pp/edhub-2.0/blob/main/LICENSE
-[prod-shield]: https://img.shields.io/github/actions/workflow/status/gleb-pp/edhub-2.0/deploy-prod.yml?style=for-the-badge
-[prod-url]: https://github.com/gleb-pp/edhub-2.0/actions
 
+Now you can go to http://localhost/api/docs/ to access the application.
+
+# 🤝 Contributing
+
+EdHub is an open-source, non-commercial project developed primarily as a
+portfolio and educational initiative and currently maintained by a single author.
+
+### Support the Project
+If you find this project interesting or useful:
+- Giving the repository a ⭐ star is very important and highly appreciated
+- Following the author on GitHub helps support further development
+
+Even small actions like these provide strong motivation to continue improving the project.
+
+### Frontend Development
+At the moment, the project does not include a production-ready frontend.
+The previous frontend implementation was removed, and a new one is not yet available.
+
+The backend API is fully functional and can be used as a foundation
+for experimenting with frontend development, educational projects,
+or personal portfolio work.
+
+Please note that:
+- The project is not commercial
+- Frontend contributions are not paid
+- Any frontend work would be driven by personal interest and portfolio goals
+
+### Bug Reports and Feedback
+Bug reports, issue discussions, and general feedback are welcome.
+If you notice unexpected behavior or have suggestions regarding usability
+or documentation, feel free to open an issue.
+
+[Python]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
+[Python-url]: https://www.python.org/
 [FastAPI]: https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi
 [FastAPI-url]: https://fastapi.tiangolo.com/
-[React]: https://img.shields.io/badge/-ReactJs-61DAFB?logo=react&logoColor=white&style=for-the-badge
-[React-url]: https://react.dev/
+[Pydantic]: https://img.shields.io/badge/Pydantic-176DC3?style=for-the-badge&logo=pydantic&logoColor=white
+[Pydantic-url]: https://pydantic.dev/
+[SQLAlchemy]: https://img.shields.io/badge/SQLAlchemy-3673A5?style=for-the-badge&logo=sqlalchemy&logoColor=white
+[SQLAlchemy-url]: https://www.sqlalchemy.org/
+[Poetry]: https://img.shields.io/badge/Poetry-4F5D95?style=for-the-badge&logo=poetry&logoColor=white
+[Poetry-url]: https://python-poetry.org/
+
+[Pytest]: https://img.shields.io/badge/pytest-008080?style=for-the-badge&logo=pytest&logoColor=white
+[Pytest-url]: https://docs.pytest.org/
+[Ruff]: https://img.shields.io/badge/ruff-000000?style=for-the-badge&logo=ruff&logoColor=white
+[Ruff-url]: https://ruff.rs/
+[Mypy]: https://img.shields.io/badge/mypy-4B8BBE?style=for-the-badge&logo=python&logoColor=white
+[Mypy-url]: https://mypy.readthedocs.io/
+
 [PostgreSQL]: https://img.shields.io/badge/postgresql-4169e1?style=for-the-badge&logo=postgresql&logoColor=white
 [PostgreSQL-url]: https://www.postgresql.org/
-[NginX]: https://img.shields.io/badge/Nginx-009639?logo=nginx&logoColor=white&style=for-the-badge
-[NginX-url]: https://nginx.org/
 [Docker]: https://img.shields.io/badge/docker-257bd6?style=for-the-badge&logo=docker&logoColor=white
 [Docker-url]: https://www.docker.com/
+[Docker Compose]: https://img.shields.io/badge/docker--compose-2496ed?style=for-the-badge&logo=docker&logoColor=white
+[Docker Compose-url]: https://docs.docker.com/compose/
+[GitHub Actions]: https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white
+[GitHub Actions-url]: https://docs.github.com/en/actions

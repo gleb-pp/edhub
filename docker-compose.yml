@@ -1,48 +1,40 @@
 services:
   system_db:
-    build: ./database/system
+    image: postgres:16
     restart: always
     environment:
       - POSTGRES_PASSWORD=12345678
       - POSTGRES_USER=postgres
-      - PGDATA=/var/lib/postgresql/data
+      - POSTGRES_DB=edhub
     volumes:
       - edhub_system_storage:/var/lib/postgresql/data
-
-  filestorage_db:
-    build: ./database/filestorage
-    restart: always
-    environment:
-      - POSTGRES_PASSWORD=12345678
-      - POSTGRES_USER=postgres
-      - PGDATA=/var/lib/postgresql/data
-    volumes:
-      - edhub_filestorage_storage:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d edhub"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - edhub-network
 
   backend:
-    build: ./backend
-    restart: always
-    environment:
-      - DATABASE_URL=postgresql://postgres:12345678@system_db:5432/edhub
-    depends_on:
-      - system_db
-      - filestorage_db
-
-  frontend:
-    build: ./frontend
-    restart: always
-    depends_on:
-      - backend
-
-  nginx:
-    build: ./nginx
+    build:
+      context: .
+      target: prod
     restart: always
     ports:
-      - 80:80
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:12345678@system_db:5432/edhub
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     depends_on:
-      - frontend
-      - backend
+      system_db:
+        condition: service_healthy
+    networks:
+      - edhub-network
 
 volumes:
   edhub_system_storage:
-  edhub_filestorage_storage:
+
+networks:
+  edhub-network:
+    name: edhub-network
