@@ -7,9 +7,11 @@ on:
 jobs:
   lint_code:
     runs-on: ubuntu-latest
+    name: Check backend code style with linter
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Install Poetry
         run: pipx install poetry
