@@ -77,7 +77,7 @@ class PersonalizationService:
         return personal_info.emoji_id
 
     def change_courses_order(self, user: User, new_order: list[str]) -> None:
-        """Set the new section order within the provided course by the list of ordered section_ids."""
+        """Set the new course order for the user by the list of ordered course_ids."""
         self.logger.info(f"Changing courses order for user {user.email}")
         courses = [
             crs.course_id
