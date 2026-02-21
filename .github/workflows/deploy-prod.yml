@@ -1,15 +1,12 @@
 name: Deploy to production server
 
 on:
-  pull_request:
-    types:
-      - closed
+  push:
     branches:
       - main
 
 jobs:
   deploy:
-    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     name: Deploy to production server
     runs-on: edhub-prod
     steps:
